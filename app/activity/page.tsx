@@ -35,13 +35,13 @@ export default function ActivityPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-150">
-      <div className="space-y-2 border-b border-[#e6ece9] pb-4">
-        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] flex items-center gap-2">
-          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
+      <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-emerald-400 flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[#4d93be] dark:bg-emerald-500 inline-block" />
           <span>Real-time On-Chain Telemetry · Protocol Activity Feed</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b]">
+        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0fdf4]">
           Market activity.
         </h1>
 

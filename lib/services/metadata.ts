@@ -15,6 +15,18 @@ export function sanitizeImageUrl(url: string | null | undefined): string {
 
   const trimmed = url.trim();
 
+  if (trimmed.includes('QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco') && !trimmed.endsWith('.png') && !trimmed.endsWith('.jpg')) {
+    return 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80';
+  }
+
+  if (trimmed.includes('bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi') && !trimmed.endsWith('.png') && !trimmed.endsWith('.jpg')) {
+    return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
+  }
+
+  if (trimmed.includes('bafybeif43gq2qj6tfe2eeb3aeqbkmr23vx4zdfhshuv5b3z24o2eqk55ye') && !trimmed.endsWith('.png') && !trimmed.endsWith('.jpg')) {
+    return 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80';
+  }
+
   if (trimmed.startsWith('ipfs://')) {
     const path = trimmed.replace(/^ipfs:\/\//, '');
     return `https://gateway.pinata.cloud/ipfs/${path}`;

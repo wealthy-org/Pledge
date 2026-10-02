@@ -27,15 +27,15 @@ export default function CollectionsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-150">
-      <div className="space-y-2 border-b border-[#e6ece9] pb-4">
-        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] flex items-center gap-2">
-          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
+      <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-emerald-400 flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[#4d93be] dark:bg-emerald-500 inline-block" />
           <span>Curated Market Directory</span>
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b]">
+            <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0fdf4]">
               Curated NFT Collections
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
@@ -52,7 +52,7 @@ export default function CollectionsPage() {
             </Link>
             <Link
               href="/lend"
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[#edf7f2] hover:bg-[#e1f1e9] border border-[#cfe4dc] text-[#142d2b] transition-colors"
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[#edf7f2] dark:bg-[#142e24] hover:bg-[#e1f1e9] dark:hover:bg-[#1a3d30] border border-[#cfe4dc] dark:border-[#1e4537] text-[#142d2b] dark:text-[#f0fdf4] transition-colors"
             >
               Create Offer +
             </Link>

@@ -43,7 +43,7 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
     maxLtvBps: 7500,
     minLtvBps: 1000,
     floorPriceEth: '1.25',
-    imageUrl: 'https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi',
+    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
     riskNotes: 'High liquidity Genesis Tier pass with historical stable valuation on Robinhood Chain. Verified contract with active community collateralization.',
     socials: {
       website: 'https://robinhood.com',
@@ -66,7 +66,7 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
     maxLtvBps: 6500,
     minLtvBps: 1000,
     floorPriceEth: '0.65',
-    imageUrl: 'https://gateway.pinata.cloud/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
+    imageUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80',
     riskNotes: 'Medium liquidity avatar collection. Borrower default risk should be mitigated with conservative loan terms and appropriate LTV margins.',
     socials: {
       website: 'https://sherwoodrangers.io',
@@ -89,7 +89,7 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
     maxLtvBps: 7000,
     minLtvBps: 1000,
     floorPriceEth: '0.45',
-    imageUrl: 'https://gateway.pinata.cloud/ipfs/bafybeif43gq2qj6tfe2eeb3aeqbkmr23vx4zdfhshuv5b3z24o2eqk55ye',
+    imageUrl: 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80',
     riskNotes: 'Art generative collection. Market depth may fluctuate during high volatility. Lender consideration of floor price variance is recommended.',
     socials: {
       website: 'https://nottinghamguild.org',

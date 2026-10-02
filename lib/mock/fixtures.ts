@@ -139,7 +139,7 @@ export const MOCK_WALLET_NFTS: WalletNftItem[] = [
     tokenId: '1',
     collectionName: 'Robinhood Genesis Pass',
     name: 'Robinhood Genesis Pass #1',
-    imageUrl: 'https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi',
+    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
     tokenUri: 'ipfs://bafybeihrhgpass/1',
   },
   {
@@ -147,7 +147,7 @@ export const MOCK_WALLET_NFTS: WalletNftItem[] = [
     tokenId: '2',
     collectionName: 'Robinhood Genesis Pass',
     name: 'Robinhood Genesis Pass #2',
-    imageUrl: 'https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi',
+    imageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80',
     tokenUri: 'ipfs://bafybeihrhgpass/2',
   },
   {
@@ -155,7 +155,7 @@ export const MOCK_WALLET_NFTS: WalletNftItem[] = [
     tokenId: '10',
     collectionName: 'Sherwood Forest Rangers',
     name: 'Sherwood Ranger #10',
-    imageUrl: 'https://gateway.pinata.cloud/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
+    imageUrl: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80',
     tokenUri: 'ipfs://bafybeishrfpass/10',
   },
 ];

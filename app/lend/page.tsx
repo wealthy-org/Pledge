@@ -133,13 +133,13 @@ export default function LendPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-150">
-      <div className="space-y-2 border-b border-[#e6ece9] pb-4">
-        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] flex items-center gap-2">
-          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
+      <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-emerald-400 flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[#4d93be] dark:bg-emerald-500 inline-block" />
           <span>Put your ETH to work · Earn fixed yields</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b]">
+        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0fdf4]">
           Set the terms. Fund the loan.
         </h1>
 
@@ -148,12 +148,12 @@ export default function LendPage() {
         </p>
       </div>
 
-      <div className="border border-[#cfe5dd] rounded-xl p-6 sm:p-7 bg-gradient-to-r from-[#e9f7ef] to-[#f0f7fc] flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+      <div className="border border-[#cfe5dd] dark:border-[#1e332c] rounded-xl p-6 sm:p-7 bg-gradient-to-r from-[#e9f7ef] to-[#f0f7fc] dark:from-[#11221b] dark:to-[#0f2420] flex flex-col sm:flex-row sm:items-center justify-between gap-5">
         <div className="space-y-1.5 max-w-xl">
-          <h3 className="text-base sm:text-lg font-normal text-[#142d2b]">
+          <h3 className="text-base sm:text-lg font-normal text-[#142d2b] dark:text-[#f0fdf4]">
             Start with a collection you understand.
           </h3>
-          <p className="text-xs text-[#547466] leading-relaxed">
+          <p className="text-xs text-[#547466] dark:text-[#8ba79b] leading-relaxed">
             If a borrower defaults, you can claim their NFT. Collateral value and resale liquidity can change.
           </p>
         </div>
@@ -169,7 +169,7 @@ export default function LendPage() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-[#142d2b]">Choose a market</h2>
+          <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a market</h2>
           <span className="text-xs text-[var(--muted)]">
             {CURATED_COLLECTIONS.length} curated collections
           </span>
@@ -191,7 +191,7 @@ export default function LendPage() {
       <div className="space-y-4 pt-6 border-t border-[var(--line)]">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-medium text-[#142d2b]">Your Open Offers</h2>
+            <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Your Open Offers</h2>
             <p className="text-xs text-[var(--muted)]">
               Active liquidity offers deposited into the protocol waiting to be accepted
             </p>
