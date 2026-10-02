@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useAccount, useDisconnect, useChainId } from 'wagmi';
 import { truncateAddress } from '@/lib/web3/wallet';
 import { ConnectWalletModal } from './ConnectWalletModal';
+import { WalletDropdownMenu } from './WalletDropdownMenu';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
@@ -72,6 +73,7 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
 
         <button
           onClick={() => setMenuOpen(!menuOpen)}
+          aria-expanded={menuOpen}
           className="px-2.5 py-1 text-xs font-mono font-medium text-text bg-raised hover:bg-line rounded-md transition-colors cursor-pointer flex items-center gap-1.5"
         >
           <span>{truncateAddress(address)}</span>
@@ -81,42 +83,13 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
         </button>
       </div>
 
-      {menuOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setMenuOpen(false)}
-          />
-          <div className="absolute right-0 top-full mt-1.5 z-50 w-48 p-1.5 bg-panel border border-line rounded-xl shadow-lg animate-in fade-in zoom-in-95 duration-100">
-            <div className="px-3 py-2 border-b border-line mb-1">
-              <div className="text-[10px] uppercase tracking-wider text-muted font-mono">Connected as</div>
-              <div className="text-xs font-mono text-text font-medium truncate">{address}</div>
-            </div>
-
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(address);
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-muted hover:text-text hover:bg-raised rounded-lg transition-colors cursor-pointer text-left"
-            >
-              <span>📋</span>
-              <span>Copy Address</span>
-            </button>
-
-            <button
-              onClick={() => {
-                disconnect();
-                setMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer text-left font-medium"
-            >
-              <span>🚪</span>
-              <span>Disconnect</span>
-            </button>
-          </div>
-        </>
-      )}
+      <WalletDropdownMenu
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        address={address}
+        chainId={chainId}
+        onDisconnect={disconnect}
+      />
 
       <ConnectWalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
