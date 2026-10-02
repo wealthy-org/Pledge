@@ -29,7 +29,11 @@ export function resolveMediaUrl(uri: string): string {
 
   if (trimmed.startsWith('ipfs://')) {
     const path = trimmed.replace(/^ipfs:\/\//, '');
-    return `https://ipfs.io/ipfs/${path}`;
+    return `https://gateway.pinata.cloud/ipfs/${path}`;
+  }
+
+  if (trimmed.includes('ipfs.io/ipfs/')) {
+    return trimmed.replace(/https?:\/\/ipfs\.io\/ipfs\//, 'https://gateway.pinata.cloud/ipfs/');
   }
 
   if (trimmed.startsWith('ar://')) {

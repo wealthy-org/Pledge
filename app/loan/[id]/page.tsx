@@ -47,7 +47,7 @@ export default async function LoanDetailPage({ params }: LoanPageProps) {
   const imageUrl =
     walletNft?.imageUrl ||
     collectionDef?.imageUrl ||
-    'https://ipfs.io/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi';
+    'https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi';
 
   return (
     <LoanDetailClient

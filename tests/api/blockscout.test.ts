@@ -19,10 +19,10 @@ describe('TICKET-05b: Blockscout Client & Media Sanitization Test Suite', () => 
 
   it('TS-01: resolveMediaUrl correctly transforms IPFS, Arweave, and HTTPS URIs', () => {
     expect(resolveMediaUrl('ipfs://QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/1.png')).toBe(
-      'https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/1.png'
+      'https://gateway.pinata.cloud/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco/1.png'
     );
     expect(resolveMediaUrl('ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi')).toBe(
-      'https://ipfs.io/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
+      'https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
     );
     expect(resolveMediaUrl('ar://1uo_ZtU46fUfZv0qQ8mNq9h3j9qQ8mNq9h3j9qQ8mNq')).toBe(
       'https://arweave.net/1uo_ZtU46fUfZv0qQ8mNq9h3j9qQ8mNq9h3j9qQ8mNq'
@@ -46,7 +46,7 @@ describe('TICKET-05b: Blockscout Client & Media Sanitization Test Suite', () => 
     const sanitized = sanitizeMetadata(raw);
     expect(sanitized.name).toBe('Robinhood Genesis #42');
     expect(sanitized.description).toBe('First edition collateral NFT');
-    expect(sanitized.imageUrl).toBe('https://ipfs.io/ipfs/QmGenesis42');
+    expect(sanitized.imageUrl).toBe('https://gateway.pinata.cloud/ipfs/QmGenesis42');
     expect(sanitized.attributes).toEqual([{ trait_type: 'Rarity', value: 'Legendary' }]);
   });
 

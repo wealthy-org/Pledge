@@ -84,7 +84,7 @@ describe('TICKET-39: Loan Detail Page & Components', () => {
         <LoanTermsCard
           loan={mockActiveLoan}
           collectionName="Robinhood Genesis Pass"
-          imageUrl="https://ipfs.io/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+          imageUrl="https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
         />
       );
 

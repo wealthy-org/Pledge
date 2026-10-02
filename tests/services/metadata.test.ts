@@ -43,7 +43,7 @@ describe('TICKET-22: NFT Metadata Service & Caching Layer Test Suite', () => {
     it('resolves ipfs:// URI to https gateway URL', () => {
       const ipfsUri = 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/1.png';
       const resolved = sanitizeImageUrl(ipfsUri);
-      expect(resolved).toBe('https://ipfs.io/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/1.png');
+      expect(resolved).toBe('https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/1.png');
     });
 
     it('resolves ar:// URI to https gateway URL', () => {
