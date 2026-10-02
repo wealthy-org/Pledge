@@ -7,6 +7,7 @@ import { HeaderBar } from './HeaderBar';
 import { ActivityPanel } from './ActivityPanel';
 import { FooterStatusBar } from './FooterStatusBar';
 import { MobileBottomNav } from './MobileBottomNav';
+import { NavigationProgressBar } from './NavigationProgressBar';
 import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 
 const GlobalSearch = dynamic(
@@ -25,6 +26,7 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-white text-[var(--text)]">
+      <NavigationProgressBar />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--primary)] focus:text-white focus:rounded-lg focus:shadow-lg focus:font-medium focus:text-sm"
@@ -44,7 +46,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <ActivityPanel />
       <FooterStatusBar />
-      <MobileBottomNav />
+      <MobileBottomNav onSearchClick={() => setSearchOpen(true)} />
 
       {searchOpen && (
         <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />

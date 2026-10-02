@@ -6,18 +6,23 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatUnits } from 'viem';
 import { getCollectionByAddress } from '@/config/collections';
+import { CountdownTimer } from '@/components/common/CountdownTimer';
+import { LTVHealthBar } from '@/components/common/LTVHealthBar';
+import { Skeleton } from '@/components/ui/Skeleton';
 import type { LoanItem } from '@/types/api';
 
 export interface BorrowingTabProps {
   loans: LoanItem[];
   userAddress?: string;
   onRepay?: (loan: LoanItem) => void;
+  isLoading?: boolean;
 }
 
 export function BorrowingTab({
   loans,
   userAddress,
   onRepay,
+  isLoading = false,
 }: BorrowingTabProps) {
   const router = useRouter();
   const normalizedUser = userAddress?.toLowerCase();
@@ -44,6 +49,43 @@ export function BorrowingTab({
     const total = BigInt(principalWei) + BigInt(interestWei || '0');
     return `${Number(formatUnits(total, 18)).toFixed(2)} ETH`;
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3.5">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            data-testid="borrowing-skeleton-card"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#161b22] border border-[#dee7e3] dark:border-[#30363d] rounded-xl"
+          >
+            <div className="flex items-center gap-3.5">
+              <Skeleton width="56px" height="56px" borderRadius="8px" />
+              <div className="space-y-2">
+                <Skeleton width="140px" height="16px" />
+                <Skeleton width="80px" height="12px" />
+              </div>
+            </div>
+            <div className="flex items-center gap-6 sm:gap-8">
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <div className="w-24 space-y-1">
+                <Skeleton width="100%" height="10px" />
+                <Skeleton width="100%" height="8px" />
+              </div>
+              <Skeleton width="70px" height="32px" borderRadius="8px" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (userBorrowingLoans.length === 0) {
     return (
@@ -118,6 +160,20 @@ export function BorrowingTab({
                 <strong className="text-xs font-mono font-semibold text-[#184b3b]">
                   {totalDueEth}
                 </strong>
+              </div>
+
+              <div>
+                <small className="text-[9px] text-[var(--muted)] block">Time Remaining</small>
+                <div className="mt-0.5">
+                  <CountdownTimer dueAt={loan.dueAt} />
+                </div>
+              </div>
+
+              <div className="w-24">
+                <LTVHealthBar
+                  principalEth={Number(formatUnits(BigInt(loan.principalWei), 18))}
+                  floorPriceEth={col?.floorPriceEth ? parseFloat(col.floorPriceEth) : undefined}
+                />
               </div>
 
               <div>

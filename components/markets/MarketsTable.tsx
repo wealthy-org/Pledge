@@ -6,6 +6,10 @@ import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { RankingTabs, type RankingTabType } from './RankingTabs';
+import { TimeframeSelector, type TimeframeType } from './TimeframeSelector';
+import { Tooltip } from '@/components/common/Tooltip';
+import { useWatchlist } from '@/hooks/useWatchlist';
 
 export interface MarketCollectionItem {
   address: string;
@@ -28,15 +32,11 @@ export interface MarketsTableProps {
 type SortField = 'poolSize' | 'bestOffer' | 'offerCount';
 
 export function MarketsTable({ collections, isLoading = false }: MarketsTableProps) {
+  const [rankingTab, setRankingTab] = useState<RankingTabType>('top');
+  const [timeframe, setTimeframe] = useState<TimeframeType>('24h');
   const [sortField, setSortField] = useState<SortField>('poolSize');
-  const [watchlist, setWatchlist] = useState<string[]>([]);
+  const { watchlist, toggleWatchlist, isWatchlisted } = useWatchlist();
   const [activeTab, setActiveTab] = useState<'all' | 'watchlist'>('all');
-
-  const toggleWatchlist = (addr: string) => {
-    setWatchlist((prev) =>
-      prev.includes(addr) ? prev.filter((a) => a !== addr) : [...prev, addr]
-    );
-  };
 
   const filteredAndSorted = useMemo(() => {
     let list = [...collections];
@@ -45,13 +45,13 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
     }
 
     return list.sort((a, b) => {
-      if (sortField === 'bestOffer') {
+      if (rankingTab === 'movers' || sortField === 'offerCount') {
+        return b.offerCount - a.offerCount;
+      }
+      if (rankingTab === 'volume' || sortField === 'bestOffer') {
         const valA = BigInt(a.bestOfferWei || '0');
         const valB = BigInt(b.bestOfferWei || '0');
         return valB > valA ? 1 : -1;
-      }
-      if (sortField === 'offerCount') {
-        return b.offerCount - a.offerCount;
       }
       const poolA = BigInt(a.poolSizeWei || '0');
       const poolB = BigInt(b.poolSizeWei || '0');
@@ -60,7 +60,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
       }
       return b.offerCount - a.offerCount;
     });
-  }, [collections, activeTab, watchlist, sortField]);
+  }, [collections, activeTab, watchlist, rankingTab, sortField]);
 
   const formatEthValue = (weiString?: string) => {
     if (!weiString || weiString === '0') return '—';
@@ -135,15 +135,15 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e1e8e9]">
-        <div className="flex items-center gap-2">
-          <div className="bg-[#f3f5f4] p-[3px] rounded-[7px] flex gap-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e1e8e9] dark:border-[#30363d]">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="bg-[#f3f5f4] dark:bg-[#161b22] p-[3px] rounded-[7px] flex gap-1 border border-[#e1e8e9] dark:border-[#30363d]">
             <button
               onClick={() => setActiveTab('all')}
               className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
                 activeTab === 'all'
-                  ? 'bg-white text-[#174732] border border-[#e3e9e6] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] hover:text-[#174732]'
+                  ? 'bg-white dark:bg-[#21262d] text-[#174732] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#30363d] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
+                  : 'text-[#607169] dark:text-[#8b949e] hover:text-[#174732] dark:hover:text-white'
               }`}
             >
               All markets <span className="text-[10px] text-[#64777a] ml-1">{collections.length}</span>
@@ -152,13 +152,16 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
               onClick={() => setActiveTab('watchlist')}
               className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
                 activeTab === 'watchlist'
-                  ? 'bg-white text-[#174732] border border-[#e3e9e6] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] hover:text-[#174732]'
+                  ? 'bg-white dark:bg-[#21262d] text-[#174732] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#30363d] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
+                  : 'text-[#607169] dark:text-[#8b949e] hover:text-[#174732] dark:hover:text-white'
               }`}
             >
               Watchlist <span className="text-[10px] text-[#64777a] ml-1">{watchlist.length}</span>
             </button>
           </div>
+
+          <RankingTabs activeTab={rankingTab} onTabChange={setRankingTab} />
+          <TimeframeSelector timeframe={timeframe} onSelectTimeframe={setTimeframe} />
         </div>
 
         <div className="flex items-center gap-2 text-[11px] text-[var(--muted)]">
@@ -186,13 +189,28 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left border-collapse whitespace-nowrap">
             <thead>
-              <tr className="border-b border-[#e1e8e9] text-[10px] font-medium text-[#617378] select-none">
+              <tr className="border-b border-[#e1e8e9] dark:border-[#30363d] text-[10px] font-medium text-[#617378] dark:text-[#8b949e] select-none">
                 <th scope="col" className="py-2.5 px-3">#</th>
                 <th scope="col" className="py-2.5 px-3">Collection</th>
-                <th scope="col" className="py-2.5 px-3">Best Offer</th>
-                <th scope="col" className="py-2.5 px-3">Pool Size</th>
+                <th scope="col" className="py-2.5 px-3">
+                  <div className="flex items-center gap-1">
+                    <span>Best Offer</span>
+                    <Tooltip content="Highest available borrower offer ready to accept immediately" />
+                  </div>
+                </th>
+                <th scope="col" className="py-2.5 px-3">
+                  <div className="flex items-center gap-1">
+                    <span>Pool Size</span>
+                    <Tooltip content="Total available liquidity across all active lending offers" />
+                  </div>
+                </th>
                 <th scope="col" className="py-2.5 px-3">Offers</th>
-                <th scope="col" className="py-2.5 px-3">LTV</th>
+                <th scope="col" className="py-2.5 px-3">
+                  <div className="flex items-center gap-1">
+                    <span>LTV</span>
+                    <Tooltip content="Max loan-to-value ratio based on curated collection parameters" />
+                  </div>
+                </th>
                 <th scope="col" className="py-2.5 px-3 text-right">Action</th>
               </tr>
             </thead>
