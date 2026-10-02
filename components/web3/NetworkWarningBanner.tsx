@@ -44,7 +44,7 @@ export function NetworkWarningBanner() {
           <button
             onClick={handleSwitch}
             disabled={isPending}
-            className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+            className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
           >
             {isPending ? 'Switching...' : `Switch to ${targetChain.name}`}
           </button>
@@ -53,20 +53,20 @@ export function NetworkWarningBanner() {
 
       {isErrorModalVisible && currentErrorMessage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="relative w-full max-w-md p-6 bg-panel border border-red-500/40 rounded-xl shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center gap-3 pb-3 mb-3 border-b border-line">
+          <div className="relative w-full max-w-md p-6 bg-[var(--panel)] border border-red-500/40 rounded-xl shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 pb-3 mb-3 border-b border-[var(--line)]">
               <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400 font-bold">
                 ⚠️
               </div>
-              <h3 className="text-base font-semibold text-text">Network Switch Failed</h3>
+              <h3 className="text-base font-semibold text-[var(--text)]">Network Switch Failed</h3>
             </div>
-            <p className="text-xs text-muted mb-4 font-mono leading-relaxed bg-bg p-3 rounded-lg border border-line">
+            <p className="text-xs text-[var(--muted)] mb-4 font-mono leading-relaxed bg-[var(--surface)] p-3 rounded-lg border border-[var(--line)]">
               {currentErrorMessage}
             </p>
             <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => setDismissedError(currentErrorMessage)}
-                className="px-3.5 py-1.5 text-xs font-medium text-muted hover:text-text bg-raised hover:bg-line rounded-lg transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--text)] bg-[var(--raised)] hover:bg-[var(--line)] rounded-lg transition-colors cursor-pointer"
               >
                 Dismiss
               </button>
@@ -75,7 +75,7 @@ export function NetworkWarningBanner() {
                   setDismissedError(null);
                   handleSwitch();
                 }}
-                className="px-3.5 py-1.5 text-xs font-semibold text-black bg-lime hover:bg-lime-hover rounded-lg transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[var(--lime)] hover:bg-[#076b4d] rounded-lg transition-colors cursor-pointer"
               >
                 Retry
               </button>

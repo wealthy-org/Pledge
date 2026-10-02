@@ -26,7 +26,7 @@ export function Badge({
     active: 'bg-[var(--primary-soft)] text-[var(--primary)] border-[var(--primary50)]',
     repaid: 'bg-[var(--green-soft)] text-[var(--success)] border-[var(--success)]/30',
     overdue: 'bg-[var(--warning-bg)] text-[var(--warning-text)] border-[var(--warning-border)]',
-    foreclosed: 'bg-red-50 text-[var(--error)] border-red-200',
+    foreclosed: 'bg-red-500/10 text-[var(--error)] border-red-500/30',
     cancelled: 'bg-[var(--raised)] text-[var(--muted)] border-[var(--line)]',
     filled: 'bg-[var(--primary-soft)] text-[var(--primary)] border-[var(--primary50)]',
   };
