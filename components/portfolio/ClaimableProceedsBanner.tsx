@@ -68,7 +68,7 @@ export function ClaimableProceedsBanner({
           <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
             Active Borrowed
           </span>
-          <div className="text-sm sm:text-base font-mono font-semibold text-[var(--text)]">
+          <div className="text-sm sm:text-base font-mono font-semibold text-sky-600 dark:text-sky-400">
             <span>{totalBorrowedEth}</span>
             <span className="text-xs font-normal text-[var(--muted)] ml-1">ETH</span>
           </div>
@@ -78,7 +78,7 @@ export function ClaimableProceedsBanner({
           <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
             Active Lent
           </span>
-          <div className="text-sm sm:text-base font-mono font-semibold text-[var(--text)]">
+          <div className="text-sm sm:text-base font-mono font-semibold text-emerald-600 dark:text-emerald-400">
             <span>{totalLentEth}</span>
             <span className="text-xs font-normal text-[var(--muted)] ml-1">ETH</span>
           </div>
@@ -88,7 +88,7 @@ export function ClaimableProceedsBanner({
           <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
             Lifetime Yield
           </span>
-          <div className="text-sm sm:text-base font-mono font-semibold text-[var(--accent-primary)]">
+          <div className="text-sm sm:text-base font-mono font-semibold text-amber-600 dark:text-amber-400">
             <span>+{totalEarnedEth}</span>
             <span className="text-xs font-normal text-[var(--muted)] ml-1">ETH</span>
           </div>

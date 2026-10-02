@@ -118,6 +118,19 @@ export function Sidebar() {
                 ? pathname === '/'
                 : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
+            const activeColorClass =
+              item.href === '/borrow'
+                ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30'
+                : item.href === '/lend'
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                : item.href === '/collections'
+                ? 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30'
+                : item.href === '/portfolio'
+                ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30'
+                : item.href === '/activity'
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
+                : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30';
+
             return (
               <Link
                 key={item.href}
@@ -125,10 +138,10 @@ export function Sidebar() {
                 aria-label={item.name}
                 title={item.name}
                 data-active={isActive ? 'true' : 'false'}
-                className={`flex items-center justify-center w-11 h-11 rounded-lg transition-colors duration-150 cursor-pointer ${
+                className={`flex items-center justify-center w-11 h-11 rounded-lg transition-colors duration-150 cursor-pointer border ${
                   isActive
-                    ? 'bg-[var(--panel)] text-[var(--accent-primary)] border border-[var(--line)]'
-                    : 'text-[var(--muted)] hover:bg-[var(--panel)] hover:text-[var(--text)]'
+                    ? `${activeColorClass} shadow-xs`
+                    : 'border-transparent text-[var(--muted)] hover:bg-[var(--panel)] hover:text-[var(--text)]'
                 }`}
               >
                 {item.icon}

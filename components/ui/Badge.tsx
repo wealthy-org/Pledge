@@ -22,13 +22,13 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const statusStyles: Record<BadgeStatus, string> = {
-    open: 'bg-[var(--blue-soft)] text-[var(--blue)] border-[var(--blue)]/30',
-    active: 'bg-[var(--primary-soft)] text-[var(--primary)] border-[var(--primary50)]',
-    repaid: 'bg-[var(--green-soft)] text-[var(--success)] border-[var(--success)]/30',
-    overdue: 'bg-[var(--warning-bg)] text-[var(--warning-text)] border-[var(--warning-border)]',
-    foreclosed: 'bg-red-500/10 text-[var(--error)] border-red-500/30',
-    cancelled: 'bg-[var(--raised)] text-[var(--muted)] border-[var(--line)]',
-    filled: 'bg-[var(--primary-soft)] text-[var(--primary)] border-[var(--primary50)]',
+    open: 'bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-500/25',
+    active: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
+    repaid: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/25',
+    overdue: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/25',
+    foreclosed: 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/25',
+    cancelled: 'bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/25',
+    filled: 'bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-500/25',
   };
 
   return (

@@ -74,6 +74,17 @@ export function MobileBottomNav({ onSearchClick }: MobileBottomNavProps) {
     >
       {NAV_LINKS.map((item) => {
         const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
+        const activeColorClass =
+          item.href === '/borrow'
+            ? 'text-sky-600 dark:text-sky-400 bg-sky-500/10 border-sky-500/30'
+            : item.href === '/lend'
+            ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+            : item.href === '/portfolio'
+            ? 'text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/30'
+            : item.href === '/activity'
+            ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/30'
+            : 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+
         return (
           <Link
             key={item.href}
@@ -81,10 +92,10 @@ export function MobileBottomNav({ onSearchClick }: MobileBottomNavProps) {
             aria-label={item.name}
             aria-current={isActive ? 'page' : undefined}
             data-active={isActive ? 'true' : 'false'}
-            className={`flex flex-col items-center justify-center min-w-[46px] py-1 px-1.5 rounded-lg transition-colors ${
+            className={`flex flex-col items-center justify-center min-w-[46px] py-1 px-1.5 rounded-lg transition-colors border ${
               isActive
-                ? 'text-[var(--accent-primary)] font-medium bg-[var(--panel)] border border-[var(--line)]'
-                : 'text-[var(--muted)] hover:text-[var(--text)]'
+                ? `${activeColorClass} font-semibold shadow-xs`
+                : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
             }`}
           >
             <span className="mb-0.5">{item.icon}</span>

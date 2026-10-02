@@ -45,7 +45,7 @@ export function LendCollectionCard({
 
       <div className="p-4 flex flex-col flex-1 justify-between">
         <div>
-          <div className="text-[10px] uppercase tracking-wider font-semibold text-[var(--accent-primary)]">
+          <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-600 dark:text-violet-400">
             Curated Market
           </div>
           <h3 className="text-sm font-semibold text-[var(--text)] mt-0.5 mb-3 truncate">
@@ -55,7 +55,7 @@ export function LendCollectionCard({
           <div className="space-y-2 text-xs pb-3 border-b border-[var(--line)]">
             <div className="flex items-center justify-between">
               <span className="text-[var(--muted)]">Pool size</span>
-              <strong className="font-mono text-[var(--accent-primary)]">
+              <strong className="font-mono text-emerald-600 dark:text-emerald-400">
                 {displayPool}
               </strong>
             </div>
@@ -69,7 +69,7 @@ export function LendCollectionCard({
         <button
           type="button"
           onClick={() => onMakeOffer(collection)}
-          className="w-full mt-3 py-2 px-3 rounded-lg text-xs font-semibold bg-[var(--panel)] hover:bg-[var(--surface)] border border-[var(--line)] text-[var(--text)] transition-colors cursor-pointer flex items-center justify-center gap-1"
+          className="w-full mt-3 py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white border border-emerald-500/25 transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
         >
           <span>Make offer</span>
           <span className="text-sm font-normal">+</span>

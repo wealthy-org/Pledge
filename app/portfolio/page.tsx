@@ -137,21 +137,30 @@ export default function PortfolioPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6">
         <div className="space-y-1">
-          <span className="text-[10px] text-[var(--muted)] block uppercase font-mono">Borrowed ETH</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+            <span>Borrowed ETH</span>
+          </div>
           <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
             {totalBorrowedEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
 
         <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
-          <span className="text-[10px] text-[var(--muted)] block uppercase font-mono">Total repayment due</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+            <span>Total repayment due</span>
+          </div>
           <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
             {totalRepaymentDueEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
 
         <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
-          <span className="text-[10px] text-[var(--muted)] block uppercase font-mono">Open offer principal</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
+            <span>Open offer principal</span>
+          </div>
           <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
             {totalOpenOfferEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>

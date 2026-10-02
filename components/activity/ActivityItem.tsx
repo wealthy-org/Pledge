@@ -78,7 +78,7 @@ export function ActivityItemRow({
   return (
     <div
       data-testid="activity-row"
-      className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] hover:bg-[#F0F7F7] dark:hover:bg-[#14221e] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--raised)] transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-4"
     >
       <div className="flex items-center gap-4 min-w-0">
         <div className="flex-shrink-0">{getEventBadge()}</div>
@@ -87,7 +87,7 @@ export function ActivityItemRow({
           <div className="flex items-center gap-2 font-bold text-xs sm:text-sm text-[var(--text)] truncate">
             <span>{collectionName}</span>
             {tokenId && (
-              <span className="font-mono text-[var(--primary)] text-xs">
+              <span className="font-mono text-violet-600 dark:text-violet-400 text-xs font-semibold">
                 #{tokenId}
               </span>
             )}
@@ -114,7 +114,7 @@ export function ActivityItemRow({
           target="_blank"
           rel="noopener noreferrer"
           aria-label="View transaction on Blockscout"
-          className="p-2 rounded-lg bg-[var(--raised)] border border-[var(--line)] hover:bg-[var(--panel)] text-[var(--primary)] hover:underline decoration-dotted transition-colors"
+          className="p-2 rounded-lg bg-[var(--panel)] border border-[var(--line)] hover:bg-[var(--raised)] text-sky-600 dark:text-sky-400 hover:border-sky-500/40 transition-colors"
         >
           TX ↗
         </a>

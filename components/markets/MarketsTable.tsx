@@ -234,7 +234,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                           onClick={() => toggleWatchlist(c.address)}
                           aria-label={isStarred ? 'Remove from watchlist' : 'Add to watchlist'}
                           className={`p-1 cursor-pointer transition-colors ${
-                            isStarred ? 'text-[var(--accent-primary)]' : 'text-[var(--muted)] hover:text-[var(--text)]'
+                            isStarred ? 'text-amber-500' : 'text-[var(--muted)] hover:text-amber-500'
                           }`}
                         >
                           <svg className="w-4 h-4" viewBox="0 0 24 24" fill={isStarred ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -242,7 +242,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                           </svg>
                         </button>
 
-                        <div className="w-10 h-10 rounded-[8px] bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] overflow-hidden flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-[8px] bg-[var(--panel)] border border-[var(--line)] overflow-hidden flex items-center justify-center shrink-0">
                           {c.imageUrl ? (
                             <Image
                               src={c.imageUrl}
@@ -253,7 +253,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                               unoptimized
                             />
                           ) : (
-                            <span className="font-mono font-bold text-xs text-[#214e3b] dark:text-emerald-400">
+                            <span className="font-mono font-bold text-xs text-violet-600 dark:text-violet-400">
                               {c.symbol.slice(0, 2)}
                             </span>
                           )}
@@ -262,14 +262,14 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                         <div>
                           <Link
                             href={`/collection/${c.address}`}
-                            className="text-xs font-semibold text-[#142d2b] dark:text-[#f0f6fc] hover:text-[var(--lime)] dark:hover:text-emerald-400 transition-colors flex items-center gap-1"
+                            className="text-xs font-semibold text-[var(--text)] hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-1"
                           >
                             <span>{c.name}</span>
-                            <span className="text-[11px] text-[#1b8a62] dark:text-emerald-400 font-bold" title="Curated pool">
+                            <span className="text-[11px] text-violet-600 dark:text-violet-400 font-bold" title="Curated pool">
                               ✦
                             </span>
                           </Link>
-                          <div className="text-[10px] text-[var(--muted)] dark:text-[#8ca197] mt-0.5">
+                          <div className="text-[10px] text-[var(--muted)] mt-0.5">
                             Robinhood Chain · Verified Asset
                           </div>
                         </div>
@@ -277,29 +277,31 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                     </td>
 
                     <td className="py-3.5 px-3">
-                      <span className="font-mono font-medium text-xs text-[#184b3b] dark:text-emerald-400">
+                      <span className="font-mono font-medium text-xs text-sky-600 dark:text-sky-400">
                         {formatEthValue(c.bestOfferWei)}
                       </span>
                     </td>
 
                     <td className="py-3.5 px-3">
-                      <span className="font-mono font-medium text-xs text-[#142d2b] dark:text-[#f0f6fc]">
+                      <span className="font-mono font-medium text-xs text-emerald-600 dark:text-emerald-400">
                         {formatEthValue(c.poolSizeWei)}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-3 text-xs text-[#142d2b] dark:text-[#f0f6fc]">
+                    <td className="py-3.5 px-3 text-xs text-[var(--text)]">
                       <span className="font-mono">{c.offerCount}</span>
                     </td>
 
-                    <td className="py-3.5 px-3 text-[#087f5b] dark:text-emerald-400 font-medium text-xs">
-                      {c.maxLtvBps ? `${(c.maxLtvBps / 100).toFixed(0)}%` : '70%'}
+                    <td className="py-3.5 px-3 font-medium text-xs">
+                      <span className="font-mono text-emerald-600 dark:text-emerald-400">
+                        {c.maxLtvBps ? `${(c.maxLtvBps / 100).toFixed(0)}%` : '70%'}
+                      </span>
                     </td>
 
                     <td className="py-3.5 px-3 text-right">
                       <Link
                         href={`/borrow?collection=${c.address}`}
-                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-[#e1ebe6] dark:border-[#1e332c] bg-white dark:bg-[#14221e] hover:bg-[#eef5fb] dark:hover:bg-[#1b302a] hover:border-[#c4dcee] dark:hover:border-emerald-500/40 text-[#286a9b] dark:text-emerald-400 text-[11px] font-semibold transition-all shadow-xs"
+                        className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-[6px] border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 dark:hover:text-white text-sky-600 dark:text-sky-400 text-[11px] font-semibold transition-colors shadow-xs"
                       >
                         <span>Borrow</span>
                         <span>↗</span>
