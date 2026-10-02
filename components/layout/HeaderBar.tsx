@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useAccount, useChainId, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { ConnectWallet } from '@/components/web3/ConnectWallet';
-import { NetworkWarningBanner } from '@/components/web3/NetworkWarningBanner';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
@@ -27,46 +27,60 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
   const activeChain = getActiveChain(chainId);
 
   return (
-    <header className="h-[var(--header-height)] w-full border-b border-[var(--line)] bg-[var(--surface)]/90 backdrop-blur-md sticky top-0 z-30 px-6 flex items-center justify-between">
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
+    <header className="fixed top-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--header-height)] bg-white/95 backdrop-blur-md z-30 px-6 border-b border-[#e6ece9] flex items-center justify-between gap-6 shadow-[0_2px_9px_rgba(35,79,56,0.06)]">
+      <div className="flex items-center gap-6 flex-1 max-w-2xl">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-[26px] font-semibold tracking-[-1.4px] text-[#183d30] shrink-0 select-none hover:opacity-90 transition-opacity"
+        >
+          <svg className="w-7 h-7 text-[var(--lime)]" viewBox="0 0 32 32" fill="none">
+            <path d="M5 27V5h12a8 8 0 0 1 0 16h-5v6H5Z" fill="currentColor" />
+            <path d="M12 11h5a2 2 0 0 1 0 4h-5v-4Z" fill="#ffffff" />
+            <path d="m23 23 5-5v9h-9l4-4Z" fill="currentColor" />
+          </svg>
+          <span>
+            pledge<span className="text-[var(--lime)]">.</span>
+          </span>
+        </Link>
+
         <button
           onClick={onSearchClick}
-          className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-[#F4F6F7] border border-[var(--line)] text-xs text-[var(--muted)] hover:border-[var(--primary)] hover:text-[var(--text)] transition-all cursor-pointer shadow-xs"
+          className="flex-1 hidden sm:flex items-center justify-between h-[47px] px-4 rounded-xl bg-[#f4f6f7] border border-[#f0f3f3] text-[13px] text-[var(--muted)] hover:border-[#79acd0] hover:bg-white hover:shadow-[0_0_0_3px_#eaf3fb] transition-all cursor-pointer"
         >
-          <div className="flex items-center gap-2.5">
-            <span className="text-sm">🔍</span>
-            <span>Search collections, loans, or addresses...</span>
+          <div className="flex items-center gap-3">
+            <svg className="w-5 h-5 text-[var(--muted)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="10" cy="10" r="6" />
+              <path d="m15 15 5 5" />
+            </svg>
+            <span>Search collections or collectibles</span>
           </div>
-          <kbd className="px-2 py-0.5 rounded bg-[var(--raised)] border border-[var(--line)] text-[10px] font-mono text-[var(--muted)]">
+          <kbd className="px-2 py-0.5 rounded bg-white border border-[#e4e9e7] text-[11px] font-mono text-[#708179] shadow-xs">
             /
           </kbd>
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {mounted && (
-          <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-[var(--primary-soft)] border border-[var(--primary50)] text-[var(--primary)] text-xs font-mono">
+          <div className="hidden sm:flex items-center gap-2 text-[11px] font-medium text-[#54716a] whitespace-nowrap">
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                isSupportedChain ? 'bg-[var(--primary)] animate-pulse' : 'bg-red-500'
+                isSupportedChain ? 'bg-[#2881bd] shadow-[0_0_0_3px_#e9f2fb] animate-pulse' : 'bg-red-500'
               }`}
             />
-            <span>
-              {activeChain.name} ({activeChain.id})
-            </span>
+            <span>{isSupportedChain ? `${activeChain.name} (${activeChain.id})` : 'Wrong Network'}</span>
           </div>
         )}
 
         {mounted && isConnected && balanceData && (
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--raised)] border border-[var(--line)] text-xs font-mono text-[var(--text)]">
-            <span className="text-[var(--muted)] text-[11px]">Balance:</span>
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f4f7f5] border border-[#d9e8e5] text-xs font-mono text-[#183d30]">
+            <span className="text-[var(--muted)] text-[10px]">Balance:</span>
             <span className="font-semibold">
               {Number(formatUnits(balanceData.value, balanceData.decimals)).toFixed(3)} {balanceData.symbol}
             </span>
           </div>
         )}
 
-        <NetworkWarningBanner />
         <ConnectWallet />
       </div>
     </header>

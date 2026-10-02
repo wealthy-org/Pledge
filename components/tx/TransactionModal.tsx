@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { type TransactionState } from '@/hooks/useTransactionFlow';
 import { Button } from '@/components/ui/Button';
 import { getExplorerTxUrl } from '@/config/chains';
@@ -20,7 +21,7 @@ export function TransactionModal({
   onRetry,
   chainId,
 }: TransactionModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const isPending =
     state.stage === 'PREPARING' ||
@@ -45,7 +46,7 @@ export function TransactionModal({
   const currentDesc = state.description || stageDescriptions[state.stage] || '';
   const explorerUrl = state.txHash ? getExplorerTxUrl(state.txHash, chainId) : null;
 
-  return (
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -157,4 +158,6 @@ export function TransactionModal({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

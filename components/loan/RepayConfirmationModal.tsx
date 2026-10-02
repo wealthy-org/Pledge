@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 
 export interface RepayConfirmationModalProps {
@@ -32,7 +33,7 @@ export function RepayConfirmationModal({
   onClose,
   isLoading = false,
 }: RepayConfirmationModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const displayName = nftName || (collectionName ? `${collectionName} #${tokenId}` : `Loan #${loanId}`);
   const formattedDueDate = new Date(dueAt).toLocaleDateString(undefined, {
@@ -43,7 +44,7 @@ export function RepayConfirmationModal({
     minute: '2-digit',
   });
 
-  return (
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -131,4 +132,6 @@ export function RepayConfirmationModal({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

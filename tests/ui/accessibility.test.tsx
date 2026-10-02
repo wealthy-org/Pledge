@@ -36,6 +36,10 @@ vi.mock('@/components/layout/MobileBottomNav', () => ({
   MobileBottomNav: () => <nav aria-label="Mobile Navigation" data-testid="mobile-nav" />,
 }));
 
+vi.mock('@/components/layout/FooterStatusBar', () => ({
+  FooterStatusBar: () => <footer data-testid="footer-status-bar" />,
+}));
+
 describe('TICKET-43: Accessibility & WCAG 2.1 AA Test Suite', () => {
   it('TS-01: AppShell provides skip-to-content link pointing to main element', () => {
     render(

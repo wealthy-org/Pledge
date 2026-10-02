@@ -102,7 +102,7 @@ export default function LendPage() {
       setIsTxModalOpen(false);
       setToastMessage('Lending offer created successfully! Capital committed to escrow.');
     } catch {
-      // Error handled by modal
+      // Handled by modal
     }
   };
 
@@ -132,47 +132,50 @@ export default function LendPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
-      <div className="relative overflow-hidden rounded-[var(--radius)] bg-gradient-to-br from-[#214E3B] to-[#123124] text-white p-8 lg:p-10 shadow-[var(--shadow-raised)]">
-        <div className="max-w-2xl relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[#A5C9B3] text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Yield Generation Workbench</span>
-          </div>
+    <div className="space-y-8 animate-in fade-in duration-150">
+      <div className="space-y-2 border-b border-[#e6ece9] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
+          <span>Put your ETH to work · Earn fixed yields</span>
+        </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-            Earn Fixed Yields on Your Capital
-          </h1>
+        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b]">
+          Set the terms. Fund the loan.
+        </h1>
 
-          <p className="text-[#D7E6D9] text-sm sm:text-base leading-relaxed">
-            Provide liquidity to NFT holders on Robinhood Chain at deterministic fixed interest rates. Receive predictable yield returns upon loan settlement, backed by full collateral protection.
+        <p className="text-xs sm:text-sm text-[var(--muted)]">
+          Make offers on curated collections. Liquidity opportunities with fixed interest when borrowers repay.
+        </p>
+      </div>
+
+      <div className="border border-[#cfe5dd] rounded-xl p-6 sm:p-7 bg-gradient-to-r from-[#e9f7ef] to-[#f0f7fc] flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div className="space-y-1.5 max-w-xl">
+          <h3 className="text-base sm:text-lg font-normal text-[#142d2b]">
+            Start with a collection you understand.
+          </h3>
+          <p className="text-xs text-[#547466] leading-relaxed">
+            If a borrower defaults, you can claim their NFT. Collateral value and resale liquidity can change.
           </p>
-
-          <div className="pt-2">
-            <button
-              onClick={() => handleOpenDrawer()}
-              className="px-6 py-3 rounded-xl bg-[var(--primary)] text-white text-sm font-semibold hover:bg-[var(--primary-dark)] transition-all shadow-md cursor-pointer inline-flex items-center gap-2"
-            >
-              <span>➕</span>
-              <span>Create Custom Offer</span>
-            </button>
-          </div>
         </div>
 
-        <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-10 pointer-events-none flex items-center justify-center text-[180px] font-black">
-          💰
-        </div>
+        <button
+          onClick={() => handleOpenDrawer()}
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white text-xs font-semibold transition-all shadow-xs shrink-0 cursor-pointer"
+        >
+          <span>Create an offer</span>
+          <span className="text-sm font-normal">+</span>
+        </button>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-[var(--text)]">Liquidity Opportunities</h2>
-          <p className="text-xs text-[var(--muted)]">
-            Explore curated collections seeking peer-to-peer liquidity deployment
-          </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium text-[#142d2b]">Choose a market</h2>
+          <span className="text-xs text-[var(--muted)]">
+            {CURATED_COLLECTIONS.length} curated collections
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {CURATED_COLLECTIONS.map((col) => (
             <LendCollectionCard
               key={col.id}
@@ -185,12 +188,14 @@ export default function LendPage() {
         </div>
       </div>
 
-      <div className="space-y-4 pt-4 border-t border-[var(--line)]">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-[var(--text)]">Your Open Offers</h2>
-          <p className="text-xs text-[var(--muted)]">
-            Active liquidity offers deposited into the protocol waiting to be accepted by borrowers
-          </p>
+      <div className="space-y-4 pt-6 border-t border-[var(--line)]">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-medium text-[#142d2b]">Your Open Offers</h2>
+            <p className="text-xs text-[var(--muted)]">
+              Active liquidity offers deposited into the protocol waiting to be accepted
+            </p>
+          </div>
         </div>
 
         <MyOpenOffersList

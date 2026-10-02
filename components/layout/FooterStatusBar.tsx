@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { useBlockNumber, useChainId } from 'wagmi';
-import { getActiveChain } from '@/config/chains';
+import { getActiveChain, TESTNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
 export function FooterStatusBar() {
@@ -12,62 +13,49 @@ export function FooterStatusBar() {
     watch: true,
   });
 
-  const activeChain = getActiveChain(chainId);
+  const activeChain = getActiveChain(chainId ?? TESTNET_CHAIN_ID);
   const explorerUrl = activeChain.blockExplorers?.default.url || 'https://explorer.testnet.robinhood.com';
 
   return (
-    <div
-      className="h-[var(--footer-bar-height)] w-full border-t border-[#316950] px-3 flex items-center justify-between text-[11px] text-[#A5C9B3] font-mono select-none"
+    <footer
+      className="fixed bottom-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--footer-bar-height)] z-30 bg-[#f6f8f7] border-t border-[#e2e9e4] px-4 flex items-center justify-between text-[10px] text-[#6b7f70] select-none shadow-xs"
       data-testid="footer-status-bar"
     >
       <div className="flex items-center gap-2 truncate">
-        <span className="flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-          <span>ETH $3,450</span>
-        </span>
-        <span className="text-[#4D856B]">|</span>
-        <span>12 GWEI</span>
-        <span className="text-[#4D856B]">|</span>
-        <span>
+        <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] inline-block animate-pulse" />
+        <span className="font-medium text-[#183d30]">{activeChain.name}</span>
+        <span className="text-[#d0dbd3]">|</span>
+        <span className="font-mono">
           {mounted && blockNumber
-            ? `Block #${blockNumber.toString()}`
+            ? `Block #${blockNumber.toString()} · Synced`
             : isBlockLoading
-            ? 'Syncing...'
-            : 'Block #--'}
+            ? 'Syncing block...'
+            : 'Block synced'}
         </span>
-        <span className="text-[#4D856B]">|</span>
-        <span className="text-emerald-300 font-medium">Synced</span>
+        <span className="text-[#d0dbd3]">|</span>
+        <span className="font-mono text-[#267451]">ETH: $2,450</span>
+        <span className="text-[#d0dbd3]">|</span>
+        <span className="font-mono text-[#267451]">Gas: 15 Gwei</span>
+        <span className="text-[#d0dbd3]">|</span>
+        <span className="text-[#267451] font-medium hidden sm:inline">Non-Custodial Smart Contract Escrow</span>
       </div>
 
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-4 text-[10px]">
+        <span className="hidden lg:inline text-[#8a9d90]">Fixed Rate P2P NFT Lending</span>
         <a
           href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:text-white transition-colors"
           aria-label="Blockscout Explorer"
+          className="text-[#4d7a99] hover:underline flex items-center gap-1"
         >
-          🔍
+          <span>Blockscout Explorer</span>
+          <span>↗</span>
         </a>
-        <a
-          href="https://twitter.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-white transition-colors"
-          aria-label="Twitter"
-        >
-          𝕏
-        </a>
-        <a
-          href="https://discord.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:text-white transition-colors"
-          aria-label="Discord"
-        >
-          👾
-        </a>
+        <Link href="/activity" className="text-[#4d7a99] hover:underline">
+          About Pledge ↗
+        </Link>
       </div>
-    </div>
+    </footer>
   );
 }

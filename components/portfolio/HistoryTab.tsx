@@ -2,8 +2,6 @@
 
 import React from 'react';
 import { formatUnits } from 'viem';
-import { Badge, type BadgeStatus } from '@/components/ui/Badge';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
 import type { LoanItem, OfferItem } from '@/types/api';
 
@@ -19,7 +17,7 @@ interface HistoryEntry {
   type: 'Loan' | 'Offer';
   role: 'Borrower' | 'Lender';
   principalEth: string;
-  status: BadgeStatus;
+  status: string;
   date: string;
   txHash: string;
 }
@@ -75,9 +73,8 @@ export function HistoryTab({
     try {
       const d = new Date(isoString);
       return d.toLocaleDateString(undefined, {
-        month: 'short',
         day: 'numeric',
-        year: 'numeric',
+        month: 'short',
       });
     } catch {
       return isoString;
@@ -86,72 +83,81 @@ export function HistoryTab({
 
   if (historyEntries.length === 0) {
     return (
-      <div className="p-8 rounded-2xl border border-[var(--line)] bg-[var(--surface)]">
-        <EmptyState
-          title="No Transaction History"
-          description="You have no settled loans or closed offers recorded yet."
-        />
+      <div className="py-16 px-6 border border-dashed border-[#e1e8e9] rounded-xl text-center">
+        <div className="text-3xl text-[var(--lime)] mb-2 font-mono">◈</div>
+        <h3 className="text-base font-medium text-[#142d2b]">A fresh start.</h3>
+        <p className="text-xs text-[var(--muted)] mt-1">
+          Repaid loans and cancelled offers will appear here.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow-subtle)]">
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs text-left">
-          <thead className="bg-[var(--panel)] border-b border-[var(--line)] text-[9px] font-mono uppercase tracking-[1.5px] text-[var(--muted)]">
-            <tr>
-              <th className="py-3.5 px-4 font-semibold">Activity</th>
-              <th className="py-3.5 px-4 font-semibold">Your Role</th>
-              <th className="py-3.5 px-4 font-semibold">Principal</th>
-              <th className="py-3.5 px-4 font-semibold">Date</th>
-              <th className="py-3.5 px-4 font-semibold">Outcome</th>
-              <th className="py-3.5 px-4 font-semibold text-right">Proof</th>
-            </tr>
-          </thead>
+    <div className="space-y-3">
+      {historyEntries.map((entry, idx) => {
+        const txUrl = getExplorerTxUrl(entry.txHash, chainId);
 
-          <tbody className="divide-y divide-[var(--line)]">
-            {historyEntries.map((entry, idx) => {
-              const txUrl = getExplorerTxUrl(entry.txHash, chainId);
+        return (
+          <article
+            key={`${entry.id}-${idx}`}
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white border border-[#dee7e3] hover:border-[#b7d4c9] rounded-xl transition-all"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-lg bg-[#f4f7f5] border border-[#dee7e3] flex items-center justify-center text-sm font-mono font-bold text-[#214e3b]">
+                {entry.type === 'Loan' ? '⚡' : '💰'}
+              </div>
 
-              return (
-                <tr key={`${entry.id}-${idx}`} className="hover:bg-[#F0F7F7] transition-colors">
-                  <td className="py-3.5 px-4 font-mono font-bold text-[var(--text)]">
-                    {entry.id}
-                  </td>
+              <div>
+                <h3 className="text-sm font-semibold text-[#142d2b]">{entry.id}</h3>
+                <span
+                  className={`inline-block text-[9px] px-2 py-0.5 mt-0.5 rounded font-medium ${
+                    entry.status === 'repaid'
+                      ? 'bg-[#e8f2fd] text-[#276fa6]'
+                      : entry.status === 'cancelled'
+                      ? 'bg-[#f4f6f7] text-[#8d8172]'
+                      : 'bg-[#fee2e2] text-red-700'
+                  }`}
+                >
+                  {entry.type} · {entry.status}
+                </span>
+              </div>
+            </div>
 
-                  <td className="py-3.5 px-4 font-mono font-medium text-[var(--muted)]">
-                    {entry.role}
-                  </td>
+            <div className="flex items-center gap-6 sm:gap-8 justify-between sm:justify-end">
+              <div>
+                <small className="text-[9px] text-[var(--muted)] block">Role</small>
+                <strong className="text-xs font-mono font-medium text-[#142d2b]">
+                  {entry.role}
+                </strong>
+              </div>
 
-                  <td className="py-3.5 px-4 font-mono font-bold text-[var(--text)]">
-                    {entry.principalEth}
-                  </td>
+              <div>
+                <small className="text-[9px] text-[var(--muted)] block">Principal</small>
+                <strong className="text-xs font-mono font-semibold text-[#142d2b]">
+                  {entry.principalEth}
+                </strong>
+              </div>
 
-                  <td className="py-3.5 px-4 font-mono text-[var(--muted)]">
-                    {formatDate(entry.date)}
-                  </td>
+              <div>
+                <small className="text-[9px] text-[var(--muted)] block">Date</small>
+                <strong className="text-xs font-mono font-normal text-[var(--muted)]">
+                  {formatDate(entry.date)}
+                </strong>
+              </div>
 
-                  <td className="py-3.5 px-4">
-                    <Badge status={entry.status}>{entry.status}</Badge>
-                  </td>
-
-                  <td className="py-3.5 px-4 text-right">
-                    <a
-                      href={txUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-mono text-[11px] text-[var(--primary)] hover:underline decoration-dotted"
-                    >
-                      TX ↗
-                    </a>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+              <a
+                href={txUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-1.5 rounded-lg border border-[#e1e8e9] bg-white hover:bg-[#eef5fb] text-[#286a9b] text-xs font-semibold transition-colors"
+              >
+                Explorer ↗
+              </a>
+            </div>
+          </article>
+        );
+      })}
     </div>
   );
 }

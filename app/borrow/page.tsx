@@ -133,52 +133,71 @@ function BorrowContent() {
     : null;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
-      <div className="relative overflow-hidden rounded-[var(--radius)] bg-gradient-to-br from-[#214E3B] to-[#123124] text-white p-8 lg:p-10 shadow-[var(--shadow-raised)]">
-        <div className="max-w-2xl relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[#A5C9B3] text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Borrowing Workbench</span>
-          </div>
-
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-            Instant Collateral Liquidity
-          </h1>
-
-          <p className="text-[#D7E6D9] text-sm sm:text-base leading-relaxed">
-            Select your eligible NFT below to view real-time open lending offers. Lock your NFT into non-custodial escrow and receive instant ETH liquidity.
-          </p>
+    <div className="space-y-8 animate-in fade-in duration-150">
+      <div className="space-y-2 border-b border-[#e6ece9] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
+          <span>Make room for your next move · Instant collateral liquidity</span>
         </div>
 
-        <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-10 pointer-events-none flex items-center justify-center text-[180px] font-black">
-          ⚡
-        </div>
+        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b]">
+          Borrow against your collection.
+        </h1>
+
+        <p className="text-xs sm:text-sm text-[var(--muted)]">
+          Choose an NFT, compare offers, and review your exact repayment.
+        </p>
       </div>
 
       <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-bold tracking-tight text-[var(--text)]">Your Eligible NFTs</h2>
-          <p className="text-xs text-[var(--muted)]">
-            NFTs in your wallet eligible for instantaneous collateral loans
-          </p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium text-[#142d2b]">Your eligible NFTs</h2>
+          <span className="text-xs text-[var(--muted)]">
+            {filteredNfts.length} eligible NFT{filteredNfts.length === 1 ? '' : 's'}
+          </span>
         </div>
 
         <NFTGrid
           nfts={filteredNfts}
           selectedNft={selectedNft}
-          onSelectNft={(nft) => setSelectedNft(nft)}
+          onSelectNft={(nft) => {
+            setSelectedNft(nft);
+            const offers = MOCK_OFFERS.filter(
+              (o) =>
+                o.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
+                o.status === 'open'
+            );
+            if (offers.length > 0) {
+              setSelectedOffer(offers[0]);
+              setIsDrawerOpen(true);
+            }
+          }}
         />
+      </div>
+
+      <div className="border border-[#dceae3] rounded-xl p-5 bg-[#f6fbf8] flex items-center gap-5">
+        <div className="w-12 h-12 rounded-xl bg-[#eef8f1] border border-[#cce4dc] text-[var(--lime)] flex items-center justify-center text-xl shrink-0">
+          ◷
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-[#142d2b] mb-1">
+            A fixed term. A clear commitment.
+          </h3>
+          <p className="text-xs text-[var(--muted)] leading-relaxed">
+            Repay by the deadline to release your NFT. If you miss the deadline, the lender can claim the collateral.
+          </p>
+        </div>
       </div>
 
       {selectedNft && (
         <div className="space-y-4 pt-4 border-t border-[var(--line)] animate-in fade-in duration-150">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-[var(--text)]">
+              <h2 className="text-lg font-medium text-[#142d2b]">
                 Available Offers for {selectedNft.name}
               </h2>
               <p className="text-xs text-[var(--muted)]">
-                Collection: {selectedCollectionDef?.name || selectedNft.collectionName} • Sorted by Principal DESC
+                Collection: {selectedCollectionDef?.name || selectedNft.collectionName} • Fixed Rate Term
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 
 export interface CreateOfferConfirmationModalProps {
@@ -30,11 +31,11 @@ export function CreateOfferConfirmationModal({
   onClose,
   isLoading = false,
 }: CreateOfferConfirmationModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
   const interestRatePercent = (termInterestBps / 100).toFixed(1);
 
-  return (
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -137,4 +138,6 @@ export function CreateOfferConfirmationModal({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

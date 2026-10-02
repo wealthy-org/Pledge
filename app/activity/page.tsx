@@ -34,26 +34,20 @@ export default function ActivityPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#214E3B] to-[#123124] text-white p-8 shadow-[var(--shadow-raised)]">
-        <div className="max-w-2xl space-y-3 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[#A5C9B3] text-xs font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>On-Chain Provenance</span>
-          </div>
-
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
-            Protocol Activity Feed
-          </h1>
-
-          <p className="text-xs sm:text-sm text-[#D7E6D9] leading-relaxed">
-            Live timeline of liquidity offers, loan originations, settlements, and foreclosures on Robinhood Chain.
-          </p>
+    <div className="space-y-8 animate-in fade-in duration-150">
+      <div className="space-y-2 border-b border-[#e6ece9] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
+          <span>Real-time On-Chain Telemetry · Protocol Activity Feed</span>
         </div>
 
-        <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-10 pointer-events-none flex items-center justify-center text-[180px] font-black">
-          📡
-        </div>
+        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b]">
+          Market activity.
+        </h1>
+
+        <p className="text-xs sm:text-sm text-[var(--muted)]">
+          Live timeline of liquidity offers, loan originations, settlements, and foreclosures on Robinhood Chain.
+        </p>
       </div>
 
       <div className="space-y-4">

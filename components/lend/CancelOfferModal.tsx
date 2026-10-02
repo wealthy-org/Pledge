@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 
 export interface CancelOfferModalProps {
@@ -22,9 +23,9 @@ export function CancelOfferModal({
   onClose,
   isLoading = false,
 }: CancelOfferModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -95,4 +96,6 @@ export function CancelOfferModal({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

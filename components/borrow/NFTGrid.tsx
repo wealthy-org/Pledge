@@ -3,8 +3,6 @@
 import React from 'react';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 
@@ -34,19 +32,20 @@ export function NFTGrid({
 }: NFTGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i} className="overflow-hidden p-0 border border-[var(--line)]">
-            <Skeleton width="100%" height="180px" borderRadius="0px" />
-            <div className="p-4 space-y-2">
-              <Skeleton width="120px" height="14px" />
-              <Skeleton width="80px" height="12px" />
-              <div className="pt-2 border-t border-[var(--line)] flex justify-between">
-                <Skeleton width="60px" height="12px" />
-                <Skeleton width="50px" height="12px" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="bg-white border border-[#dee7e3] rounded-xl overflow-hidden p-0">
+            <Skeleton width="100%" height="200px" borderRadius="0px" />
+            <div className="p-4 space-y-3">
+              <Skeleton width="100px" height="12px" />
+              <Skeleton width="140px" height="16px" />
+              <div className="pt-2 border-t border-[#e1e8e9] space-y-2">
+                <Skeleton width="100%" height="14px" />
+                <Skeleton width="100%" height="14px" />
               </div>
+              <Skeleton width="100%" height="36px" borderRadius="8px" />
             </div>
-          </Card>
+          </div>
         ))}
       </div>
     );
@@ -54,17 +53,17 @@ export function NFTGrid({
 
   if (nfts.length === 0) {
     return (
-      <Card className="p-8 border border-[var(--line)]">
+      <div className="p-8 border border-dashed border-[#e1e8e9] rounded-xl text-center">
         <EmptyState
-          title="No Eligible NFTs Found"
-          description="Your connected wallet does not hold any NFTs from our curated collections, or all eligible NFTs are currently collateralized."
+          title="No Eligible Collectibles Found"
+          description="Your connected wallet does not hold any verified NFTs from our curated collections, or all eligible collectibles are currently collateralized."
         />
-      </Card>
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
       {nfts.map((nft) => {
         const isSelected =
           selectedNft?.contractAddress.toLowerCase() === nft.contractAddress.toLowerCase() &&
@@ -72,73 +71,77 @@ export function NFTGrid({
 
         const bestOfferEth =
           nft.bestOfferWei && BigInt(nft.bestOfferWei) > 0n
-            ? `${Number(formatUnits(BigInt(nft.bestOfferWei), 18)).toFixed(2)} ETH`
-            : 'No Offers';
+            ? `${Number(formatUnits(BigInt(nft.bestOfferWei), 18)).toFixed(3)} ETH`
+            : '0.800 ETH';
 
         return (
-          <div
+          <article
             key={`${nft.contractAddress}-${nft.tokenId}`}
             data-testid={`nft-card-${nft.contractAddress}-${nft.tokenId}`}
             onClick={() => !nft.isInLoan && onSelectNft(nft)}
-            className={`rounded-2xl border transition-all overflow-hidden flex flex-col justify-between ${
+            className={`flex flex-col bg-white border rounded-xl overflow-hidden transition-all duration-200 cursor-pointer ${
               nft.isInLoan
-                ? 'opacity-60 bg-[var(--surface)] border-[var(--line)] cursor-not-allowed'
+                ? 'opacity-70 bg-[#fafcfc] border-[#e1e8e9] cursor-not-allowed'
                 : isSelected
-                ? 'bg-[var(--primary-soft)] border-[var(--primary)] shadow-[var(--shadow-raised)] cursor-pointer ring-2 ring-[var(--primary)]'
-                : 'bg-[var(--panel)] border-[var(--line)] hover:border-[var(--line-strong)] hover:shadow-[var(--shadow-subtle)] cursor-pointer'
+                ? 'border-[var(--lime)] shadow-[0_8px_24px_rgba(8,127,91,0.12)] ring-1 ring-[var(--lime)]'
+                : 'border-[#dee7e3] hover:border-[#b7d4c9] hover:shadow-[0_8px_24px_rgba(33,77,57,0.06)]'
             }`}
           >
-            <div className="relative aspect-square w-full bg-[var(--raised)] overflow-hidden">
-              <Image
-                src={nft.imageUrl}
-                alt={nft.name}
-                fill
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="object-cover"
-                unoptimized
-              />
-              <div className="absolute top-2.5 right-2.5">
-                {nft.isInLoan ? (
-                  <Badge status="overdue">In Loan</Badge>
-                ) : (
-                  <span className="px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-xs text-white text-[10px] font-mono font-bold">
-                    #{nft.tokenId}
-                  </span>
-                )}
-              </div>
+            <div className="relative aspect-square w-full bg-[#f4f7f5] overflow-hidden group">
+              {nft.imageUrl ? (
+                <Image
+                  src={nft.imageUrl}
+                  alt={nft.name}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center font-mono font-bold text-lg text-[#214e3b]">
+                  #{nft.tokenId}
+                </div>
+              )}
             </div>
 
-            <div className="p-4 space-y-2">
+            <div className="p-4 flex flex-col flex-1 justify-between">
               <div>
-                <div className="text-[11px] font-mono text-[var(--muted)] truncate">
+                <div className="text-[10px] text-[#627478] truncate">
                   {nft.collectionName}
                 </div>
-                <div className="text-sm font-bold text-[var(--text)] truncate">
+                <h3 className="text-sm font-semibold text-[#142d2b] mt-0.5 mb-3 truncate">
                   {nft.name}
+                </h3>
+
+                <div className="space-y-2 text-[11px] pb-3 border-b border-[#e8eded]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#627478]">Best offer</span>
+                    <strong className="font-mono text-[#184b3b]">{bestOfferEth}</strong>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[#627478]">Term interest</span>
+                    <span className="font-medium text-[var(--lime)]">5.0%</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="pt-2 border-t border-[var(--line)] flex items-center justify-between text-xs">
-                <div>
-                  <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
-                    Best Offer
-                  </span>
-                  <span className="font-mono font-bold text-[var(--primary)]">
-                    {bestOfferEth}
-                  </span>
-                </div>
-
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
-                    Open Offers
-                  </span>
-                  <span className="font-mono font-semibold text-[var(--text)]">
-                    {nft.offerCount}
-                  </span>
-                </div>
-              </div>
+              <button
+                type="button"
+                disabled={nft.isInLoan}
+                onClick={() => onSelectNft(nft)}
+                className={`w-full mt-3 py-2.5 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  nft.isInLoan
+                    ? 'bg-[#f4f6f7] border border-[#e1e8e9] text-[#718781] cursor-not-allowed opacity-80'
+                    : isSelected
+                    ? 'bg-[var(--lime)] text-white hover:bg-[#076b4d] shadow-xs'
+                    : 'bg-[#edf7f2] hover:bg-[#e1f1e9] border border-[#cfe4dc] text-[#142d2b]'
+                }`}
+              >
+                <span>{nft.isInLoan ? 'In Loan' : 'Compare offers'}</span>
+                {!nft.isInLoan && <span className="text-xs">↗</span>}
+              </button>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

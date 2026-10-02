@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/Button';
 
 export interface BorrowConfirmationModalProps {
@@ -34,9 +35,9 @@ export function BorrowConfirmationModal({
   isApproving = false,
   isConfirming = false,
 }: BorrowConfirmationModalProps) {
-  if (!isOpen) return null;
+  if (!isOpen || typeof document === 'undefined') return null;
 
-  return (
+  const content = (
     <div
       role="dialog"
       aria-modal="true"
@@ -141,4 +142,6 @@ export function BorrowConfirmationModal({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }
