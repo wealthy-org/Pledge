@@ -137,26 +137,26 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#e1ebe6] dark:border-[#1e332c]">
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="bg-[#f0f4f2] dark:bg-[#14221e] p-[3px] rounded-[7px] flex gap-1 border border-[#e1ebe6] dark:border-[#1e332c]">
+          <div className="bg-[var(--panel)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
             <button
               onClick={() => setActiveTab('all')}
-              className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'all'
-                  ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              All markets <span className="text-[10px] text-[#64777a] dark:text-[#8ca197] ml-1">{collections.length}</span>
+              All markets <span className="text-[10px] text-[var(--muted)] ml-1">{collections.length}</span>
             </button>
             <button
               onClick={() => setActiveTab('watchlist')}
-              className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'watchlist'
-                  ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              Watchlist <span className="text-[10px] text-[#64777a] dark:text-[#8ca197] ml-1">{watchlist.length}</span>
+              Watchlist <span className="text-[10px] text-[var(--muted)] ml-1">{watchlist.length}</span>
             </button>
           </div>
 
@@ -164,12 +164,12 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
           <TimeframeSelector timeframe={timeframe} onSelectTimeframe={setTimeframe} />
         </div>
 
-        <div className="flex items-center gap-2 text-[11px] text-[var(--muted)] dark:text-[#8ca197]">
+        <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
           <span>Sort by</span>
           <select
             value={sortField}
             onChange={(e) => setSortField(e.target.value as SortField)}
-            className="text-[11px] bg-white dark:bg-[#14221e] border border-[#e1ebe6] dark:border-[#1e332c] rounded-[6px] px-2.5 py-1 text-[#142d2b] dark:text-[#f0f6fc] focus:outline-hidden focus:border-[var(--lime)] cursor-pointer"
+            className="text-xs bg-[var(--surface)] border border-[var(--line)] rounded-md px-2.5 py-1 text-[var(--text)] focus:outline-hidden focus:border-[var(--accent-primary)] cursor-pointer"
           >
             <option value="poolSize">Total liquidity</option>
             <option value="bestOffer">Highest loan</option>
@@ -233,11 +233,13 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                           type="button"
                           onClick={() => toggleWatchlist(c.address)}
                           aria-label={isStarred ? 'Remove from watchlist' : 'Add to watchlist'}
-                          className={`text-sm cursor-pointer transition-colors ${
-                            isStarred ? 'text-[var(--lime)] dark:text-emerald-400' : 'text-[#718781] dark:text-[#8ca197] hover:text-[var(--lime)]'
+                          className={`p-1 cursor-pointer transition-colors ${
+                            isStarred ? 'text-[var(--accent-primary)]' : 'text-[var(--muted)] hover:text-[var(--text)]'
                           }`}
                         >
-                          {isStarred ? '★' : '☆'}
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill={isStarred ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
                         </button>
 
                         <div className="w-10 h-10 rounded-[8px] bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] overflow-hidden flex items-center justify-center shrink-0">

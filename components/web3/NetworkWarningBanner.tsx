@@ -35,7 +35,11 @@ export function NetworkWarningBanner() {
       <div className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-200 px-4 py-2.5 transition-all">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 text-sm">⚠️</span>
+            <svg className="w-4 h-4 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
             <span>
               <strong className="font-semibold text-amber-300">Unsupported Network:</strong> You are currently connected to Chain ID {chainId}. Please switch to{' '}
               <span className="font-mono underline font-medium">{targetChain.name} ({targetChain.id})</span> to interact with Pledge Protocol.
@@ -56,7 +60,11 @@ export function NetworkWarningBanner() {
           <div className="relative w-full max-w-md p-6 bg-[var(--panel)] border border-red-500/40 rounded-xl shadow-2xl animate-in fade-in zoom-in-95">
             <div className="flex items-center gap-3 pb-3 mb-3 border-b border-[var(--line)]">
               <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400 font-bold">
-                ⚠️
+                <svg className="w-4 h-4 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
               </div>
               <h3 className="text-base font-semibold text-[var(--text)]">Network Switch Failed</h3>
             </div>

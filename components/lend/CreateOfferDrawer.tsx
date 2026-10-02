@@ -263,7 +263,10 @@ export function CreateOfferDrawer({
 
         <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs leading-relaxed">
           <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-900 dark:text-amber-100">
-            <span>ℹ️</span>
+            <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4m0-4h.01" />
+            </svg>
             <span>Collateral Security Disclosure</span>
           </div>
           <p>

@@ -125,7 +125,7 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
   ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-8">
       <CollectionHeader
         collection={collection}
         stats={stats}

@@ -38,8 +38,11 @@ export function ErrorModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 text-rose-600 dark:text-rose-400 flex items-center justify-center text-3xl font-black">
-            ✕
+          <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
           </div>
         </div>
 
@@ -57,7 +60,7 @@ export function ErrorModal({
         {actionHint && (
           <div className="p-3.5 rounded-xl bg-[var(--panel)] border border-[var(--line)] text-left text-xs space-y-1">
             <span className="font-bold text-[var(--text)] block text-[11px] uppercase tracking-wider font-mono">
-              💡 Suggested Next Step:
+              Suggested Next Step
             </span>
             <p className="text-[var(--muted)] leading-relaxed">{actionHint}</p>
           </div>

@@ -119,7 +119,7 @@ export default function PortfolioPage() {
     withdrawTxState.stage === 'CONFIRMING';
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-150">
+    <div className="space-y-8">
       <div className="space-y-2 border-b border-[var(--line)] pb-4">
         <div className="text-[10px] uppercase font-semibold tracking-wider text-[var(--accent-primary)] flex items-center gap-2">
           <span className="w-5 h-[1px] bg-[var(--accent-primary)] inline-block" />
@@ -174,10 +174,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'loans'}
               onClick={() => setActiveTab('loans')}
-              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'loans'
-                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
               Borrowing
@@ -186,10 +186,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'offers'}
               onClick={() => setActiveTab('offers')}
-              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'offers'
-                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
               Offers
@@ -198,10 +198,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'lending'}
               onClick={() => setActiveTab('lending')}
-              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'lending'
-                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
               Lending
@@ -210,10 +210,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'history'}
               onClick={() => setActiveTab('history')}
-              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'history'
-                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
               History

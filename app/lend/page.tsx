@@ -141,39 +141,32 @@ export default function LendPage() {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-150">
+    <div className="space-y-8">
       <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
         <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-emerald-400 flex items-center gap-2">
           <span className="w-5 h-[1px] bg-[#4d93be] dark:bg-emerald-500 inline-block" />
           <span>Put your ETH to work · Earn fixed yields</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0fdf4]">
-          Set the terms. Fund the loan.
-        </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0fdf4]">
+              Set the terms. Fund the loan.
+            </h1>
 
-        <p className="text-xs sm:text-sm text-[var(--muted)]">
-          Make offers on curated collections. Liquidity opportunities with fixed interest when borrowers repay.
-        </p>
-      </div>
+            <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
+              Make offers on curated collections. Liquidity opportunities with fixed interest when borrowers repay.
+            </p>
+          </div>
 
-      <div className="border border-[#cfe5dd] dark:border-[#1e332c] rounded-xl p-6 sm:p-7 bg-gradient-to-r from-[#e9f7ef] to-[#f0f7fc] dark:from-[#11221b] dark:to-[#0f2420] flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-        <div className="space-y-1.5 max-w-xl">
-          <h3 className="text-base sm:text-lg font-normal text-[#142d2b] dark:text-[#f0fdf4]">
-            Start with a collection you understand.
-          </h3>
-          <p className="text-xs text-[#547466] dark:text-[#8ba79b] leading-relaxed">
-            If a borrower defaults, you can claim their NFT. Collateral value and resale liquidity can change.
-          </p>
+          <button
+            type="button"
+            onClick={() => handleOpenDrawer()}
+            className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs shrink-0 cursor-pointer"
+          >
+            Create Offer +
+          </button>
         </div>
-
-        <button
-          onClick={() => handleOpenDrawer()}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white text-xs font-semibold transition-all shadow-xs shrink-0 cursor-pointer"
-        >
-          <span>Create an offer</span>
-          <span className="text-sm font-normal">+</span>
-        </button>
       </div>
 
       <div className="space-y-4">

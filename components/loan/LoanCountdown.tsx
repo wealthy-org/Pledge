@@ -36,7 +36,9 @@ export function LoanCountdown({
     return (
       <div className="p-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-900 dark:text-emerald-200 space-y-1">
         <div className="flex items-center gap-2 font-mono font-bold text-sm">
-          <span>✓</span>
+          <svg className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
           <span>Loan Repaid</span>
         </div>
         <p className="text-xs text-emerald-800/80 dark:text-emerald-200/80">
@@ -50,7 +52,11 @@ export function LoanCountdown({
     return (
       <div className="p-6 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-900 dark:text-rose-200 space-y-1">
         <div className="flex items-center gap-2 font-mono font-bold text-sm">
-          <span>⚠️</span>
+          <svg className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
           <span>Loan Foreclosed</span>
         </div>
         <p className="text-xs text-rose-800/80 dark:text-rose-200/80">

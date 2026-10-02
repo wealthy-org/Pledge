@@ -124,27 +124,38 @@ export function ActivityPanel() {
           aria-label="Toggle activity panel"
           className="text-xs text-[var(--muted)] hover:text-[var(--text)] p-1 cursor-pointer"
         >
-          {isOpen ? '✕' : '☰'}
+          {isOpen ? (
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          ) : (
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          )}
         </button>
       </div>
 
       <div className="flex bg-[var(--panel)] rounded-lg p-1 mb-3 gap-1 border border-[var(--line)]">
         <button
           onClick={() => setFeedScope('all')}
-          className={`flex-1 text-xs font-medium rounded-md py-1.5 px-2 transition-colors cursor-pointer ${
+          className={`flex-1 text-xs font-medium rounded-md py-1.5 px-2 transition-colors cursor-pointer border ${
             feedScope === 'all'
-              ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-              : 'text-[var(--muted)] hover:text-[var(--text)]'
+              ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+              : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
           }`}
         >
           All Activity
         </button>
         <button
           onClick={() => setFeedScope('watch')}
-          className={`flex-1 text-xs font-medium rounded-md py-1.5 px-2 transition-colors cursor-pointer ${
+          className={`flex-1 text-xs font-medium rounded-md py-1.5 px-2 transition-colors cursor-pointer border ${
             feedScope === 'watch'
-              ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-              : 'text-[var(--muted)] hover:text-[var(--text)]'
+              ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+              : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
           }`}
         >
           Watchlist

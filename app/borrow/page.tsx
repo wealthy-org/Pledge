@@ -160,7 +160,7 @@ function BorrowContent() {
     : null;
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-150">
+    <div className="space-y-8">
       <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
         <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-emerald-400 flex items-center gap-2">
           <span className="w-5 h-[1px] bg-[#4d93be] dark:bg-emerald-500 inline-block" />
@@ -202,22 +202,8 @@ function BorrowContent() {
         />
       </div>
 
-      <div className="border border-[#dceae3] rounded-xl p-5 bg-[#f6fbf8] flex items-center gap-5">
-        <div className="w-12 h-12 rounded-xl bg-[#eef8f1] border border-[#cce4dc] text-[var(--lime)] flex items-center justify-center text-xl shrink-0">
-          ◷
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-[#142d2b] mb-1">
-            A fixed term. A clear commitment.
-          </h3>
-          <p className="text-xs text-[var(--muted)] leading-relaxed">
-            Repay by the deadline to release your NFT. If you miss the deadline, the lender can claim the collateral.
-          </p>
-        </div>
-      </div>
-
       {selectedNft && (
-        <div className="space-y-4 pt-4 border-t border-[var(--line)] animate-in fade-in duration-150">
+        <div className="space-y-4 pt-4 border-t border-[var(--line)]">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-medium text-[#142d2b]">

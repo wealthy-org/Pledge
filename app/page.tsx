@@ -54,7 +54,7 @@ export default function HomePage() {
   }, [collections]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-150">
+    <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--line)]">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
@@ -157,10 +157,10 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setSelectedFilter('all')}
-                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer ${
+                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
                   selectedFilter === 'all'
-                    ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                    : 'text-[var(--muted)] hover:text-[var(--text)]'
+                    ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
                 }`}
               >
                 All
@@ -168,10 +168,10 @@ export default function HomePage() {
               <button
                 type="button"
                 onClick={() => setSelectedFilter('has_offers')}
-                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer ${
+                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
                   selectedFilter === 'has_offers'
-                    ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                    : 'text-[var(--muted)] hover:text-[var(--text)]'
+                    ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
                 }`}
               >
                 Has offers
@@ -215,20 +215,20 @@ export default function HomePage() {
           <div className="bg-[var(--panel)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
             <button
               onClick={() => setLoanMarketTab('offers')}
-              className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer ${
+              className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
                 loanMarketTab === 'offers'
-                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
               Available offers
             </button>
             <button
               onClick={() => setLoanMarketTab('active')}
-              className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer ${
+              className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
                 loanMarketTab === 'active'
-                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
-                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
               My active loans

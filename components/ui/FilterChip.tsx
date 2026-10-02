@@ -24,7 +24,7 @@ export function FilterChip({
       type="button"
       data-selected={selected ? 'true' : 'false'}
       onClick={() => onSelect(id)}
-      className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium border transition-all cursor-pointer whitespace-nowrap select-none ${
+      className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer whitespace-nowrap select-none ${
         selected
           ? 'bg-[var(--primary-soft)] text-[var(--primary)] border-[var(--primary)] shadow-xs font-semibold'
           : 'bg-[var(--panel)] text-[var(--muted)] hover:text-[var(--text)] border-[var(--line)] hover:bg-[var(--raised)]'

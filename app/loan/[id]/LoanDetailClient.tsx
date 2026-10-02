@@ -99,7 +99,7 @@ export function LoanDetailClient({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-200">
+    <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--line)] pb-4">
         <div className="flex items-center gap-3">
           <Link
@@ -128,8 +128,12 @@ export function LoanDetailClient({
           />
 
           <div className="p-5 rounded-2xl border border-[var(--line)] bg-[var(--surface)] space-y-2 text-xs text-[var(--muted)]">
-            <h4 className="font-bold text-[var(--text)] font-mono uppercase tracking-wider text-[11px]">
-              🔒 Non-Custodial Escrow Contract Terms
+            <h4 className="font-bold text-[var(--text)] font-mono uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-[var(--accent-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+              <span>Non-Custodial Escrow Contract Terms</span>
             </h4>
             <p className="leading-relaxed">
               This loan is executed under the immutable PledgeLoans smart contract. The collateral NFT is held in isolated escrow until either:

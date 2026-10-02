@@ -23,7 +23,6 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         setRecentSearches(JSON.parse(saved));
       }
     } catch {
-      // ignore
     }
   }, [isOpen]);
 
@@ -34,7 +33,6 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       setRecentSearches(updated);
       localStorage.setItem('pledge:recent-searches', JSON.stringify(updated));
     } catch {
-      // ignore
     }
   };
 
@@ -116,11 +114,14 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Search Protocol"
-        className="w-full max-w-xl bg-white dark:bg-[#111a17] border border-[#e6ece9] dark:border-[#1e332c] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
+        className="w-full max-w-xl bg-[var(--surface)] border border-[var(--line)] rounded-xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center px-4 py-3.5 border-b border-[#e6ece9] dark:border-[#1e332c] gap-3 bg-[#f8faf9] dark:bg-[#14221e]">
-          <span className="text-base text-[var(--muted)]">🔍</span>
+        <div className="flex items-center px-4 py-3 border-b border-[var(--line)] gap-3 bg-[var(--panel)]">
+          <svg className="w-4 h-4 text-[var(--muted)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.3-4.3" />
+          </svg>
           <input
             ref={inputRef}
             type="text"
@@ -136,15 +137,15 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             }}
             onKeyDown={handleInputKeyDown}
             placeholder="Search collections, loans, or addresses..."
-            className="flex-1 bg-transparent border-none text-sm text-[#142d2b] dark:text-[#f0f6fc] placeholder-[var(--muted)] focus:outline-hidden"
+            className="flex-1 bg-transparent border-none text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-hidden"
           />
-          <kbd className="px-2 py-0.5 rounded bg-white dark:bg-[#192b25] border border-[#e6ece9] dark:border-[#1e332c] text-[10px] font-mono text-[var(--muted)] shadow-xs">
+          <kbd className="px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--line)] text-[10px] font-mono text-[var(--muted)]">
             ESC
           </kbd>
         </div>
 
         {recentSearches.length > 0 && !query && (
-          <div className="px-4 py-2 bg-[#f4f7f5] dark:bg-[#14221e] border-b border-[#e6ece9] dark:border-[#1e332c] flex items-center justify-between">
+          <div className="px-4 py-2 bg-[var(--panel)] border-b border-[var(--line)] flex items-center justify-between">
             <div className="flex items-center gap-2 overflow-x-auto text-[11px] text-[var(--muted)]">
               <span className="font-semibold uppercase tracking-wider text-[9px]">Recent:</span>
               {recentSearches.map((item) => (
@@ -152,7 +153,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                   key={item}
                   type="button"
                   onClick={() => setQuery(item)}
-                  className="px-2 py-0.5 rounded bg-white dark:bg-[#192b25] border border-[#dee7e3] dark:border-[#1e332c] text-[#214e3b] dark:text-emerald-400 hover:border-emerald-500 transition-colors shrink-0"
+                  className="px-2 py-0.5 rounded-md bg-[var(--surface)] border border-[var(--line)] text-[var(--accent-primary)] hover:border-[var(--line-strong)] transition-colors shrink-0"
                 >
                   {item}
                 </button>
@@ -168,7 +169,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           </div>
         )}
 
-        <div id="search-results-list" role="listbox" className="max-h-80 overflow-y-auto p-2 divide-y divide-[#e6ece9] dark:divide-[#1e332c]">
+        <div id="search-results-list" role="listbox" className="max-h-80 overflow-y-auto p-2 divide-y divide-[var(--line)]">
           {filteredCollections.length === 0 ? (
             <div className="p-6 text-center text-xs text-[var(--muted)]">
               No matching collections found for &ldquo;{query}&rdquo;
@@ -183,24 +184,24 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(col)}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-colors cursor-pointer ${
+                  className={`flex items-center justify-between p-3 rounded-lg transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-[#edf7f2] dark:bg-[#16382b] text-[#214e3b] dark:text-emerald-300'
-                      : 'hover:bg-[#f4f7f5] dark:hover:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc]'
+                      ? 'bg-[var(--panel)] text-[var(--accent-primary)]'
+                      : 'hover:bg-[var(--panel)] text-[var(--text)]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#f4f7f5] dark:bg-[#192b25] border border-[#dee7e3] dark:border-[#1e332c] flex items-center justify-center text-xs font-bold font-mono text-[#214e3b] dark:text-emerald-400">
+                    <div className="w-8 h-8 rounded-md bg-[var(--surface)] border border-[var(--line)] flex items-center justify-center text-xs font-bold font-mono text-[var(--accent-primary)]">
                       {col.symbol.slice(0, 3)}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold leading-tight">{col.name}</div>
-                      <div className="text-[11px] text-[var(--muted)] mt-0.5">{col.category}</div>
+                      <div className="text-xs font-semibold leading-tight">{col.name}</div>
+                      <div className="text-[10px] text-[var(--muted)] mt-0.5">{col.category}</div>
                     </div>
                   </div>
 
                   <div className="text-right text-xs">
-                    <div className="font-mono font-bold">{col.floorPriceEth} ETH</div>
+                    <div className="font-mono font-semibold">{col.floorPriceEth} ETH</div>
                     <div className="text-[10px] text-[var(--muted)] font-mono">
                       Max {(col.maxLtvBps / 100).toFixed(0)}% LTV
                     </div>
@@ -211,7 +212,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           )}
         </div>
 
-        <div className="px-4 py-2 bg-[#f8faf9] dark:bg-[#14221e] border-t border-[#e6ece9] dark:border-[#1e332c] flex items-center justify-between text-[11px] text-[var(--muted)] font-mono">
+        <div className="px-4 py-2 bg-[var(--panel)] border-t border-[var(--line)] flex items-center justify-between text-[10px] text-[var(--muted)] font-mono">
           <div className="flex items-center gap-3">
             <span>↑↓ to navigate</span>
             <span>↵ to select</span>

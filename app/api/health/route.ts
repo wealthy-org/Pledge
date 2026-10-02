@@ -58,7 +58,7 @@ export async function GET() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: `⚠️ **Pledge Indexer Lag Alert**\n- Chain ID: \`${chain.id}\`\n- Latest RPC Block: \`${Number(latestRpcBlock)}\`\n- Last Indexed Block: \`${lastIndexedBlock}\`\n- Lag: \`${lagBlocks} blocks\`\n- Timestamp: \`${new Date().toISOString()}\``,
+          content: `[ALERT] **Pledge Indexer Lag Alert**\n- Chain ID: \`${chain.id}\`\n- Latest RPC Block: \`${Number(latestRpcBlock)}\`\n- Last Indexed Block: \`${lastIndexedBlock}\`\n- Lag: \`${lagBlocks} blocks\`\n- Timestamp: \`${new Date().toISOString()}\``,
         }),
       });
     } catch {}

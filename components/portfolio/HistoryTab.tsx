@@ -91,7 +91,7 @@ export function HistoryTab({
           <article
             key={i}
             data-testid="history-skeleton-row"
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[var(--surface)] border border-[var(--line)] rounded-xl"
           >
             <div className="flex items-center gap-3.5">
               <Skeleton width="48px" height="48px" borderRadius="8px" />
@@ -118,10 +118,10 @@ export function HistoryTab({
 
   if (historyEntries.length === 0) {
     return (
-      <div className="py-16 px-6 border border-dashed border-[#e1ebe6] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17]">
-        <div className="text-3xl text-[var(--lime)] dark:text-emerald-400 mb-2 font-mono">◈</div>
-        <h3 className="text-base font-medium text-[#142d2b] dark:text-[#f0f6fc]">A fresh start.</h3>
-        <p className="text-xs text-[var(--muted)] dark:text-[#8ca197] mt-1">
+      <div className="py-16 px-6 border border-dashed border-[var(--line)] rounded-xl text-center bg-[var(--surface)]">
+        <div className="text-2xl text-[var(--accent-primary)] mb-2 font-mono">◈</div>
+        <h3 className="text-sm font-semibold text-[var(--text)]">A fresh start</h3>
+        <p className="text-xs text-[var(--muted)] mt-1">
           Repaid loans and cancelled offers will appear here.
         </p>
       </div>
@@ -136,22 +136,31 @@ export function HistoryTab({
         return (
           <article
             key={`${entry.id}-${idx}`}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] hover:border-[#b7d4c9] dark:hover:border-emerald-500/40 rounded-xl transition-all"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] rounded-xl transition-colors"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-lg bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] flex items-center justify-center text-sm font-mono font-bold text-[#214e3b] dark:text-emerald-400">
-                {entry.type === 'Loan' ? '⚡' : '💰'}
+              <div className="w-11 h-11 rounded-lg bg-[var(--panel)] border border-[var(--line)] flex items-center justify-center shrink-0">
+                {entry.type === 'Loan' ? (
+                  <svg className="w-5 h-5 text-[var(--accent-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="4" y="4" width="16" height="16" rx="3" />
+                    <path d="M12 7v10m-4-4 4 4 4-4" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-[var(--accent-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m4 15 4-4 4 3 8-9M14 5h6v6M4 20h16" />
+                  </svg>
+                )}
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-[#142d2b] dark:text-[#f0f6fc]">{entry.id}</h3>
+                <h3 className="text-sm font-semibold text-[var(--text)]">{entry.id}</h3>
                 <span
-                  className={`inline-block text-[9px] px-2 py-0.5 mt-0.5 rounded font-medium ${
+                  className={`inline-block text-[10px] px-2 py-0.5 mt-0.5 rounded-md font-medium ${
                     entry.status === 'repaid'
-                      ? 'bg-[#e8f2fd] dark:bg-[#142838] text-[#276fa6] dark:text-[#58a6ff]'
+                      ? 'bg-[var(--panel)] text-[var(--accent-primary)] border border-[var(--line)]'
                       : entry.status === 'cancelled'
-                      ? 'bg-[#f4f6f7] dark:bg-[#192b25] text-[#8d8172] dark:text-[#a3b8af]'
-                      : 'bg-[#fee2e2] dark:bg-[#3d1a1a] text-red-700 dark:text-red-400'
+                      ? 'bg-[var(--panel)] text-[var(--muted)] border border-[var(--line)]'
+                      : 'bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20'
                   }`}
                 >
                   {entry.type} · {entry.status}
@@ -161,22 +170,22 @@ export function HistoryTab({
 
             <div className="flex items-center gap-6 sm:gap-8 justify-between sm:justify-end">
               <div>
-                <small className="text-[9px] text-[var(--muted)] dark:text-[#8ca197] block">Role</small>
-                <strong className="text-xs font-mono font-medium text-[#142d2b] dark:text-[#f0f6fc]">
+                <small className="text-[10px] text-[var(--muted)] block uppercase font-mono">Role</small>
+                <strong className="text-xs font-mono font-medium text-[var(--text)]">
                   {entry.role}
                 </strong>
               </div>
 
               <div>
-                <small className="text-[9px] text-[var(--muted)] dark:text-[#8ca197] block">Principal</small>
-                <strong className="text-xs font-mono font-semibold text-[#142d2b] dark:text-[#f0f6fc]">
+                <small className="text-[10px] text-[var(--muted)] block uppercase font-mono">Principal</small>
+                <strong className="text-xs font-mono font-semibold text-[var(--text)]">
                   {entry.principalEth}
                 </strong>
               </div>
 
               <div>
-                <small className="text-[9px] text-[var(--muted)] dark:text-[#8ca197] block">Date</small>
-                <strong className="text-xs font-mono font-normal text-[var(--muted)] dark:text-[#8ca197]">
+                <small className="text-[10px] text-[var(--muted)] block uppercase font-mono">Date</small>
+                <strong className="text-xs font-mono font-normal text-[var(--muted)]">
                   {formatDate(entry.date)}
                 </strong>
               </div>
@@ -185,7 +194,7 @@ export function HistoryTab({
                 href={txUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-1.5 rounded-lg border border-[#e1e8e9] dark:border-[#1e332c] bg-white dark:bg-[#14221e] hover:bg-[#eef5fb] dark:hover:bg-[#1b302a] text-[#286a9b] dark:text-emerald-400 text-xs font-semibold transition-colors"
+                className="px-3 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--panel)] hover:bg-[var(--surface)] text-[var(--text)] text-xs font-medium transition-colors"
               >
                 Explorer ↗
               </a>

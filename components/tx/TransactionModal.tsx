@@ -113,7 +113,7 @@ export function TransactionModal({
           {isError && state.actionHint && (
             <div className="mt-3 p-3 rounded-xl bg-[var(--panel)] border border-[var(--line)] text-left text-xs space-y-1">
               <span className="font-bold text-[var(--text)] block text-[10px] uppercase tracking-wider font-mono">
-                💡 Suggested Action:
+                Suggested Action
               </span>
               <p className="text-[var(--muted)] leading-relaxed">{state.actionHint}</p>
             </div>

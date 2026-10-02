@@ -15,7 +15,7 @@ export function RankingTabs({
   onTabChange,
   className = '',
 }: RankingTabsProps) {
-  const tabs: { id: RankingTabType; label: string; icon?: string }[] = [
+  const tabs: { id: RankingTabType; label: string }[] = [
     { id: 'top', label: 'Top' },
     { id: 'volume', label: 'Volume' },
     { id: 'movers', label: 'Movers' },
@@ -25,7 +25,7 @@ export function RankingTabs({
     <div
       role="tablist"
       aria-label="Collection Market Ranking"
-      className={`inline-flex items-center p-1 bg-[#f0f4f2] dark:bg-[#14221e] border border-[#dce6e1] dark:border-[#1e332c] rounded-xl gap-1 ${className}`}
+      className={`inline-flex items-center p-1 bg-[var(--panel)] border border-[var(--line)] rounded-lg gap-1 ${className}`}
     >
       {tabs.map((tab) => {
         const isSelected = activeTab === tab.id;
@@ -36,10 +36,10 @@ export function RankingTabs({
             type="button"
             aria-selected={isSelected}
             onClick={() => onTabChange(tab.id)}
-            className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors cursor-pointer border ${
               isSelected
-                ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] shadow-xs border border-[#d2dfd8] dark:border-[#1e332c]'
-                : 'text-[#61736b] dark:text-[#8b949e] hover:text-[#142d2b] dark:hover:text-white'
+                ? 'bg-[var(--surface)] text-[var(--text)] shadow-xs border-[var(--line)]'
+                : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
             }`}
           >
             {tab.label}
