@@ -1,0 +1,27 @@
+{
+  "chainId": 46630,
+  "chainName": "Robinhood Testnet",
+  "deployer": "0xD27e57beD346fB2ADA1Ed5798770d70ae0a43ff5",
+  "contracts": {
+    "PledgeLoans": {
+      "address": "0xA8452Ec99ce0C64f20701dB7dD3abDb607c00496",
+      "verified": true
+    },
+    "MockRHG": {
+      "name": "Robinhood Genesis Pass",
+      "symbol": "RHG",
+      "address": "0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496"
+    },
+    "MockSFR": {
+      "name": "Sherwood Forest Rangers",
+      "symbol": "SFR",
+      "address": "0x34A1D3fff3958843C43aD80F30b94c510645C316"
+    },
+    "MockNGP": {
+      "name": "Nottingham Guild Pledges",
+      "symbol": "NGP",
+      "address": "0x90193C961A926261B756D1E5bb255e67ff9498A1"
+    }
+  },
+  "deployedAt": "2026-10-01T23:53:30Z"
+}
