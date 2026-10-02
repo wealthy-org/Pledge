@@ -81,7 +81,7 @@ describe('TICKET-51: Transaction Error Decoder & Edge Case Suite', () => {
       <ErrorModal
         isOpen={true}
         title="Contract Revert Encountered"
-        errorMessage="Tawaran ini telah diisi oleh pengguna lain atau telah dibatalkan."
+        errorMessage="This offer is no longer open (it has been accepted or cancelled)."
         errorCode="OfferNotOpen"
         actionHint="Please refresh the markets page to discover current active liquidity offers."
         onRetry={mockRetry}
@@ -90,7 +90,7 @@ describe('TICKET-51: Transaction Error Decoder & Edge Case Suite', () => {
     );
 
     expect(screen.getByText('Contract Revert Encountered')).toBeDefined();
-    expect(screen.getByText(/Tawaran ini telah diisi/)).toBeDefined();
+    expect(screen.getByText(/This offer is no longer open/)).toBeDefined();
     expect(screen.getByText('Error Code: OfferNotOpen')).toBeDefined();
     expect(screen.getByText(/Please refresh the markets page/)).toBeDefined();
 

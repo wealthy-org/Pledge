@@ -102,7 +102,7 @@ export function BorrowConfirmationModal({
             <span>Foreclosure Warning</span>
           </div>
           <p>
-            NFT Anda akan ditransfer ke dalam escrow smart contract. Jika Anda tidak melunasi tepat waktu sebelum masa pinjaman berakhir, NFT Anda dapat disita secara permanen oleh pemberi pinjaman.
+            Your NFT will be transferred into smart contract escrow. If you do not repay on time before the loan duration expires, your collateral NFT may be permanently foreclosed by the lender.
           </p>
         </div>
 

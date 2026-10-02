@@ -39,21 +39,21 @@ export function Input({
       )}
 
       <div
-        className={`flex items-center rounded-xl bg-[var(--surface)] border px-3.5 py-2 transition-all ${
+        className={`flex items-center min-w-0 rounded-xl bg-[var(--surface)] border px-3.5 py-2 transition-all ${
           error
             ? 'border-[var(--error)] focus-within:ring-2 focus-within:ring-red-500/20'
             : 'border-[var(--line)] focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-emerald-500/20'
         }`}
       >
-        {prefix && <span className="text-xs text-[var(--muted)] font-mono mr-2">{prefix}</span>}
+        {prefix && <span className="text-xs text-[var(--muted)] font-mono mr-2 shrink-0 select-none">{prefix}</span>}
         <input
           id={inputId}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={describedBy}
-          className={`flex-1 bg-transparent border-none text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-hidden font-mono ${className}`}
+          className={`flex-1 min-w-0 w-full bg-transparent border-none text-sm text-[var(--text)] placeholder-[var(--muted)] focus:outline-hidden font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${className}`}
           {...props}
         />
-        {suffix && <span className="text-xs text-[var(--muted)] font-mono ml-2 font-medium">{suffix}</span>}
+        {suffix && <span className="text-xs text-[var(--muted)] font-mono ml-2 font-medium shrink-0 select-none">{suffix}</span>}
       </div>
 
       {error && (

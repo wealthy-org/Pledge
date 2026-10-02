@@ -90,14 +90,14 @@ describe('TICKET-37: Lend Page & Create Offer Drawer Test Suite', () => {
 
     expect(screen.getByRole('dialog', { name: /create lending offer/i })).toBeDefined();
 
-    const principalInput = screen.getByLabelText(/principal.*eth/i);
+    const principalInput = screen.getByLabelText(/principal/i);
     fireEvent.change(principalInput, { target: { value: '1.0' } });
 
-    const interestInput = screen.getByLabelText(/term interest.*%/i);
+    const interestInput = screen.getByLabelText(/term interest/i);
     fireEvent.change(interestInput, { target: { value: '5.0' } });
 
     expect(screen.getByText('0.050 ETH')).toBeDefined();
-    expect(screen.getByText(/pengembalian dana bergantung pada pelunasan peminjam/i)).toBeDefined();
+    expect(screen.getByText(/fund recovery depends on borrower repayment/i)).toBeDefined();
 
     const submitBtn = screen.getByRole('button', { name: /deposit & publish offer/i });
     fireEvent.click(submitBtn);

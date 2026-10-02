@@ -147,13 +147,13 @@ export function BorrowReviewDrawer({
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 text-xs leading-relaxed">
-          <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-800">
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs leading-relaxed">
+          <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-900 dark:text-amber-100">
             <span>⚠️</span>
             <span>Escrow & Foreclosure Disclaimer</span>
           </div>
           <p>
-            NFT Anda akan dipindahkan ke smart contract selama pinjaman berlangsung. Anda tidak dapat mentransfer atau menjual NFT ini. Jika gagal melunasi sebelum deadline, lender berhak mengklaim NFT Anda.
+            Your NFT will be transferred to the smart contract escrow for the duration of the loan. You cannot transfer or sell this asset. If you fail to repay before the deadline, the lender is entitled to claim the NFT collateral.
           </p>
         </div>
 

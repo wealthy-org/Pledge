@@ -184,7 +184,7 @@ describe('TICKET-36: Borrow Page & Review Drawer Test Suite', () => {
     expect(screen.getAllByText(/1.500 ETH/i).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(/0.015 ETH/i)).toBeDefined();
     expect(screen.getByText(/1.515 ETH/i)).toBeDefined();
-    expect(screen.getByText(/NFT Anda akan dipindahkan ke smart contract/i)).toBeDefined();
+    expect(screen.getByText(/Your NFT will be transferred to the smart contract escrow/i)).toBeDefined();
     expect(screen.getByRole('button', { name: /borrow 1.500 eth/i })).toBeDefined();
 
     fireEvent.click(screen.getByRole('button', { name: /borrow 1.500 eth/i }));

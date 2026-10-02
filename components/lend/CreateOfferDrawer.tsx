@@ -148,7 +148,7 @@ export function CreateOfferDrawer({
         <div className="grid grid-cols-2 gap-4">
           <Input
             id="lend-principal"
-            label="Principal (ETH)"
+            label="Principal"
             type="number"
             step="0.01"
             min="0.01"
@@ -161,7 +161,7 @@ export function CreateOfferDrawer({
 
           <Input
             id="lend-interest"
-            label="Term Interest (%)"
+            label="Term Interest"
             type="number"
             step="0.1"
             min="0.1"
@@ -261,13 +261,13 @@ export function CreateOfferDrawer({
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 text-xs leading-relaxed">
-          <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-800">
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs leading-relaxed">
+          <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-900 dark:text-amber-100">
             <span>ℹ️</span>
             <span>Collateral Security Disclosure</span>
           </div>
           <p>
-            Pengembalian dana bergantung pada pelunasan peminjam; jika peminjam gagal bayar, Anda berhak menyita NFT kolateral.
+            Fund recovery depends on borrower repayment; if the borrower defaults, you are entitled to foreclose and claim the collateral NFT.
           </p>
         </div>
 

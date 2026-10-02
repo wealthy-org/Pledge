@@ -108,9 +108,9 @@ export function CreateOfferConfirmationModal({
           </div>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 text-xs leading-relaxed">
+        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs leading-relaxed">
           <p className="font-medium">
-            ETH Anda akan disetor ke dalam kontrak escrow smart contract Pledge. Anda dapat membatalkan penawaran kapan saja selama belum diisi oleh peminjam.
+            Your ETH will be deposited into the Pledge smart contract escrow. You can cancel this offer at any time as long as it has not been accepted by a borrower.
           </p>
         </div>
 
