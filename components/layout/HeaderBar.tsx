@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useAccount, useChainId, useBalance } from 'wagmi';
+import { useConnection, useChainId, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { ConnectWallet } from '@/components/web3/ConnectWallet';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
@@ -14,7 +14,7 @@ interface HeaderBarProps {
 }
 
 export function HeaderBar({ onSearchClick }: HeaderBarProps) {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const chainId = useChainId();
   const mounted = useMounted();
   const { data: balanceData } = useBalance({

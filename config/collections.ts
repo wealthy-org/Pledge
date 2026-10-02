@@ -104,11 +104,27 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
 ];
 
 export function getCuratedCollections(chainId?: number): ActiveCuratedCollection[] {
-  const targetChain = chainId || Number(process.env.NEXT_PUBLIC_CHAIN_ID) || TESTNET_CHAIN_ID;
-  return CURATED_COLLECTIONS.map((col) => ({
-    ...col,
-    contractAddress: col.addresses[targetChain] || col.addresses[TESTNET_CHAIN_ID],
-  }));
+  let targetChain: number | undefined = chainId;
+  if (targetChain === undefined) {
+    const envVal = process.env.NEXT_PUBLIC_CHAIN_ID;
+    if (!envVal) {
+      throw new Error('Chain ID is not configured. NEXT_PUBLIC_CHAIN_ID must be set.');
+    }
+    targetChain = Number(envVal);
+  }
+  if (isNaN(targetChain)) {
+    throw new Error('Invalid chain ID configuration.');
+  }
+  return CURATED_COLLECTIONS.map((col) => {
+    const contractAddress = col.addresses[targetChain];
+    if (!contractAddress) {
+      throw new Error(`Collection ${col.name} (${col.id}) is not deployed on chain ${targetChain}.`);
+    }
+    return {
+      ...col,
+      contractAddress,
+    };
+  });
 }
 
 export function getCollectionByAddress(
@@ -117,9 +133,37 @@ export function getCollectionByAddress(
 ): ActiveCuratedCollection | null {
   if (!address) return null;
   const lowerTarget = address.toLowerCase();
-  const all = getCuratedCollections(chainId);
+  let targetChain: number | undefined = chainId;
+  if (targetChain === undefined) {
+    const envVal = process.env.NEXT_PUBLIC_CHAIN_ID;
+    if (!envVal) {
+      throw new Error('Chain ID is not configured. NEXT_PUBLIC_CHAIN_ID must be set.');
+    }
+    targetChain = Number(envVal);
+  }
+  if (isNaN(targetChain)) {
+    throw new Error('Invalid chain ID configuration.');
+  }
+  const all = getCuratedCollections(targetChain);
   const found = all.find((col) => col.contractAddress.toLowerCase() === lowerTarget);
-  return found || null;
+  if (found) return found;
+
+  for (const c of CURATED_COLLECTIONS) {
+    const isMatch = Object.values(c.addresses).some(
+      (addr) => addr && typeof addr === 'string' && addr.toLowerCase() === lowerTarget
+    );
+    if (isMatch) {
+      const targetAddress = c.addresses[targetChain];
+      if (!targetAddress) {
+        throw new Error(`Collection ${c.name} (${c.id}) is not deployed on chain ${targetChain}.`);
+      }
+      return {
+        ...c,
+        contractAddress: targetAddress,
+      };
+    }
+  }
+  return null;
 }
 
 export function isCollectionAllowed(address: string, chainId?: number): boolean {

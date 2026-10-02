@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI, ERC721_ABI } from '@/config/contracts';
@@ -23,7 +23,7 @@ export interface AcceptOfferParams {
 }
 
 export function useAcceptOffer() {
-  const { address, isConnected, chainId } = useAccount();
+  const { address, isConnected, chainId } = useConnection();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();

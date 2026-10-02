@@ -17,6 +17,11 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: '0x2222222222222222222222222222222222222222',
+    isConnected: true,
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: '0x2222222222222222222222222222222222222222',
     isConnected: true,

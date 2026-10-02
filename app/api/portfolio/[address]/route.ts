@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { indexerStore } from '@/lib/indexer/store';
+import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
 import { LoanItem, OfferItem } from '@/types/api';
 
@@ -14,7 +15,7 @@ export interface PortfolioResponse {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ address: string }> }
 ) {
   const { address } = await context.params;
@@ -27,27 +28,35 @@ export async function GET(
     );
   }
 
+  const { searchParams } = new URL(request.url);
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
+
+  await syncOnChainLogs(chainId);
+
   const target = address.toLowerCase();
 
   const allLoans: LoanItem[] = [];
   for (const row of indexerStore.loans.values()) {
-    allLoans.push({
-      loanId: row.loan_id,
-      offerId: row.offer_id,
-      chainId: row.chain_id,
-      lender: row.lender,
-      borrower: row.borrower,
-      collection: row.collection,
-      tokenId: row.token_id,
-      principalWei: row.principal_wei,
-      interestWei: row.interest_wei,
-      feeBpsSnapshot: row.fee_bps_snapshot,
-      startedAt: row.started_at,
-      dueAt: row.due_at,
-      status: row.status,
-      blockNumber: row.block_number,
-      txHash: row.tx_hash,
-    });
+    if (chainId === undefined || row.chain_id === chainId) {
+      allLoans.push({
+        loanId: row.loan_id,
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        borrower: row.borrower,
+        collection: row.collection,
+        tokenId: row.token_id,
+        principalWei: row.principal_wei,
+        interestWei: row.interest_wei,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        startedAt: row.started_at,
+        dueAt: row.due_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
+      });
+    }
   }
 
   const borrowedLoans = allLoans.filter((l) => l.borrower.toLowerCase() === target && l.status === 'active');
@@ -55,21 +64,23 @@ export async function GET(
 
   const allOffers: OfferItem[] = [];
   for (const row of indexerStore.offers.values()) {
-    allOffers.push({
-      offerId: row.offer_id,
-      chainId: row.chain_id,
-      lender: row.lender,
-      collection: row.collection,
-      principalWei: row.principal_wei,
-      termInterestBps: row.term_interest_bps,
-      feeBpsSnapshot: row.fee_bps_snapshot,
-      durationSeconds: row.duration_seconds,
-      expiresAt: row.expires_at,
-      status: row.status,
-      blockNumber: row.block_number,
-      txHash: row.tx_hash,
-      createdAt: row.indexed_at,
-    });
+    if (chainId === undefined || row.chain_id === chainId) {
+      allOffers.push({
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        collection: row.collection,
+        principalWei: row.principal_wei,
+        termInterestBps: row.term_interest_bps,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        durationSeconds: row.duration_seconds,
+        expiresAt: row.expires_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
+        createdAt: row.indexed_at,
+      });
+    }
   }
 
   const activeOffers = allOffers.filter((o) => o.lender.toLowerCase() === target && o.status === 'open');

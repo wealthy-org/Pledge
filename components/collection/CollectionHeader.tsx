@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { getExplorerAddressUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getExplorerAddressUrl } from '@/config/chains';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import type { ActiveCuratedCollection } from '@/config/collections';
 
 export interface CollectionHeaderStats {
@@ -25,12 +26,14 @@ export interface CollectionHeaderProps {
 export function CollectionHeader({
   collection,
   stats,
-  chainId = TESTNET_CHAIN_ID,
+  chainId,
 }: CollectionHeaderProps) {
+  const safeChainId = useSafeChainId();
+  const activeChainId = chainId ?? safeChainId;
   const [copied, setCopied] = useState(false);
 
   const truncatedAddress = `${collection.contractAddress.slice(0, 6)}...${collection.contractAddress.slice(-4)}`;
-  const explorerUrl = getExplorerAddressUrl(collection.contractAddress, chainId);
+  const explorerUrl = getExplorerAddressUrl(collection.contractAddress, activeChainId);
 
   const bestOfferEth = stats.bestOfferWei
     ? `${Number(formatUnits(BigInt(stats.bestOfferWei), 18)).toFixed(2)} ETH`

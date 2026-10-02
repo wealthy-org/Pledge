@@ -71,6 +71,11 @@ const mockOffers: OfferItem[] = [
 let connectedAccount: string | undefined = mockUserAddress;
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: connectedAccount,
+    isConnected: Boolean(connectedAccount),
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: connectedAccount,
     isConnected: Boolean(connectedAccount),

@@ -8,7 +8,7 @@ import { indexerStore } from './store';
 let lastSyncTime = 0;
 const SYNC_COOLDOWN_MS = 5000;
 
-export async function syncOnChainLogs(chainId: number = TESTNET_CHAIN_ID): Promise<number> {
+export async function syncOnChainLogs(chainId?: number): Promise<number> {
   const now = Date.now();
   if (now - lastSyncTime < SYNC_COOLDOWN_MS) {
     return 0;
@@ -17,8 +17,11 @@ export async function syncOnChainLogs(chainId: number = TESTNET_CHAIN_ID): Promi
 
   try {
     const chain = getActiveChain(chainId);
-    const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL || (chain.rpcUrls.default.http[0] as string);
-    const contractAddress = getPledgeLoansAddress(chainId);
+    const rpcUrl = chain.rpcUrls.default.http[0];
+    if (!rpcUrl) {
+      throw new Error(`RPC URL is missing for chain ID ${chain.id}`);
+    }
+    const contractAddress = getPledgeLoansAddress(chain.id);
 
     const client = createPublicClient({
       chain,
@@ -26,7 +29,7 @@ export async function syncOnChainLogs(chainId: number = TESTNET_CHAIN_ID): Promi
     });
 
     const currentBlock = await client.getBlockNumber();
-    const checkpoint = indexerStore.getCheckpoint(chainId, contractAddress);
+    const checkpoint = indexerStore.getCheckpoint(chain.id, contractAddress);
     const fromBlock = checkpoint ? BigInt(checkpoint.last_block_number + 1) : 0n;
 
     if (fromBlock > currentBlock) {
@@ -49,7 +52,7 @@ export async function syncOnChainLogs(chainId: number = TESTNET_CHAIN_ID): Promi
         });
 
         parsedLogs.push({
-          chainId,
+          chainId: chain.id,
           contractAddress: log.address.toLowerCase(),
           blockNumber: Number(log.blockNumber),
           blockHash: log.blockHash || '',
@@ -66,7 +69,7 @@ export async function syncOnChainLogs(chainId: number = TESTNET_CHAIN_ID): Promi
       return result.eventsInserted;
     }
 
-    indexerStore.setCheckpoint(chainId, contractAddress, Number(currentBlock), '');
+    indexerStore.setCheckpoint(chain.id, contractAddress, Number(currentBlock), '');
     return 0;
   } catch {
     return 0;

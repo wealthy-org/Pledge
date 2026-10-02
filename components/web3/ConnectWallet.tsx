@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAccount, useDisconnect, useChainId } from 'wagmi';
+import { useConnection, useDisconnect, useChainId } from 'wagmi';
 import { truncateAddress } from '@/lib/web3/wallet';
 import { ConnectWalletModal } from './ConnectWalletModal';
 import { WalletDropdownMenu } from './WalletDropdownMenu';
@@ -14,7 +14,7 @@ export interface ConnectWalletProps {
 }
 
 export function ConnectWallet({ className = '' }: ConnectWalletProps) {
-  const { address, isConnected, isConnecting } = useAccount();
+  const { address, isConnected, isConnecting } = useConnection();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
   const [isModalOpen, setIsModalOpen] = useState(false);

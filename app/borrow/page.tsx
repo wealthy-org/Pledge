@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { CURATED_COLLECTIONS } from '@/config/collections';
+import { getCuratedCollections, getCollectionByAddress } from '@/config/collections';
 import { NFTGrid, type BorrowableNft } from '@/components/borrow/NFTGrid';
 import { OfferComparisonList } from '@/components/borrow/OfferComparisonList';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
@@ -14,18 +14,20 @@ import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
 import { useCollections } from '@/hooks/api/useCollections';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import type { OfferItem } from '@/types/api';
 
 function BorrowContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const collectionParam = searchParams.get('collection');
-  const { address, isConnected } = useAccount();
+  const chainId = useSafeChainId();
+  const { address, isConnected } = useConnection();
   const { state: txState, checkIsApproved, approveNFT, acceptOffer, reset: resetTx } = useAcceptOffer();
 
-  const { nfts: rawWalletNfts } = useEligibleNfts(address);
-  const { data: collectionsData } = useCollections();
+  const { nfts: rawWalletNfts } = useEligibleNfts(address, chainId);
+  const { data: collectionsData } = useCollections(chainId);
   const { data: userLoansData } = useLoans({ borrower: address, status: 'active' });
 
   const [selectedNft, setSelectedNft] = useState<BorrowableNft | null>(null);
@@ -69,8 +71,8 @@ function BorrowContent() {
       });
     }
 
-    return CURATED_COLLECTIONS.map((col, idx) => {
-      const colAddress = col.addresses[46630];
+    return getCuratedCollections(chainId).map((col, idx) => {
+      const colAddress = col.contractAddress;
       const remoteStats = collectionsData?.collections?.find(
         (c) => c.address.toLowerCase() === colAddress.toLowerCase()
       );
@@ -86,7 +88,7 @@ function BorrowContent() {
         isInLoan: false,
       };
     });
-  }, [rawWalletNfts, collectionsData, userLoansData]);
+  }, [rawWalletNfts, collectionsData, userLoansData, chainId]);
 
   const filteredNfts = useMemo(() => {
     if (!collectionParam) return borrowableNfts;
@@ -154,9 +156,7 @@ function BorrowContent() {
   };
 
   const selectedCollectionDef = selectedNft
-    ? CURATED_COLLECTIONS.find(
-        (c) => c.addresses[46630].toLowerCase() === selectedNft.contractAddress.toLowerCase()
-      )
+    ? getCollectionByAddress(selectedNft.contractAddress, chainId)
     : null;
 
   return (

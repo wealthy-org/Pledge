@@ -2,16 +2,18 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import { CURATED_COLLECTIONS } from '@/config/collections';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { getCuratedCollections } from '@/config/collections';
 import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 
 export default function CollectionsPage() {
-  const { data: apiData } = useCollections();
+  const chainId = useSafeChainId();
+  const { data: apiData } = useCollections(chainId);
 
   const collections: MarketCollectionItem[] = useMemo(() => {
-    return CURATED_COLLECTIONS.map((col) => {
-      const address = col.addresses[46630];
+    return getCuratedCollections(chainId).map((col) => {
+      const address = col.contractAddress;
       const remote = apiData?.collections?.find(
         (c) => c.address.toLowerCase() === address.toLowerCase()
       );
@@ -29,7 +31,7 @@ export default function CollectionsPage() {
         maxLtvBps: col.maxLtvBps,
       };
     });
-  }, [apiData]);
+  }, [apiData, chainId]);
 
   return (
     <div className="space-y-8">

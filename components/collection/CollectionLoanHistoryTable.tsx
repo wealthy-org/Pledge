@@ -5,7 +5,8 @@ import { formatUnits } from 'viem';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getExplorerTxUrl } from '@/config/chains';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import type { LoanItem } from '@/types/api';
 
 export interface CollectionLoanHistoryTableProps {
@@ -17,8 +18,10 @@ export interface CollectionLoanHistoryTableProps {
 export function CollectionLoanHistoryTable({
   loans,
   isLoading = false,
-  chainId = TESTNET_CHAIN_ID,
+  chainId,
 }: CollectionLoanHistoryTableProps) {
+  const safeChainId = useSafeChainId();
+  const activeChainId = chainId ?? safeChainId;
   const formatDue = (isoString: string) => {
     try {
       const d = new Date(isoString);
@@ -80,7 +83,7 @@ export function CollectionLoanHistoryTable({
               const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
               const totalDueEth = calculateTotalDueEth(loan.principalWei, loan.interestWei);
               const borrowerTruncated = `${loan.borrower.slice(0, 6)}...${loan.borrower.slice(-4)}`;
-              const txUrl = getExplorerTxUrl(loan.txHash, chainId);
+              const txUrl = getExplorerTxUrl(loan.txHash, activeChainId);
 
               return (
                 <tr

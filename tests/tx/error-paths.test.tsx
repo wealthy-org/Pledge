@@ -10,6 +10,11 @@ const mockWriteContract = vi.fn();
 const mockWaitForTransactionReceipt = vi.fn();
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: '0x02070747E2436d46f56A691F605A7c03332DFe8d',
+    isConnected: true,
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: '0x02070747E2436d46f56A691F605A7c03332DFe8d',
     isConnected: true,

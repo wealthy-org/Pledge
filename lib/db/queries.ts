@@ -1,5 +1,4 @@
 import { getCuratedCollections, getCollectionByAddress } from '@/config/collections';
-import { TESTNET_CHAIN_ID } from '@/config/chains';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import {
@@ -17,11 +16,25 @@ import {
 } from '@/types/api';
 import { OfferStatus, LoanStatus } from '@/types/database';
 
-export async function getLastIndexedBlock(chainId = TESTNET_CHAIN_ID): Promise<number> {
-  await syncOnChainLogs(chainId);
+function resolveChainId(chainId?: number): number {
+  if (chainId !== undefined) return chainId;
+  const envChainId = process.env.NEXT_PUBLIC_CHAIN_ID;
+  if (!envChainId) {
+    throw new Error('Chain ID is not configured. NEXT_PUBLIC_CHAIN_ID must be set.');
+  }
+  const parsed = Number(envChainId);
+  if (isNaN(parsed) || parsed <= 0) {
+    throw new Error(`Invalid NEXT_PUBLIC_CHAIN_ID: ${envChainId}`);
+  }
+  return parsed;
+}
+
+export async function getLastIndexedBlock(chainId?: number): Promise<number> {
+  const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   let highest = 120;
   for (const checkpoint of indexerStore.checkpoints.values()) {
-    if (checkpoint.chain_id === chainId && checkpoint.last_block_number > highest) {
+    if (checkpoint.chain_id === targetChain && checkpoint.last_block_number > highest) {
       highest = checkpoint.last_block_number;
     }
   }
@@ -30,13 +43,14 @@ export async function getLastIndexedBlock(chainId = TESTNET_CHAIN_ID): Promise<n
 
 export async function getCollectionStatsFromStore(
   collectionAddress: string,
-  chainId = TESTNET_CHAIN_ID
+  chainId?: number
 ): Promise<CollectionStatsResponse> {
+  const targetChain = resolveChainId(chainId);
   const target = collectionAddress.toLowerCase();
   const openOffers: OfferItem[] = [];
 
   for (const row of indexerStore.offers.values()) {
-    if (row.chain_id === chainId && row.collection.toLowerCase() === target && row.status === 'open') {
+    if (row.chain_id === targetChain && row.collection.toLowerCase() === target && row.status === 'open') {
       openOffers.push({
         offerId: row.offer_id,
         chainId: row.chain_id,
@@ -68,12 +82,12 @@ export async function getCollectionStatsFromStore(
 
   let activeLoansCount = 0;
   for (const row of indexerStore.loans.values()) {
-    if (row.chain_id === chainId && row.collection.toLowerCase() === target && row.status === 'active') {
+    if (row.chain_id === targetChain && row.collection.toLowerCase() === target && row.status === 'active') {
       activeLoansCount++;
     }
   }
 
-  const lastBlock = await getLastIndexedBlock(chainId);
+  const lastBlock = await getLastIndexedBlock(targetChain);
 
   return {
     bestOfferWei: bestOfferBigInt > 0n ? bestOfferBigInt.toString() : null,
@@ -84,12 +98,13 @@ export async function getCollectionStatsFromStore(
   };
 }
 
-export async function fetchCollectionsWithStats(chainId = TESTNET_CHAIN_ID): Promise<CollectionItemResponse[]> {
-  const collections = getCuratedCollections(chainId);
+export async function fetchCollectionsWithStats(chainId?: number): Promise<CollectionItemResponse[]> {
+  const targetChain = resolveChainId(chainId);
+  const collections = getCuratedCollections(targetChain);
 
   const results: CollectionItemResponse[] = [];
   for (const col of collections) {
-    const stats = await getCollectionStatsFromStore(col.contractAddress, chainId);
+    const stats = await getCollectionStatsFromStore(col.contractAddress, targetChain);
     results.push({
       address: col.contractAddress,
       name: col.name,
@@ -109,12 +124,13 @@ export async function fetchCollectionsWithStats(chainId = TESTNET_CHAIN_ID): Pro
 
 export async function fetchCollectionDetail(
   address: string,
-  chainId = TESTNET_CHAIN_ID
+  chainId?: number
 ): Promise<CollectionDetailResponse | null> {
-  const collection = getCollectionByAddress(address, chainId);
+  const targetChain = resolveChainId(chainId);
+  const collection = getCollectionByAddress(address, targetChain);
   if (!collection) return null;
 
-  const stats = await getCollectionStatsFromStore(address, chainId);
+  const stats = await getCollectionStatsFromStore(address, targetChain);
 
   return {
     collection: {
@@ -139,13 +155,14 @@ export async function fetchCollectionOffers(
   sort = 'principal',
   limit = 20,
   cursor?: string,
-  chainId = TESTNET_CHAIN_ID
+  chainId?: number
 ): Promise<OffersListResponse> {
+  const targetChain = resolveChainId(chainId);
   const target = address.toLowerCase();
   const allOffers: OfferItem[] = [];
 
   for (const row of indexerStore.offers.values()) {
-    if (row.chain_id === chainId && row.collection.toLowerCase() === target) {
+    if (row.chain_id === targetChain && row.collection.toLowerCase() === target) {
       allOffers.push({
         offerId: row.offer_id,
         chainId: row.chain_id,
@@ -194,8 +211,9 @@ export async function fetchCollectionOffers(
   };
 }
 
-export async function fetchLoanDetail(loanId: number, chainId = TESTNET_CHAIN_ID): Promise<LoanDetailResponse | null> {
-  const fromStore = indexerStore.getLoan(chainId, loanId);
+export async function fetchLoanDetail(loanId: number, chainId?: number): Promise<LoanDetailResponse | null> {
+  const targetChain = resolveChainId(chainId);
+  const fromStore = indexerStore.getLoan(targetChain, loanId);
   if (!fromStore) return null;
 
   const loan: LoanItem = {
@@ -216,7 +234,7 @@ export async function fetchLoanDetail(loanId: number, chainId = TESTNET_CHAIN_ID
     txHash: fromStore.tx_hash,
   };
 
-  const collection = getCollectionByAddress(loan.collection, chainId);
+  const collection = getCollectionByAddress(loan.collection, targetChain);
   const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
 
   return {
@@ -238,13 +256,14 @@ export async function fetchWalletLoans(
   role?: string,
   limit = 20,
   cursor?: string,
-  chainId = TESTNET_CHAIN_ID
+  chainId?: number
 ): Promise<WalletLoansResponse> {
+  const targetChain = resolveChainId(chainId);
   const target = address.toLowerCase();
   const allLoans: LoanItem[] = [];
 
   for (const row of indexerStore.loans.values()) {
-    if (row.chain_id === chainId) {
+    if (row.chain_id === targetChain) {
       allLoans.push({
         loanId: row.loan_id,
         offerId: row.offer_id,
@@ -288,25 +307,78 @@ export async function fetchWalletLoans(
   };
 }
 
+export async function fetchOffersForWallet(
+  address: string,
+  status?: OfferStatus,
+  limit = 20,
+  cursor?: string,
+  chainId?: number
+): Promise<OffersListResponse> {
+  const targetChain = resolveChainId(chainId);
+  const target = address.toLowerCase();
+  const allOffers: OfferItem[] = [];
+
+  for (const row of indexerStore.offers.values()) {
+    if (row.chain_id === targetChain && row.lender.toLowerCase() === target) {
+      allOffers.push({
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        collection: row.collection,
+        principalWei: row.principal_wei,
+        termInterestBps: row.term_interest_bps,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        durationSeconds: row.duration_seconds,
+        expiresAt: row.expires_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
+        createdAt: row.indexed_at,
+      });
+    }
+  }
+
+  let filtered = allOffers;
+  if (status) {
+    filtered = filtered.filter((o) => o.status === status);
+  }
+
+  filtered.sort((a, b) => b.offerId - a.offerId);
+
+  const startIndex = cursor ? parseInt(cursor, 10) : 0;
+  const paginated = filtered.slice(startIndex, startIndex + limit);
+  const nextCursor = startIndex + limit < filtered.length ? (startIndex + limit).toString() : null;
+
+  return {
+    offers: paginated,
+    nextCursor,
+    total: filtered.length,
+  };
+}
+
 export async function fetchActivityFeed(
   collection?: string,
   type?: string,
   limit = 20,
-  cursor?: string
+  cursor?: string,
+  chainId?: number
 ): Promise<ActivityResponse> {
-  await syncOnChainLogs();
+  const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   const allActivity: ActivityItem[] = [];
 
   for (const eventRow of indexerStore.events) {
-    allActivity.push({
-      id: eventRow.id,
-      eventType: eventRow.event_type,
-      contractAddress: eventRow.contract_address,
-      blockNumber: eventRow.block_number,
-      txHash: eventRow.tx_hash,
-      timestamp: eventRow.indexed_at,
-      data: eventRow.data as Record<string, unknown>,
-    });
+    if (eventRow.chain_id === targetChain) {
+      allActivity.push({
+        id: eventRow.id,
+        eventType: eventRow.event_type,
+        contractAddress: eventRow.contract_address,
+        blockNumber: eventRow.block_number,
+        txHash: eventRow.tx_hash,
+        timestamp: eventRow.indexed_at,
+        data: eventRow.data as Record<string, unknown>,
+      });
+    }
   }
 
   let filtered = allActivity;
@@ -333,23 +405,29 @@ export async function fetchActivityFeed(
   };
 }
 
-export async function fetchMarketStats(): Promise<MarketStatsResponse> {
+export async function fetchMarketStats(chainId?: number): Promise<MarketStatsResponse> {
+  const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   let totalPoolSize = 0n;
   let totalVolume = 0n;
   let activeLoansCount = 0;
   let totalOffersCount = 0;
 
   for (const offerRow of indexerStore.offers.values()) {
-    totalOffersCount++;
-    if (offerRow.status === 'open') {
-      totalPoolSize += BigInt(offerRow.principal_wei);
+    if (offerRow.chain_id === targetChain) {
+      totalOffersCount++;
+      if (offerRow.status === 'open') {
+        totalPoolSize += BigInt(offerRow.principal_wei);
+      }
     }
   }
 
   for (const loanRow of indexerStore.loans.values()) {
-    totalVolume += BigInt(loanRow.principal_wei);
-    if (loanRow.status === 'active') {
-      activeLoansCount++;
+    if (loanRow.chain_id === targetChain) {
+      totalVolume += BigInt(loanRow.principal_wei);
+      if (loanRow.status === 'active') {
+        activeLoansCount++;
+      }
     }
   }
 

@@ -4,8 +4,9 @@ import React from 'react';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { Badge } from '@/components/ui/Badge';
-import { getExplorerAddressUrl, getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getExplorerAddressUrl, getExplorerTxUrl } from '@/config/chains';
 import { getCollectionByAddress } from '@/config/collections';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { LTVHealthBar } from '@/components/common/LTVHealthBar';
 import type { LoanItem } from '@/types/api';
 
@@ -20,8 +21,10 @@ export function LoanTermsCard({
   loan,
   collectionName,
   imageUrl,
-  chainId = TESTNET_CHAIN_ID,
+  chainId,
 }: LoanTermsCardProps) {
+  const safeChainId = useSafeChainId();
+  const activeChainId = chainId ?? safeChainId;
   const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
   const interestEth = `${Number(formatUnits(BigInt(loan.interestWei), 18)).toFixed(2)} ETH`;
   const totalDueBigInt = BigInt(loan.principalWei) + BigInt(loan.interestWei);
@@ -46,10 +49,10 @@ export function LoanTermsCard({
     }
   };
 
-  const borrowerUrl = getExplorerAddressUrl(loan.borrower, chainId);
-  const lenderUrl = getExplorerAddressUrl(loan.lender, chainId);
-  const collectionUrl = getExplorerAddressUrl(loan.collection, chainId);
-  const txUrl = getExplorerTxUrl(loan.txHash, chainId);
+  const borrowerUrl = getExplorerAddressUrl(loan.borrower, activeChainId);
+  const lenderUrl = getExplorerAddressUrl(loan.lender, activeChainId);
+  const collectionUrl = getExplorerAddressUrl(loan.collection, activeChainId);
+  const txUrl = getExplorerTxUrl(loan.txHash, activeChainId);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 rounded-2xl border border-[var(--line)] bg-[var(--surface)] shadow-[var(--shadow-subtle)]">
@@ -128,7 +131,7 @@ export function LoanTermsCard({
           <div className="p-3.5 rounded-xl bg-[var(--panel)] border border-[var(--line)]">
             <LTVHealthBar
               principalEth={Number(formatUnits(BigInt(loan.principalWei), 18))}
-              floorPriceEth={getCollectionByAddress(loan.collection, chainId)?.floorPriceEth ? parseFloat(getCollectionByAddress(loan.collection, chainId)!.floorPriceEth) : undefined}
+              floorPriceEth={getCollectionByAddress(loan.collection, activeChainId)?.floorPriceEth ? parseFloat(getCollectionByAddress(loan.collection, activeChainId)!.floorPriceEth) : undefined}
             />
           </div>
 

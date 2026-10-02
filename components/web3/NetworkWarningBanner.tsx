@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { useConnection, useChainId, useSwitchChain } from 'wagmi';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
 export function NetworkWarningBanner() {
-  const { isConnected } = useAccount();
+  const { isConnected } = useConnection();
   const chainId = useChainId();
   const { switchChain, isPending, error: switchError } = useSwitchChain();
   const [dismissedError, setDismissedError] = useState<string | null>(null);

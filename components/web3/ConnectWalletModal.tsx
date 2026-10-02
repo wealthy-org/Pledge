@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useConnect, useConnectors, useAccount } from 'wagmi';
+import { useConnect, useConnectors, useConnection } from 'wagmi';
 import { checkWalletAvailability, type WalletType } from '@/lib/web3/wallet';
 
 export interface ConnectWalletModalProps {
@@ -14,7 +14,7 @@ export interface ConnectWalletModalProps {
 
 export function ConnectWalletModal({ isOpen, onClose, onSuccess, onError }: ConnectWalletModalProps) {
   const connectors = useConnectors();
-  const { isConnected } = useAccount();
+  const { isConnected } = useConnection();
   const { mutate: connect, isPending, error } = useConnect();
   const availability = typeof window !== 'undefined' ? checkWalletAvailability() : {
     phantom: false,

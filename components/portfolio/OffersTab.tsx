@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
 import type { OfferItem } from '@/types/api';
 
@@ -11,13 +12,17 @@ export interface OffersTabProps {
   offers: OfferItem[];
   userAddress?: string;
   onCancelOffer: (offer: OfferItem) => void;
+  chainId?: number;
 }
 
 export function OffersTab({
   offers,
   userAddress,
   onCancelOffer,
+  chainId: propChainId,
 }: OffersTabProps) {
+  const hookChainId = useSafeChainId();
+  const chainId = propChainId || hookChainId;
   const normalizedUser = userAddress?.toLowerCase();
 
   const userOpenOffers = offers.filter((offer) => {
@@ -51,7 +56,7 @@ export function OffersTab({
         const principalEth = `${Number(formatUnits(BigInt(offer.principalWei), 18)).toFixed(2)} ETH`;
         const days = Math.round(offer.durationSeconds / 86400);
         const termPercent = (offer.termInterestBps / 100).toFixed(1);
-        const colDef = getCollectionByAddress(offer.collection, 46630);
+        const colDef = getCollectionByAddress(offer.collection, chainId);
         const collectionName = colDef?.name || 'Curated Collection';
 
         return (

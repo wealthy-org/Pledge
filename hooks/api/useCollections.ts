@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSafeQueryClient } from './useSafeQueryClient';
 import type { CollectionsResponse } from '@/types/api';
 
-export function useCollections() {
+export function useCollections(chainId?: number) {
   const queryClient = useSafeQueryClient();
 
   const query = useQuery<{
@@ -12,9 +12,10 @@ export function useCollections() {
     indexedBlock: number | null;
   }>(
     {
-      queryKey: ['collections'],
+      queryKey: ['collections', chainId],
       queryFn: async () => {
-        const res = await fetch('/api/collections');
+        const url = chainId ? `/api/collections?chainId=${chainId}` : '/api/collections';
+        const res = await fetch(url);
         if (!res.ok) {
           let errJson: { error?: string } = {};
           try {

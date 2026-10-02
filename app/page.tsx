@@ -3,19 +3,21 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CURATED_COLLECTIONS } from '@/config/collections';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { getCuratedCollections } from '@/config/collections';
 import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
 
 export default function HomePage() {
+  const chainId = useSafeChainId();
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'has_offers'>('all');
   const [loanMarketTab, setLoanMarketTab] = useState<'offers' | 'active'>('offers');
-  const { data: apiData } = useCollections();
+  const { data: apiData } = useCollections(chainId);
 
   const collections: MarketCollectionItem[] = useMemo(() => {
-    return CURATED_COLLECTIONS.map((col) => {
-      const address = col.addresses[46630];
+    return getCuratedCollections(chainId).map((col) => {
+      const address = col.contractAddress;
       const remote = apiData?.collections?.find(
         (c) => c.address.toLowerCase() === address.toLowerCase()
       );
@@ -33,7 +35,7 @@ export default function HomePage() {
         maxLtvBps: col.maxLtvBps,
       };
     });
-  }, [apiData]);
+  }, [apiData, chainId]);
 
   const filteredCollections = useMemo(() => {
     if (selectedFilter === 'has_offers') {

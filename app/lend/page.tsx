@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { CURATED_COLLECTIONS, type CuratedCollectionDefinition } from '@/config/collections';
+import { getCuratedCollections, type CuratedCollectionDefinition, type ActiveCuratedCollection } from '@/config/collections';
 import { LendCollectionCard } from '@/components/lend/LendCollectionCard';
 import { MyOpenOffersList } from '@/components/lend/MyOpenOffersList';
 import { CreateOfferDrawer, type CreateOfferFormData } from '@/components/lend/CreateOfferDrawer';
@@ -13,13 +13,15 @@ import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useCollections } from '@/hooks/api/useCollections';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import type { OfferItem } from '@/types/api';
 
 export default function LendPage() {
-  const { address } = useAccount();
+  const chainId = useSafeChainId();
+  const { address } = useConnection();
   const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
-  const { data: collectionsData } = useCollections();
+  const { data: collectionsData } = useCollections(chainId);
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
@@ -46,10 +48,12 @@ export default function LendPage() {
     });
   }, [apiOffers, localOffers]);
 
+  const curated = useMemo(() => getCuratedCollections(chainId), [chainId]);
+
   const collectionStats = useMemo(() => {
     const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
-    for (const col of CURATED_COLLECTIONS) {
-      const colAddress = col.addresses[46630];
+    for (const col of curated) {
+      const colAddress = col.contractAddress;
       const remote = collectionsData?.collections?.find(
         (c) => c.address.toLowerCase() === colAddress.toLowerCase()
       );
@@ -61,13 +65,13 @@ export default function LendPage() {
       };
     }
     return map;
-  }, [collectionsData]);
+  }, [collectionsData, curated]);
 
   const selectedCol = useMemo(() => {
-    return CURATED_COLLECTIONS.find((c) => c.id === selectedCollectionId) || CURATED_COLLECTIONS[0];
-  }, [selectedCollectionId]);
+    return curated.find((c) => c.id === selectedCollectionId) || curated[0];
+  }, [curated, selectedCollectionId]);
 
-  const handleOpenDrawer = (collection?: CuratedCollectionDefinition) => {
+  const handleOpenDrawer = (collection?: CuratedCollectionDefinition | ActiveCuratedCollection) => {
     if (collection) {
       setSelectedCollectionId(collection.id);
     }
@@ -96,7 +100,7 @@ export default function LendPage() {
 
       const newOffer: OfferItem = {
         offerId: Date.now(),
-        chainId: 46630,
+        chainId,
         lender: address || '',
         collection: pendingFormData.collectionAddress,
         principalWei: pendingFormData.principalWei,
@@ -173,12 +177,12 @@ export default function LendPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a market</h2>
           <span className="text-xs text-[var(--muted)]">
-            {CURATED_COLLECTIONS.length} curated collections
+            {curated.length} curated collections
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {CURATED_COLLECTIONS.map((col) => (
+          {curated.map((col) => (
             <LendCollectionCard
               key={col.id}
               collection={col}
@@ -208,7 +212,7 @@ export default function LendPage() {
 
       <CreateOfferDrawer
         isOpen={isDrawerOpen}
-        collections={CURATED_COLLECTIONS}
+        collections={curated}
         initialCollectionId={selectedCollectionId}
         onClose={() => setIsDrawerOpen(false)}
         onSubmit={handleDrawerSubmit}

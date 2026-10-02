@@ -4,15 +4,18 @@ import { useQuery } from '@tanstack/react-query';
 import { useSafeQueryClient } from './useSafeQueryClient';
 import type { WalletNftsResponse } from '@/types/api';
 
-export function useEligibleNfts(address?: string | null) {
+export function useEligibleNfts(address?: string | null, chainId?: number) {
   const queryClient = useSafeQueryClient();
 
   const query = useQuery<WalletNftsResponse>(
     {
-      queryKey: ['eligible-nfts', address],
+      queryKey: ['eligible-nfts', address, chainId],
       queryFn: async () => {
         if (!address) return { nfts: [], nextCursor: null, total: 0 };
-        const res = await fetch(`/api/wallets/${address}/eligible-nfts`);
+        const url = chainId
+          ? `/api/wallets/${address}/eligible-nfts?chainId=${chainId}`
+          : `/api/wallets/${address}/eligible-nfts`;
+        const res = await fetch(url);
         if (!res.ok) {
           let errJson: { error?: string } = {};
           try {

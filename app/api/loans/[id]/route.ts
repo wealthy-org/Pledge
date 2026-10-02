@@ -3,7 +3,7 @@ import { fetchLoanDetail } from '@/lib/db/queries';
 import { jsonResponse, errorResponse } from '@/lib/api/response';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { id } = await context.params;
@@ -17,7 +17,11 @@ export async function GET(
     );
   }
 
-  const detail = await fetchLoanDetail(loanId);
+  const { searchParams } = new URL(request.url);
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
+
+  const detail = await fetchLoanDetail(loanId, chainId);
   if (!detail) {
     return errorResponse(
       `Loan with ID ${loanId} not found`,

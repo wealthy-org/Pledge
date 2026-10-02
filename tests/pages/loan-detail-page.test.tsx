@@ -39,6 +39,11 @@ const mockOverdueLoan: LoanItem = {
 let currentConnectedAddress: string | undefined = mockBorrower;
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: currentConnectedAddress,
+    isConnected: Boolean(currentConnectedAddress),
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: currentConnectedAddress,
     isConnected: Boolean(currentConnectedAddress),

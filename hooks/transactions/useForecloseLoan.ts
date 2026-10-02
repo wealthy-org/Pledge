@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react';
 import { isAddress } from 'viem';
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI } from '@/config/contracts';
@@ -18,7 +18,7 @@ export interface ForecloseLoanParams {
 }
 
 export function useForecloseLoan() {
-  const { address, isConnected, chainId } = useAccount();
+  const { address, isConnected, chainId } = useConnection();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();

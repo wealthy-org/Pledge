@@ -5,7 +5,10 @@ import { getSupabaseClient } from '@/lib/db/supabase';
 
 export async function GET() {
   const chain = getActiveChain();
-  const rpcUrl = chain.rpcUrls.default.http[0] || process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.testnet.robinhood.com';
+  const rpcUrl = chain.rpcUrls.default.http[0];
+  if (!rpcUrl) {
+    throw new Error(`RPC URL is not configured for chain ID ${chain.id}`);
+  }
 
   let latestRpcBlock = 0n;
   try {

@@ -21,8 +21,10 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
   const cursor = searchParams.get('cursor');
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
 
-  const curated = getCuratedCollections();
+  const curated = getCuratedCollections(chainId);
   const allowlistMap = new Map<string, string>();
   for (const c of curated) {
     allowlistMap.set(c.contractAddress.toLowerCase(), c.name);
@@ -31,7 +33,7 @@ export async function GET(
   let nfts: WalletNftItem[] = [];
 
   try {
-    const client = getBlockscoutClient();
+    const client = getBlockscoutClient(chainId);
     const result = await client.fetchWalletNFTs(address);
     for (const item of result.items) {
       const colAddr = item.collectionAddress.toLowerCase();

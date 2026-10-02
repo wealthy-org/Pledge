@@ -13,9 +13,7 @@ export function useWatchlist() {
       if (stored) {
         setWatchlist(JSON.parse(stored));
       }
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, []);
 
   const toggleWatchlist = useCallback((address: string) => {
@@ -27,9 +25,7 @@ export function useWatchlist() {
         : [...prev, address];
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      } catch {
-        // ignore
-      }
+      } catch {}
       return updated;
     });
   }, []);

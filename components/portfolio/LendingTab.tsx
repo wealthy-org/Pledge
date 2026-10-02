@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
 import type { LoanItem } from '@/types/api';
 
@@ -11,13 +12,17 @@ export interface LendingTabProps {
   loans: LoanItem[];
   userAddress?: string;
   onForeclose?: (loan: LoanItem) => void;
+  chainId?: number;
 }
 
 export function LendingTab({
   loans,
   userAddress,
   onForeclose,
+  chainId: propChainId,
 }: LendingTabProps) {
+  const hookChainId = useSafeChainId();
+  const chainId = propChainId || hookChainId;
   const normalizedUser = userAddress?.toLowerCase();
 
   const userLendingLoans = loans.filter((loan) => {
@@ -60,7 +65,7 @@ export function LendingTab({
   return (
     <div className="space-y-3.5">
       {userLendingLoans.map((loan) => {
-        const col = getCollectionByAddress(loan.collection, 46630);
+        const col = getCollectionByAddress(loan.collection, chainId);
         const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
         const interestEth = `${Number(formatUnits(BigInt(loan.interestWei || '0'), 18)).toFixed(3)} ETH`;
         const isPastDue = new Date(loan.dueAt).getTime() < new Date().getTime();

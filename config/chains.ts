@@ -13,7 +13,7 @@ export const robinhoodTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.testnet.robinhood.com'],
+      http: ['https://rpc.testnet.robinhood.com'],
     },
   },
   blockExplorers: {
@@ -35,7 +35,7 @@ export const robinhoodMainnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_RPC_URL || 'https://rpc.mainnet.robinhood.com'],
+      http: ['https://rpc.mainnet.robinhood.com'],
     },
   },
   blockExplorers: {
@@ -53,21 +53,40 @@ export const SUPPORTED_CHAINS: readonly [Chain, ...Chain[]] = [
 ];
 
 export function getActiveChain(chainId?: number): Chain {
-  const targetId = chainId || Number(process.env.NEXT_PUBLIC_CHAIN_ID) || TESTNET_CHAIN_ID;
+  let targetId: number | undefined = chainId;
+  if (targetId === undefined) {
+    const envVal = process.env.NEXT_PUBLIC_CHAIN_ID;
+    if (!envVal) {
+      throw new Error('Chain ID is not configured. NEXT_PUBLIC_CHAIN_ID must be set.');
+    }
+    targetId = Number(envVal);
+  }
+  if (isNaN(targetId)) {
+    throw new Error('Invalid chain ID configuration.');
+  }
   if (targetId === MAINNET_CHAIN_ID) {
     return robinhoodMainnet;
   }
-  return robinhoodTestnet;
+  if (targetId === TESTNET_CHAIN_ID) {
+    return robinhoodTestnet;
+  }
+  throw new Error(`Unsupported chain ID: ${targetId}. Supported chains are ${TESTNET_CHAIN_ID} and ${MAINNET_CHAIN_ID}.`);
 }
 
 export function getExplorerTxUrl(txHash: string, chainId?: number): string {
   const chain = getActiveChain(chainId);
-  const baseUrl = chain.blockExplorers?.default.url || 'https://explorer.testnet.robinhood.com';
+  const baseUrl = chain.blockExplorers?.default.url;
+  if (!baseUrl) {
+    throw new Error(`No block explorer configured for chain ID ${chain.id}`);
+  }
   return `${baseUrl}/tx/${txHash}`;
 }
 
 export function getExplorerAddressUrl(address: string, chainId?: number): string {
   const chain = getActiveChain(chainId);
-  const baseUrl = chain.blockExplorers?.default.url || 'https://explorer.testnet.robinhood.com';
+  const baseUrl = chain.blockExplorers?.default.url;
+  if (!baseUrl) {
+    throw new Error(`No block explorer configured for chain ID ${chain.id}`);
+  }
   return `${baseUrl}/address/${address}`;
 }

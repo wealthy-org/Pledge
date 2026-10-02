@@ -15,6 +15,7 @@ const mockUseConnect = vi.fn();
 const mockUseConnectors = vi.fn();
 
 vi.mock('wagmi', () => ({
+  useConnection: () => mockUseAccount(),
   useAccount: () => mockUseAccount(),
   useDisconnect: () => mockUseDisconnect(),
   useChainId: () => mockUseChainId(),

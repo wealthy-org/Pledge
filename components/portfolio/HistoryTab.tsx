@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { formatUnits } from 'viem';
-import { getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getExplorerTxUrl } from '@/config/chains';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { LoanItem, OfferItem } from '@/types/api';
 
@@ -28,9 +29,11 @@ export function HistoryTab({
   loans,
   offers,
   userAddress,
-  chainId = TESTNET_CHAIN_ID,
+  chainId,
   isLoading = false,
 }: HistoryTabProps) {
+  const safeChainId = useSafeChainId();
+  const activeChainId = chainId ?? safeChainId;
   const normalizedUser = userAddress?.toLowerCase();
 
   const historyEntries: HistoryEntry[] = [];
@@ -131,7 +134,7 @@ export function HistoryTab({
   return (
     <div className="space-y-3">
       {historyEntries.map((entry, idx) => {
-        const txUrl = getExplorerTxUrl(entry.txHash, chainId);
+        const txUrl = getExplorerTxUrl(entry.txHash, activeChainId);
 
         return (
           <article

@@ -29,9 +29,7 @@ export function FooterStatusBar() {
             setGasPrice(`${data.gasPriceGwei} Gwei`);
           }
         }
-      } catch {
-        // keep fallback
-      }
+      } catch {}
     };
 
     fetchTelemetry();

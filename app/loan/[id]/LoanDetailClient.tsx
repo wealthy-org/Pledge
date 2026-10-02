@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatEther } from 'viem';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
 import { LoanTermsCard } from '@/components/loan/LoanTermsCard';
 import { LoanCountdown } from '@/components/loan/LoanCountdown';
 import { LoanActionButtons } from '@/components/loan/LoanActionButtons';
@@ -26,7 +26,7 @@ export function LoanDetailClient({
   collectionName,
   imageUrl,
 }: LoanDetailClientProps) {
-  const { address: connectedAddress } = useAccount();
+  const { address: connectedAddress } = useConnection();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const [isForecloseModalOpen, setIsForecloseModalOpen] = useState(false);

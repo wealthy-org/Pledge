@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatUnits } from 'viem';
-import { CURATED_COLLECTIONS, getCollectionByAddress } from '@/config/collections';
-import { TESTNET_CHAIN_ID } from '@/config/chains';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { getCollectionByAddress, getCuratedCollections } from '@/config/collections';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
 interface ActivityItem {
@@ -21,6 +21,7 @@ interface ActivityItem {
 }
 
 export function ActivityPanel() {
+  const chainId = useSafeChainId();
   const [isOpen, setIsOpen] = useState(true);
   const [feedScope, setFeedScope] = useState<'all' | 'watch'>('all');
   const [feedType, setFeedType] = useState<'all' | 'loan' | 'repaid'>('all');
@@ -30,7 +31,8 @@ export function ActivityPanel() {
 
   const fetchActivities = async () => {
     try {
-      const res = await fetch('/api/activity?limit=20');
+      const url = chainId ? `/api/activity?limit=20&chainId=${chainId}` : '/api/activity?limit=20';
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setActivities(data.items || []);
@@ -219,14 +221,15 @@ export function ActivityPanel() {
           </div>
         ) : (
           filteredEvents.map((e) => {
-            const col = getCollectionByAddress(e.collection, TESTNET_CHAIN_ID) || CURATED_COLLECTIONS[0];
+            const col = getCollectionByAddress(e.collection, chainId) || getCuratedCollections(chainId)[0];
             const colName = e.collectionName || col?.name || 'Curated NFT';
             const symbol = col?.symbol || 'NFT';
+            const targetCollection = e.collection || col?.contractAddress || '';
 
             return (
               <Link
                 key={e.id}
-                href={`/borrow?collection=${e.collection || col?.addresses[46630] || ''}`}
+                href={`/borrow?collection=${targetCollection}`}
                 className="flex items-center gap-2.5 w-full text-left py-2.5 hover:bg-[var(--panel)] transition-colors rounded-lg px-2 cursor-pointer group"
               >
                 <div className="w-9 h-9 rounded-md bg-[var(--panel)] border border-[var(--line)] shrink-0 overflow-hidden flex items-center justify-center font-mono font-bold text-xs text-[var(--accent-primary)]">

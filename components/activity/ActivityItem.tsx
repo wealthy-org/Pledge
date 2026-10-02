@@ -4,7 +4,8 @@ import React from 'react';
 import { formatUnits } from 'viem';
 import { Badge, type BadgeStatus } from '@/components/ui/Badge';
 import { getCollectionByAddress } from '@/config/collections';
-import { getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getExplorerTxUrl } from '@/config/chains';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import type { ActivityItem } from '@/types/api';
 
 export interface ActivityItemRowProps {
@@ -14,12 +15,14 @@ export interface ActivityItemRowProps {
 
 export function ActivityItemRow({
   activity,
-  chainId = TESTNET_CHAIN_ID,
+  chainId,
 }: ActivityItemRowProps) {
-  const colDef = getCollectionByAddress(activity.contractAddress);
-  const collectionName = colDef?.name || 'Verified Collection';
+  const safeChainId = useSafeChainId();
+  const activeChainId = chainId ?? safeChainId;
+  const colDef = getCollectionByAddress(activity.contractAddress, activeChainId);
+  const collectionName = colDef?.name ?? 'Verified Collection';
 
-  const txUrl = getExplorerTxUrl(activity.txHash, chainId);
+  const txUrl = getExplorerTxUrl(activity.txHash, activeChainId);
 
   const getEventBadge = () => {
     switch (activity.eventType) {

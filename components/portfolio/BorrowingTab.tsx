@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatUnits } from 'viem';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
 import { LTVHealthBar } from '@/components/common/LTVHealthBar';
@@ -16,6 +17,7 @@ export interface BorrowingTabProps {
   userAddress?: string;
   onRepay?: (loan: LoanItem) => void;
   isLoading?: boolean;
+  chainId?: number;
 }
 
 export function BorrowingTab({
@@ -23,8 +25,11 @@ export function BorrowingTab({
   userAddress,
   onRepay,
   isLoading = false,
+  chainId: propChainId,
 }: BorrowingTabProps) {
   const router = useRouter();
+  const hookChainId = useSafeChainId();
+  const chainId = propChainId || hookChainId;
   const normalizedUser = userAddress?.toLowerCase();
 
   const userBorrowingLoans = loans.filter((loan) => {
@@ -109,7 +114,7 @@ export function BorrowingTab({
   return (
     <div className="space-y-3.5">
       {userBorrowingLoans.map((loan) => {
-        const col = getCollectionByAddress(loan.collection, 46630);
+        const col = getCollectionByAddress(loan.collection, chainId);
         const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
         const totalDueEth = calculateTotalDue(loan.principalWei, loan.interestWei);
         const tokenId = loan.tokenId || (loan as unknown as { nftId?: string }).nftId || '0';

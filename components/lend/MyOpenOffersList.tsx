@@ -2,23 +2,28 @@
 
 import React from 'react';
 import { formatUnits } from 'viem';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
-import { CURATED_COLLECTIONS } from '@/config/collections';
+import { getCollectionByAddress } from '@/config/collections';
 import type { OfferItem } from '@/types/api';
 
 export interface MyOpenOffersListProps {
   offers: OfferItem[];
   onCancelOffer: (offerId: number) => void;
   isLoading?: boolean;
+  chainId?: number;
 }
 
 export function MyOpenOffersList({
   offers,
   onCancelOffer,
   isLoading = false,
+  chainId: propChainId,
 }: MyOpenOffersListProps) {
+  const hookChainId = useSafeChainId();
+  const chainId = propChainId || hookChainId;
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -46,11 +51,7 @@ export function MyOpenOffersList({
   return (
     <div className="space-y-3">
       {offers.map((offer) => {
-        const colDef = CURATED_COLLECTIONS.find(
-          (c) =>
-            c.addresses[46630].toLowerCase() === offer.collection.toLowerCase() ||
-            c.addresses[4663].toLowerCase() === offer.collection.toLowerCase()
-        );
+        const colDef = getCollectionByAddress(offer.collection, chainId);
 
         const principalEth = `${Number(formatUnits(BigInt(offer.principalWei), 18)).toFixed(2)} ETH`;
         const days = Math.round(offer.durationSeconds / 86400);

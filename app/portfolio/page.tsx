@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
 import { formatUnits } from 'viem';
 import { ClaimableProceedsBanner } from '@/components/portfolio/ClaimableProceedsBanner';
 import { BorrowingTab } from '@/components/portfolio/BorrowingTab';
@@ -19,7 +19,7 @@ import { useOffers } from '@/hooks/api/useOffers';
 import type { OfferItem, LoanItem } from '@/types/api';
 
 export default function PortfolioPage() {
-  const { address: userAddress } = useAccount();
+  const { address: userAddress } = useConnection();
   const effectiveAddress = userAddress || '';
 
   const { data: apiPortfolio, refetch: refetchPortfolio } = usePortfolio(effectiveAddress);

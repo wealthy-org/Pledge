@@ -15,6 +15,11 @@ const mockInvalidateQueries = vi.fn();
 const mockUserAddress = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: mockUserAddress,
+    isConnected: true,
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: mockUserAddress,
     isConnected: true,

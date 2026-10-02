@@ -12,6 +12,11 @@ const mockGetBalance = vi.fn();
 const mockInvalidateQueries = vi.fn();
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: '0x1111111111111111111111111111111111111111',
+    isConnected: true,
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: '0x1111111111111111111111111111111111111111',
     isConnected: true,

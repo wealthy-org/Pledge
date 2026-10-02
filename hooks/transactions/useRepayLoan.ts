@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useAccount, usePublicClient, useWalletClient } from 'wagmi';
+import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI } from '@/config/contracts';
@@ -16,7 +16,7 @@ export interface RepayLoanParams {
 }
 
 export function useRepayLoan() {
-  const { address, isConnected, chainId } = useAccount();
+  const { address, isConnected, chainId } = useConnection();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();

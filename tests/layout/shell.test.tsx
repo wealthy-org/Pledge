@@ -14,6 +14,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({ address: undefined, isConnected: false, isConnecting: false }),
   useAccount: () => ({ address: undefined, isConnected: false, isConnecting: false }),
   useDisconnect: () => ({ disconnect: vi.fn() }),
   useChainId: () => 46630,

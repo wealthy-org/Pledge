@@ -2,10 +2,11 @@
 
 import React, { useState, useMemo } from 'react';
 import { parseUnits, formatUnits } from 'viem';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { Drawer } from '@/components/ui/Drawer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import type { CuratedCollectionDefinition } from '@/config/collections';
+import type { CuratedCollectionDefinition, ActiveCuratedCollection } from '@/config/collections';
 
 export interface CreateOfferFormData {
   collectionAddress: string;
@@ -17,7 +18,7 @@ export interface CreateOfferFormData {
 
 export interface CreateOfferDrawerProps {
   isOpen: boolean;
-  collections: readonly CuratedCollectionDefinition[];
+  collections: readonly (CuratedCollectionDefinition | ActiveCuratedCollection)[];
   initialCollectionId?: string;
   onClose: () => void;
   onSubmit: (data: CreateOfferFormData) => void;
@@ -105,12 +106,19 @@ export function CreateOfferDrawer({
     }
   }, [principalInput, interestRateInput]);
 
+  const chainId = useSafeChainId();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!preview.isValid || !selectedCol) return;
 
+    const collectionAddress =
+      (selectedCol as ActiveCuratedCollection).contractAddress ||
+      selectedCol.addresses[chainId] ||
+      Object.values(selectedCol.addresses)[0];
+
     onSubmit({
-      collectionAddress: selectedCol.addresses[46630],
+      collectionAddress,
       principalWei: preview.principalWei,
       termInterestBps: preview.termInterestBps,
       durationSeconds,

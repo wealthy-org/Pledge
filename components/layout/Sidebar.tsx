@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAccount } from 'wagmi';
+import { useConnection } from 'wagmi';
 import { truncateAddress } from '@/lib/web3/wallet';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { useMounted } from '@/hooks/useMounted';
@@ -79,7 +79,7 @@ const NAV_ITEMS: NavItem[] = [
 export function Sidebar() {
   const [isExpanded, setIsExpanded] = useState(false);
   const pathname = usePathname();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useConnection();
   const mounted = useMounted();
 
   return (

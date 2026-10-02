@@ -55,9 +55,7 @@ export function WalletDropdownMenu({
       await navigator.clipboard.writeText(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore
-    }
+    } catch {}
   };
 
   const explorerUrl = getExplorerAddressUrl(address, chainId);

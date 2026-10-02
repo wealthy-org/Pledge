@@ -14,6 +14,11 @@ const mockLenderAddress = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
 const mockCustomDestination = '0x8888888888888888888888888888888888888888';
 
 vi.mock('wagmi', () => ({
+  useConnection: () => ({
+    address: mockLenderAddress,
+    isConnected: true,
+    chainId: 46630,
+  }),
   useAccount: () => ({
     address: mockLenderAddress,
     isConnected: true,

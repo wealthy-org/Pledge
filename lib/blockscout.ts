@@ -1,3 +1,4 @@
+import { getActiveChain } from '@/config/chains';
 import type {
   BlockscoutClientConfig,
   BlockscoutRawAttribute,
@@ -93,14 +94,16 @@ export class BlockscoutClient {
   private apiKey?: string;
   private timeoutMs: number;
 
-  constructor(config?: BlockscoutClientConfig) {
-    this.baseUrl = (
-      config?.baseUrl ||
-      process.env.NEXT_PUBLIC_BLOCKSCOUT_API_URL ||
-      'https://explorer.testnet.robinhood.com/api/v2'
-    ).replace(/\/$/, '');
-    this.apiKey = config?.apiKey || process.env.BLOCKSCOUT_API_KEY;
-    this.timeoutMs = config?.timeoutMs || 10000;
+  constructor(config?: BlockscoutClientConfig, chainId?: number) {
+    const chain = getActiveChain(chainId);
+    const explorerUrl = chain.blockExplorers?.default.url;
+    const resolvedUrl = config?.baseUrl ?? process.env.NEXT_PUBLIC_BLOCKSCOUT_API_URL ?? (explorerUrl ? `${explorerUrl}/api/v2` : undefined);
+    if (!resolvedUrl) {
+      throw new Error('Blockscout API URL is not configured.');
+    }
+    this.baseUrl = resolvedUrl.replace(/\/$/, '');
+    this.apiKey = config?.apiKey ?? process.env.BLOCKSCOUT_API_KEY;
+    this.timeoutMs = config?.timeoutMs ?? 10000;
   }
 
   private async request<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
@@ -224,11 +227,24 @@ export class BlockscoutClient {
   }
 }
 
-let globalClient: BlockscoutClient | null = null;
+const clientsMap = new Map<number, BlockscoutClient>();
 
-export function getBlockscoutClient(): BlockscoutClient {
-  if (!globalClient) {
-    globalClient = new BlockscoutClient();
+export function getBlockscoutClient(chainId?: number): BlockscoutClient {
+  let targetId: number | undefined = chainId;
+  if (targetId === undefined) {
+    const envVal = process.env.NEXT_PUBLIC_CHAIN_ID;
+    if (!envVal) {
+      throw new Error('Chain ID is not configured. NEXT_PUBLIC_CHAIN_ID must be set.');
+    }
+    targetId = Number(envVal);
   }
-  return globalClient;
+  if (isNaN(targetId)) {
+    throw new Error('Invalid chain ID configuration.');
+  }
+  let client = clientsMap.get(targetId);
+  if (!client) {
+    client = new BlockscoutClient(undefined, targetId);
+    clientsMap.set(targetId, client);
+  }
+  return client;
 }

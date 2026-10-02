@@ -41,9 +41,9 @@ describe('TICKET-04b: Chain Configuration & Explorer Helpers Test Suite', () => 
     expect(mainnetAddr).toBe(`https://explorer.robinhood.com/address/${address}`);
   });
 
-  it('TS-03: getActiveChain returns appropriate chain definition', () => {
+  it('TS-03: getActiveChain returns appropriate chain definition and throws on unsupported chain ID', () => {
     expect(getActiveChain(TESTNET_CHAIN_ID).id).toBe(TESTNET_CHAIN_ID);
     expect(getActiveChain(MAINNET_CHAIN_ID).id).toBe(MAINNET_CHAIN_ID);
-    expect(getActiveChain(1).id).toBe(TESTNET_CHAIN_ID);
+    expect(() => getActiveChain(1)).toThrow(/Unsupported chain ID/i);
   });
 });
