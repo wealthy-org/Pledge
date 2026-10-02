@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { Badge } from '@/components/ui/Badge';
 import { getExplorerAddressUrl, getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getCollectionByAddress } from '@/config/collections';
+import { LTVHealthBar } from '@/components/common/LTVHealthBar';
 import type { LoanItem } from '@/types/api';
 
 export interface LoanTermsCardProps {
@@ -121,6 +123,13 @@ export function LoanTermsCard({
                 {totalDueEth}
               </span>
             </div>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-[var(--panel)] border border-[var(--line)]">
+            <LTVHealthBar
+              principalEth={Number(formatUnits(BigInt(loan.principalWei), 18))}
+              floorPriceEth={getCollectionByAddress(loan.collection, chainId)?.floorPriceEth ? parseFloat(getCollectionByAddress(loan.collection, chainId)!.floorPriceEth) : undefined}
+            />
           </div>
 
           <div className="space-y-2 text-xs font-mono">
