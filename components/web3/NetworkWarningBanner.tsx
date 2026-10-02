@@ -1,0 +1,88 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
+import { useMounted } from '@/lib/hooks/useMounted';
+
+export function NetworkWarningBanner() {
+  const { isConnected } = useAccount();
+  const chainId = useChainId();
+  const { switchChain, isPending, error: switchError } = useSwitchChain();
+  const [dismissedError, setDismissedError] = useState<string | null>(null);
+  const mounted = useMounted();
+
+  if (!mounted || !isConnected) return null;
+
+  const isSupportedChain = chainId === TESTNET_CHAIN_ID || chainId === MAINNET_CHAIN_ID;
+  if (isSupportedChain) return null;
+
+  const targetChain = getActiveChain();
+
+  const handleSwitch = () => {
+    if (!targetChain?.id) {
+      throw new Error('Target chain configuration is missing or undefined.');
+    }
+    setDismissedError(null);
+    switchChain({ chainId: targetChain.id });
+  };
+
+  const currentErrorMessage = switchError?.message || null;
+  const isErrorModalVisible = Boolean(currentErrorMessage && dismissedError !== currentErrorMessage);
+
+  return (
+    <>
+      <div className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-200 px-4 py-2.5 transition-all">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-400 text-sm">⚠️</span>
+            <span>
+              <strong className="font-semibold text-amber-300">Unsupported Network:</strong> You are currently connected to Chain ID {chainId}. Please switch to{' '}
+              <span className="font-mono underline font-medium">{targetChain.name} ({targetChain.id})</span> to interact with Pledge Protocol.
+            </span>
+          </div>
+          <button
+            onClick={handleSwitch}
+            disabled={isPending}
+            className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-md shadow-xs transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap"
+          >
+            {isPending ? 'Switching...' : `Switch to ${targetChain.name}`}
+          </button>
+        </div>
+      </div>
+
+      {isErrorModalVisible && currentErrorMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="relative w-full max-w-md p-6 bg-panel border border-red-500/40 rounded-xl shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 pb-3 mb-3 border-b border-line">
+              <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/20 text-red-400 font-bold">
+                ⚠️
+              </div>
+              <h3 className="text-base font-semibold text-text">Network Switch Failed</h3>
+            </div>
+            <p className="text-xs text-muted mb-4 font-mono leading-relaxed bg-bg p-3 rounded-lg border border-line">
+              {currentErrorMessage}
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setDismissedError(currentErrorMessage)}
+                className="px-3.5 py-1.5 text-xs font-medium text-muted hover:text-text bg-raised hover:bg-line rounded-lg transition-colors cursor-pointer"
+              >
+                Dismiss
+              </button>
+              <button
+                onClick={() => {
+                  setDismissedError(null);
+                  handleSwitch();
+                }}
+                className="px-3.5 py-1.5 text-xs font-semibold text-black bg-lime hover:bg-lime-hover rounded-lg transition-colors cursor-pointer"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
