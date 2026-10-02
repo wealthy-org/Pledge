@@ -1,0 +1,191 @@
+'use client';
+
+import React, { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { CollectionHeader, type CollectionHeaderStats } from '@/components/collection/CollectionHeader';
+import { CollectionOffersTable } from '@/components/collection/CollectionOffersTable';
+import { CollectionLoanHistoryTable } from '@/components/collection/CollectionLoanHistoryTable';
+import { CollectionRiskNotes } from '@/components/collection/CollectionRiskNotes';
+import { Tabs, type TabItem } from '@/components/ui/Tabs';
+import { Button } from '@/components/ui/Button';
+import { Toast } from '@/components/ui/Toast';
+import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
+import { MOCK_OFFERS, MOCK_LOANS, MOCK_WALLET_NFTS } from '@/lib/mock/fixtures';
+import type { ActiveCuratedCollection } from '@/config/collections';
+import type { OfferItem } from '@/types/api';
+
+export interface CollectionDetailClientProps {
+  collection: ActiveCuratedCollection;
+}
+
+export function CollectionDetailClient({ collection }: CollectionDetailClientProps) {
+  const [activeTab, setActiveTab] = useState<string>('offers');
+  const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const targetAddress = collection.contractAddress.toLowerCase();
+
+  const openOffers = useMemo(() => {
+    return MOCK_OFFERS.filter(
+      (o) => o.collection.toLowerCase() === targetAddress && o.status === 'open'
+    );
+  }, [targetAddress]);
+
+  const activeLoans = useMemo(() => {
+    return MOCK_LOANS.filter(
+      (l) => l.collection.toLowerCase() === targetAddress && l.status === 'active'
+    );
+  }, [targetAddress]);
+
+  const historyLoans = useMemo(() => {
+    return MOCK_LOANS.filter(
+      (l) => l.collection.toLowerCase() === targetAddress && l.status !== 'active'
+    );
+  }, [targetAddress]);
+
+  const stats: CollectionHeaderStats = useMemo(() => {
+    let poolSizeBigInt = 0n;
+    let bestOfferBigInt = 0n;
+    const aprValues: number[] = [];
+
+    for (const offer of openOffers) {
+      const p = BigInt(offer.principalWei);
+      poolSizeBigInt += p;
+      if (p > bestOfferBigInt) {
+        bestOfferBigInt = p;
+      }
+      const days = offer.durationSeconds / 86400 || 7;
+      const apr = (offer.termInterestBps / 10000) * (365 / days) * 100;
+      aprValues.push(apr);
+    }
+
+    let aprRange = '--';
+    if (aprValues.length > 0) {
+      const minApr = Math.min(...aprValues);
+      const maxApr = Math.max(...aprValues);
+      if (minApr === maxApr) {
+        aprRange = `${minApr.toFixed(2)}%`;
+      } else {
+        aprRange = `${minApr.toFixed(2)}% - ${maxApr.toFixed(2)}%`;
+      }
+    }
+
+    return {
+      bestOfferWei: bestOfferBigInt > 0n ? bestOfferBigInt.toString() : null,
+      poolSizeWei: poolSizeBigInt.toString(),
+      offerCount: openOffers.length,
+      aprRange,
+      activeLoansCount: activeLoans.length,
+    };
+  }, [openOffers, activeLoans]);
+
+  const eligibleWalletNft = useMemo(() => {
+    const found = MOCK_WALLET_NFTS.find(
+      (n) => n.contractAddress.toLowerCase() === targetAddress
+    );
+    if (found) {
+      return {
+        contractAddress: found.contractAddress,
+        tokenId: found.tokenId,
+        collectionName: found.collectionName,
+        name: found.name,
+        imageUrl: found.imageUrl,
+        bestOfferWei: stats.bestOfferWei || undefined,
+        offerCount: stats.offerCount,
+      };
+    }
+    return {
+      contractAddress: collection.contractAddress,
+      tokenId: '1',
+      collectionName: collection.name,
+      name: `${collection.name} #1`,
+      imageUrl: collection.imageUrl,
+      bestOfferWei: stats.bestOfferWei || undefined,
+      offerCount: stats.offerCount,
+    };
+  }, [collection, targetAddress, stats]);
+
+  const handleBorrow = (offer: OfferItem) => {
+    setSelectedOffer(offer);
+    setIsDrawerOpen(true);
+  };
+
+  const handleConfirmBorrow = () => {
+    setIsDrawerOpen(false);
+    setToastMessage(`Loan initiated successfully! Funds sent to wallet.`);
+  };
+
+  const tabs: TabItem[] = [
+    { id: 'offers', label: 'Offers', count: openOffers.length },
+    { id: 'active-loans', label: 'Active Loans', count: activeLoans.length },
+    { id: 'history', label: 'History', count: historyLoans.length },
+  ];
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-200">
+      <CollectionHeader
+        collection={collection}
+        stats={stats}
+      />
+
+      <CollectionRiskNotes
+        collectionName={collection.name}
+        notes={collection.riskNotes}
+      />
+
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <Tabs
+            tabs={tabs}
+            activeTab={activeTab}
+            onChange={(tabId) => setActiveTab(tabId)}
+          />
+
+          <Link href="/lend">
+            <Button variant="secondary" size="sm">
+              + Make an Offer
+            </Button>
+          </Link>
+        </div>
+
+        {activeTab === 'offers' && (
+          <div className="space-y-3">
+            <CollectionOffersTable
+              offers={openOffers}
+              onBorrow={handleBorrow}
+            />
+          </div>
+        )}
+
+        {activeTab === 'active-loans' && (
+          <div className="space-y-3">
+            <CollectionLoanHistoryTable loans={activeLoans} />
+          </div>
+        )}
+
+        {activeTab === 'history' && (
+          <div className="space-y-3">
+            <CollectionLoanHistoryTable loans={historyLoans} />
+          </div>
+        )}
+      </div>
+
+      <BorrowReviewDrawer
+        isOpen={isDrawerOpen}
+        nft={eligibleWalletNft}
+        offer={selectedOffer}
+        onClose={() => setIsDrawerOpen(false)}
+        onConfirm={handleConfirmBorrow}
+      />
+
+      {toastMessage && (
+        <Toast
+          message={toastMessage}
+          type="success"
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+    </div>
+  );
+}
