@@ -34,12 +34,16 @@ export function NFTGrid({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white border border-[#dee7e3] rounded-xl overflow-hidden p-0">
+          <div
+            key={i}
+            data-testid="nft-card-skeleton"
+            className="bg-white dark:bg-[#161b22] border border-[#dee7e3] dark:border-[#30363d] rounded-xl overflow-hidden p-0"
+          >
             <Skeleton width="100%" height="200px" borderRadius="0px" />
             <div className="p-4 space-y-3">
               <Skeleton width="100px" height="12px" />
               <Skeleton width="140px" height="16px" />
-              <div className="pt-2 border-t border-[#e1e8e9] space-y-2">
+              <div className="pt-2 border-t border-[#e1e8e9] dark:border-[#30363d] space-y-2">
                 <Skeleton width="100%" height="14px" />
                 <Skeleton width="100%" height="14px" />
               </div>
@@ -79,12 +83,12 @@ export function NFTGrid({
             key={`${nft.contractAddress}-${nft.tokenId}`}
             data-testid={`nft-card-${nft.contractAddress}-${nft.tokenId}`}
             onClick={() => !nft.isInLoan && onSelectNft(nft)}
-            className={`flex flex-col bg-white border rounded-xl overflow-hidden transition-all duration-200 cursor-pointer ${
+            className={`flex flex-col bg-white dark:bg-[#161b22] border rounded-xl overflow-hidden transition-all duration-200 cursor-pointer ${
               nft.isInLoan
-                ? 'opacity-70 bg-[#fafcfc] border-[#e1e8e9] cursor-not-allowed'
+                ? 'opacity-70 bg-[#fafcfc] dark:bg-[#0d1117] border-[#e1e8e9] dark:border-[#30363d] cursor-not-allowed'
                 : isSelected
-                ? 'border-[var(--lime)] shadow-[0_8px_24px_rgba(8,127,91,0.12)] ring-1 ring-[var(--lime)]'
-                : 'border-[#dee7e3] hover:border-[#b7d4c9] hover:shadow-[0_8px_24px_rgba(33,77,57,0.06)]'
+                ? 'border-[var(--lime)] shadow-[0_8px_24px_rgba(8,127,91,0.12)] ring-1 ring-[var(--lime)] hover:-translate-y-1 hover:shadow-lg'
+                : 'border-[#dee7e3] dark:border-[#30363d] hover:border-[#b7d4c9] dark:hover:border-[#3fb950]/40 hover:-translate-y-1 hover:shadow-lg'
             }`}
           >
             <div className="relative aspect-square w-full bg-[#f4f7f5] overflow-hidden group">

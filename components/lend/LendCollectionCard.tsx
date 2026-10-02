@@ -21,7 +21,7 @@ export function LendCollectionCard({
   const activeCount = activeLoansCount !== undefined ? activeLoansCount : 12;
 
   return (
-    <article className="flex flex-col bg-white border border-[#dee7e3] hover:border-[#b7d4c9] hover:shadow-[0_8px_24px_rgba(33,77,57,0.06)] rounded-xl overflow-hidden transition-all duration-200">
+    <article className="flex flex-col bg-white dark:bg-[#161b22] border border-[#dee7e3] dark:border-[#30363d] hover:border-[#b7d4c9] dark:hover:border-[#3fb950]/40 hover:-translate-y-1 hover:shadow-lg rounded-xl overflow-hidden transition-all duration-200">
       <div className="relative aspect-square w-full bg-[#f4f7f5] overflow-hidden group">
         {collection.imageUrl ? (
           <Image
