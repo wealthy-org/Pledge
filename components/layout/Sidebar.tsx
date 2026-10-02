@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import { truncateAddress } from '@/lib/web3/wallet';
-import { useMounted } from '@/lib/hooks/useMounted';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { useMounted } from '@/hooks/useMounted';
 
 interface NavItem {
   name: string;
@@ -149,6 +150,8 @@ export function Sidebar() {
             {address.slice(2, 4).toUpperCase()}
           </Link>
         )}
+
+        <ThemeToggle />
 
         <Link
           href="/activity"

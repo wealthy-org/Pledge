@@ -37,6 +37,10 @@ describe('TICKET-28: CSS Design System Tokens & Typography Test Suite', () => {
       '--warning-bg': '#fff9eb',
       '--warning-border': '#eaddb9',
       '--error': '#b7462c',
+      '--disabled': '#94a3a8',
+      '--disabled-bg': '#edf2f3',
+      '--disabled-text': '#879a9d',
+      '--disabled-border': '#d2dcdf',
       '--radius': '16px',
       '--rail-width': '68px',
       '--rail-expanded-width': '220px',
@@ -63,6 +67,8 @@ describe('TICKET-28: CSS Design System Tokens & Typography Test Suite', () => {
     expect(css).toContain('--color-panel: var(--panel)');
     expect(css).toContain('--color-line: var(--line)');
     expect(css).toContain('--color-surface: var(--surface)');
+    expect(css).toContain('--color-disabled-bg: var(--disabled-bg)');
+    expect(css).toContain('--color-disabled-text: var(--disabled-text)');
     expect(css).toContain('--font-sans: var(--font-inter)');
   });
 
@@ -72,5 +78,7 @@ describe('TICKET-28: CSS Design System Tokens & Typography Test Suite', () => {
     expect(css).toContain('--bg: #0d1117');
     expect(css).toContain('--panel: #161b22');
     expect(css).toContain('--line: #30363d');
+    expect(css).toContain('--disabled-bg: #161d26');
+    expect(css).toContain('--disabled-text: #596775');
   });
 });
