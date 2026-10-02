@@ -3,6 +3,7 @@
 import React from 'react';
 import { formatUnits } from 'viem';
 import { getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { Skeleton } from '@/components/ui/Skeleton';
 import type { LoanItem, OfferItem } from '@/types/api';
 
 export interface HistoryTabProps {
@@ -10,6 +11,7 @@ export interface HistoryTabProps {
   offers: OfferItem[];
   userAddress?: string;
   chainId?: number;
+  isLoading?: boolean;
 }
 
 interface HistoryEntry {
@@ -27,6 +29,7 @@ export function HistoryTab({
   offers,
   userAddress,
   chainId = TESTNET_CHAIN_ID,
+  isLoading = false,
 }: HistoryTabProps) {
   const normalizedUser = userAddress?.toLowerCase();
 
@@ -80,6 +83,38 @@ export function HistoryTab({
       return isoString;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[1, 2, 3, 4].map((i) => (
+          <article
+            key={i}
+            data-testid="history-skeleton-row"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#161b22] border border-[#dee7e3] dark:border-[#30363d] rounded-xl"
+          >
+            <div className="flex items-center gap-3.5">
+              <Skeleton width="48px" height="48px" borderRadius="8px" />
+              <div className="space-y-2">
+                <Skeleton width="120px" height="16px" />
+                <Skeleton width="60px" height="12px" />
+              </div>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="space-y-1">
+                <Skeleton width="40px" height="10px" />
+                <Skeleton width="70px" height="14px" />
+              </div>
+              <div className="space-y-1">
+                <Skeleton width="40px" height="10px" />
+                <Skeleton width="70px" height="14px" />
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    );
+  }
 
   if (historyEntries.length === 0) {
     return (
