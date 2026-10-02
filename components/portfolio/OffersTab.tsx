@@ -28,15 +28,15 @@ export function OffersTab({
 
   if (userOpenOffers.length === 0) {
     return (
-      <div className="py-16 px-6 border border-dashed border-[#e1e8e9] rounded-xl text-center">
-        <div className="text-3xl text-[var(--lime)] mb-2 font-mono">◈</div>
-        <h3 className="text-base font-medium text-[#142d2b]">Make your first offer.</h3>
-        <p className="text-xs text-[var(--muted)] mt-1 mb-4">
+      <div className="py-16 px-6 border border-dashed border-[#e1ebe6] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17]">
+        <div className="text-3xl text-[var(--lime)] dark:text-emerald-400 mb-2 font-mono">◈</div>
+        <h3 className="text-base font-medium text-[#142d2b] dark:text-[#f0f6fc]">Make your first offer.</h3>
+        <p className="text-xs text-[var(--muted)] dark:text-[#8ca197] mt-1 mb-4">
           Choose a curated collection and deploy liquidity to earn fixed interest.
         </p>
         <Link
           href="/lend"
-          className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#edf7f2] hover:bg-[#e1f1e9] border border-[#cfe4dc] text-[#142d2b] text-xs font-semibold transition-colors"
+          className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#edf7f2] dark:bg-[#142e24] hover:bg-[#e1f1e9] dark:hover:bg-[#1a3d30] border border-[#cfe4dc] dark:border-[#1e4537] text-[#142d2b] dark:text-[#f0f6fc] text-xs font-semibold transition-colors"
         >
           <span>Explore collections</span>
           <span>↗</span>
@@ -57,10 +57,10 @@ export function OffersTab({
         return (
           <article
             key={offer.offerId}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white border border-[#dee7e3] hover:border-[#b7d4c9] rounded-xl transition-all"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] hover:border-[#b7d4c9] dark:hover:border-emerald-500/40 rounded-xl transition-all"
           >
             <div className="flex items-center gap-3.5">
-              <div className="w-14 h-14 rounded-lg bg-[#f4f7f5] border border-[#dee7e3] overflow-hidden flex items-center justify-center shrink-0">
+              <div className="w-14 h-14 rounded-lg bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] overflow-hidden flex items-center justify-center shrink-0">
                 {colDef?.imageUrl ? (
                   <Image
                     src={colDef.imageUrl}
@@ -71,17 +71,17 @@ export function OffersTab({
                     unoptimized
                   />
                 ) : (
-                  <span className="font-mono font-bold text-xs text-[#214e3b]">
+                  <span className="font-mono font-bold text-xs text-[#214e3b] dark:text-emerald-400">
                     {colDef?.symbol || 'NFT'}
                   </span>
                 )}
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-[#142d2b]">
+                <h3 className="text-sm font-semibold text-[#142d2b] dark:text-[#f0f6fc]">
                   {collectionName}
                 </h3>
-                <span className="inline-block text-[9px] px-2 py-0.5 mt-1 rounded bg-[#edf8f1] text-[var(--lime)] font-medium">
+                <span className="inline-block text-[9px] px-2 py-0.5 mt-1 rounded bg-[#edf8f1] dark:bg-[#142e24] text-[var(--lime)] dark:text-emerald-400 font-medium">
                   Offer · open
                 </span>
               </div>
@@ -89,29 +89,29 @@ export function OffersTab({
 
             <div className="flex flex-wrap items-center gap-6 sm:gap-8 justify-between sm:justify-end">
               <div>
-                <small className="text-[9px] text-[var(--muted)] block">Principal</small>
-                <strong className="text-xs font-mono font-semibold text-[#142d2b]">
+                <small className="text-[9px] text-[var(--muted)] dark:text-[#8ca197] block">Principal</small>
+                <strong className="text-xs font-mono font-semibold text-[#142d2b] dark:text-[#f0f6fc]">
                   {principalEth}
                 </strong>
               </div>
 
               <div>
-                <small className="text-[9px] text-[var(--muted)] block">Term interest</small>
-                <strong className="text-xs font-mono font-semibold text-[#184b3b]">
+                <small className="text-[9px] text-[var(--muted)] dark:text-[#8ca197] block">Term interest</small>
+                <strong className="text-xs font-mono font-semibold text-[#184b3b] dark:text-emerald-400">
                   {termPercent}%
                 </strong>
               </div>
 
               <div>
-                <small className="text-[9px] text-[var(--muted)] block">Duration</small>
-                <strong className="text-xs font-mono font-normal text-[var(--muted)]">
+                <small className="text-[9px] text-[var(--muted)] dark:text-[#8ca197] block">Duration</small>
+                <strong className="text-xs font-mono font-normal text-[var(--muted)] dark:text-[#8ca197]">
                   {days} days
                 </strong>
               </div>
 
               <button
                 onClick={() => onCancelOffer(offer)}
-                className="px-4 py-2 rounded-lg bg-white hover:bg-[#fff9eb] border border-[#e1e8e9] text-[#775d26] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                className="px-4 py-2 rounded-lg bg-white dark:bg-[#14221e] hover:bg-[#fff9eb] dark:hover:bg-[#2d2618] border border-[#e1e8e9] dark:border-[#4d3d1e] text-[#775d26] dark:text-[#e0b86a] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
               >
                 Cancel offer
               </button>

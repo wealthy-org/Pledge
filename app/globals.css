@@ -1,12 +1,16 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
 :root {
   --bg: #ffffff;
   --panel: #f6f8fa;
   --raised: #eef3f5;
   --surface: #fafcfc;
   --line: #e1e8e9;
+  --line-strong: #c8ded4;
   --text: #142d2b;
+  --text-heading: #0c1f1d;
   --muted: #627478;
   --always-white: #ffffff;
   --primary: #087f5b;
@@ -45,20 +49,27 @@
   --z-toast: 70;
 }
 
-[data-theme="dark"] {
+[data-theme="dark"],
+.dark {
   --bg: #0d1117;
   --panel: #161b22;
   --raised: #21262d;
-  --surface: #1a1f28;
+  --surface: #161b22;
   --line: #30363d;
+  --line-strong: #3fb950;
   --text: #f0f6fc;
+  --text-heading: #ffffff;
   --muted: #8b949e;
-  --disabled: #54667a;
+  --primary: #3fb950;
+  --primary-dark: #2ea043;
+  --primary-hover-bg: #238636;
+  --primary-soft: #16382b;
+  --green-soft: #16382b;
+  --blue-soft: #172a3a;
+  --disabled: #484f58;
   --disabled-bg: #161d26;
   --disabled-text: #596775;
-  --disabled-border: #2b3542;
-  --primary-soft: #16382b;
-  --blue-soft: #182e4b;
+  --disabled-border: #21262d;
   --warning-bg: #2d2618;
   --warning-border: #4d3d1e;
   --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3);

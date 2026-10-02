@@ -86,19 +86,19 @@ export function Sidebar() {
     <aside
       aria-label="Main navigation"
       data-expanded={isExpanded ? 'true' : 'false'}
-      className="hidden md:flex fixed left-0 top-0 bottom-0 w-[var(--rail-width)] z-40 bg-[#214e3b] text-[#eef6ee] border-r border-[#214a38] flex-col items-center justify-between select-none"
+      className="hidden md:flex fixed left-0 top-0 bottom-0 w-[var(--rail-width)] z-40 bg-[#183d30] dark:bg-[#0d1714] text-[#eef6ee] dark:text-[#f0f6fc] border-r border-[#133328] dark:border-[#182c24] flex-col items-center justify-between select-none transition-colors duration-150"
     >
       <div className="w-full flex flex-col items-center">
         <div className="w-full h-[var(--header-height)] flex items-center justify-center relative">
           <Link
             href="/"
-            className="grid place-items-center text-[#e8f6e9] hover:opacity-90 transition-opacity"
+            className="grid place-items-center text-[#e8f6e9] dark:text-emerald-400 hover:opacity-90 transition-opacity"
             title="Pledge home"
             aria-label="Pledge home"
           >
             <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7">
               <path d="M5 27V5h12a8 8 0 0 1 0 16h-5v6H5Z" fill="currentColor" />
-              <path d="M12 11h5a2 2 0 0 1 0 4h-5v-4Z" fill="#214e3b" />
+              <path d="M12 11h5a2 2 0 0 1 0 4h-5v-4Z" fill="#183d30" className="dark:fill-[#0d1714]" />
             </svg>
           </Link>
           <button

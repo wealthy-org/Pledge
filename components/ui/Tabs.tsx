@@ -32,7 +32,7 @@ export function Tabs({ tabs, activeTab, onChange, className = '' }: TabsProps) {
             onClick={() => onChange(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-150 cursor-pointer select-none ${
               isActive
-                ? 'bg-white text-[var(--primary)] shadow-sm'
+                ? 'bg-white dark:bg-[#192b25] text-[var(--primary)] shadow-sm'
                 : 'text-[var(--muted)] hover:text-[var(--text)]'
             }`}
           >

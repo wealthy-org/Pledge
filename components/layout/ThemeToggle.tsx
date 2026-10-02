@@ -5,24 +5,31 @@ import React, { useEffect, useState } from 'react';
 export function ThemeToggle({ className = '' }: { className?: string }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
+  const applyTheme = (mode: 'light' | 'dark') => {
+    setTheme(mode);
+    document.documentElement.setAttribute('data-theme', mode);
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem('pledge:theme');
     if (saved === 'dark' || saved === 'light') {
-      setTheme(saved);
-      document.documentElement.setAttribute('data-theme', saved);
+      applyTheme(saved);
     } else {
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       const initial = prefersDark ? 'dark' : 'light';
-      setTheme(initial);
-      document.documentElement.setAttribute('data-theme', initial);
+      applyTheme(initial);
     }
   }, []);
 
   const toggleTheme = () => {
     const next = theme === 'light' ? 'dark' : 'light';
-    setTheme(next);
     localStorage.setItem('pledge:theme', next);
-    document.documentElement.setAttribute('data-theme', next);
+    applyTheme(next);
   };
 
   return (

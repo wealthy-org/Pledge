@@ -25,7 +25,7 @@ export function AppShell({ children }: AppShellProps) {
   useSearchShortcut(() => setSearchOpen(true));
 
   return (
-    <div className="min-h-screen bg-white text-[var(--text)]">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] transition-colors duration-150">
       <NavigationProgressBar />
       <a
         href="#main-content"
@@ -39,7 +39,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <main
         id="main-content"
-        className="pt-[calc(var(--header-height)+20px)] pb-[calc(var(--footer-bar-height)+60px)] md:pb-[calc(var(--footer-bar-height)+30px)] md:pl-[calc(var(--rail-width)+24px)] pl-4 pr-4 xl:pr-[calc(var(--feed-width)+24px)] min-h-screen bg-white"
+        className="pt-[calc(var(--header-height)+20px)] pb-[calc(var(--footer-bar-height)+60px)] md:pb-[calc(var(--footer-bar-height)+30px)] md:pl-[calc(var(--rail-width)+24px)] pl-4 pr-4 xl:pr-[calc(var(--feed-width)+24px)] min-h-screen bg-[var(--bg)]"
       >
         <div className="max-w-[1440px] mx-auto">{children}</div>
       </main>

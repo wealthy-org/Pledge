@@ -78,7 +78,7 @@ export function ActivityItemRow({
   return (
     <div
       data-testid="activity-row"
-      className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] hover:bg-[#F0F7F7] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+      className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] hover:bg-[#F0F7F7] dark:hover:bg-[#14221e] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
     >
       <div className="flex items-center gap-4 min-w-0">
         <div className="flex-shrink-0">{getEventBadge()}</div>

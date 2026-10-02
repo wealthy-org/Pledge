@@ -67,9 +67,9 @@ export function WalletDropdownMenu({
       ref={menuRef}
       role="menu"
       aria-orientation="vertical"
-      className={`absolute right-0 top-full mt-2 z-50 w-64 p-2 bg-white dark:bg-[#161b22] border border-[#e6ece9] dark:border-[#30363d] rounded-2xl shadow-xl animate-in fade-in zoom-in-95 duration-150 ${className}`}
+      className={`absolute right-0 top-full mt-2 z-50 w-64 p-2 bg-white dark:bg-[#111a17] border border-[#e6ece9] dark:border-[#1e332c] rounded-2xl shadow-xl animate-in fade-in zoom-in-95 duration-150 ${className}`}
     >
-      <div className="p-3 bg-[#f4f7f5] dark:bg-[#0d1117] rounded-xl border border-[#dee7e3] dark:border-[#21262d] mb-2">
+      <div className="p-3 bg-[#f4f7f5] dark:bg-[#14221e] rounded-xl border border-[#dee7e3] dark:border-[#1e332c] mb-2">
         <div className="flex items-center justify-between text-[10px] uppercase font-mono tracking-wider text-[var(--muted)]">
           <span>Connected Account</span>
           {ethBalance && <span className="font-semibold text-emerald-600 dark:text-emerald-400">{ethBalance} ETH</span>}
@@ -84,7 +84,7 @@ export function WalletDropdownMenu({
           type="button"
           onClick={handleCopy}
           aria-label="Copy Address"
-          className="w-full flex items-center justify-between px-3 py-2 text-xs text-[#2c3e38] dark:text-[#c9d1d9] hover:bg-[#edf7f2] dark:hover:bg-[#21262d] rounded-lg transition-colors cursor-pointer text-left"
+          className="w-full flex items-center justify-between px-3 py-2 text-xs text-[#2c3e38] dark:text-[#f0f6fc] hover:bg-[#edf7f2] dark:hover:bg-[#192b25] rounded-lg transition-colors cursor-pointer text-left"
         >
           <div className="flex items-center gap-2.5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 text-[var(--muted)]">
@@ -93,7 +93,7 @@ export function WalletDropdownMenu({
             </svg>
             <span>Copy Address</span>
           </div>
-          {copied && <span className="text-[10px] text-emerald-600 font-mono font-semibold">Copied!</span>}
+          {copied && <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-semibold">Copied!</span>}
         </button>
 
         <a
@@ -102,7 +102,7 @@ export function WalletDropdownMenu({
           rel="noopener noreferrer"
           onClick={onClose}
           aria-label="View on Explorer"
-          className="w-full flex items-center justify-between px-3 py-2 text-xs text-[#2c3e38] dark:text-[#c9d1d9] hover:bg-[#edf7f2] dark:hover:bg-[#21262d] rounded-lg transition-colors cursor-pointer text-left"
+          className="w-full flex items-center justify-between px-3 py-2 text-xs text-[#2c3e38] dark:text-[#f0f6fc] hover:bg-[#edf7f2] dark:hover:bg-[#192b25] rounded-lg transition-colors cursor-pointer text-left"
         >
           <div className="flex items-center gap-2.5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 text-[var(--muted)]">
@@ -118,7 +118,7 @@ export function WalletDropdownMenu({
           href="/portfolio"
           onClick={onClose}
           aria-label="My Portfolio"
-          className="w-full flex items-center justify-between px-3 py-2 text-xs text-[#2c3e38] dark:text-[#c9d1d9] hover:bg-[#edf7f2] dark:hover:bg-[#21262d] rounded-lg transition-colors cursor-pointer text-left"
+          className="w-full flex items-center justify-between px-3 py-2 text-xs text-[#2c3e38] dark:text-[#f0f6fc] hover:bg-[#edf7f2] dark:hover:bg-[#192b25] rounded-lg transition-colors cursor-pointer text-left"
         >
           <div className="flex items-center gap-2.5">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 text-[var(--muted)]">
@@ -131,7 +131,7 @@ export function WalletDropdownMenu({
         </Link>
       </div>
 
-      <div className="border-t border-[#e6ece9] dark:border-[#30363d] my-1 pt-1">
+      <div className="border-t border-[#e6ece9] dark:border-[#1e332c] my-1 pt-1">
         <button
           type="button"
           onClick={() => {

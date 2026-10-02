@@ -56,7 +56,7 @@ export function Table<T extends Record<string, unknown>>({
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-[#E8EDED]">
+          <tbody className="divide-y divide-[var(--line)]">
             {isLoading ? (
               <tr data-testid="table-skeleton">
                 <td colSpan={columns.length} className="p-4 space-y-3">
@@ -81,7 +81,7 @@ export function Table<T extends Record<string, unknown>>({
                   onClick={() => onRowClick && onRowClick(item)}
                   className={`transition-colors ${
                     onRowClick
-                      ? 'hover:bg-[#F0F7F7] cursor-pointer'
+                      ? 'hover:bg-[#F0F7F7] dark:hover:bg-[#14221e] cursor-pointer'
                       : 'hover:bg-[var(--panel)]'
                   }`}
                 >

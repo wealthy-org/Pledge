@@ -108,8 +108,8 @@ export function CollectionOffersTable({
                   data-best-offer={isBestOffer ? 'true' : 'false'}
                   className={`transition-colors ${
                     isBestOffer
-                      ? 'border-l-4 border-l-[var(--primary)] bg-[var(--primary-soft)] hover:bg-[#E8F3EE]'
-                      : 'hover:bg-[#F0F7F7]'
+                      ? 'border-l-4 border-l-[var(--primary)] bg-[var(--primary-soft)] hover:bg-[#E8F3EE] dark:hover:bg-[#192b25]'
+                      : 'hover:bg-[#F0F7F7] dark:hover:bg-[#14221e]'
                   }`}
                 >
                   <td className="py-3.5 px-4 font-mono font-bold text-sm text-[var(--text)]">

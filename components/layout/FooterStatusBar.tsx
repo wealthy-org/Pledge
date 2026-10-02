@@ -49,41 +49,41 @@ export function FooterStatusBar() {
 
   return (
     <footer
-      className="fixed bottom-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--footer-bar-height)] z-30 bg-[#f6f8f7] dark:bg-[#161b22] border-t border-[#e2e9e4] dark:border-[#30363d] px-4 flex items-center justify-between text-[10px] text-[#6b7f70] dark:text-[#8b949e] select-none shadow-xs"
+      className="fixed bottom-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--footer-bar-height)] z-30 bg-white dark:bg-[#09100e] border-t border-[#e1ebe6] dark:border-[#182c24] px-4 flex items-center justify-between text-[10px] text-[#556e64] dark:text-[#8b9e95] select-none shadow-xs transition-colors duration-150"
       data-testid="footer-status-bar"
     >
       <div className="flex items-center gap-2 truncate">
         <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] inline-block animate-pulse" />
-        <span className="font-medium text-[#183d30] dark:text-[#f0f6fc]">{activeChain.name}</span>
-        <span className="text-[#d0dbd3] dark:text-[#30363d]">|</span>
-        <span className="font-mono">
+        <span className="font-medium text-[#142d2b] dark:text-[#f0f6fc]">{activeChain.name}</span>
+        <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
+        <span className="font-mono text-[#556e64] dark:text-[#8b9e95]">
           {mounted && blockNumber
             ? `Block #${blockNumber.toString()} · Synced`
             : isBlockLoading
             ? 'Syncing block...'
             : 'Block synced'}
         </span>
-        <span className="text-[#d0dbd3] dark:text-[#30363d]">|</span>
-        <span className="font-mono text-[#267451] dark:text-emerald-400">ETH: {ethPrice}</span>
-        <span className="text-[#d0dbd3] dark:text-[#30363d]">|</span>
-        <span className="font-mono text-[#267451] dark:text-emerald-400">Gas: {gasPrice}</span>
-        <span className="text-[#d0dbd3] dark:text-[#30363d]">|</span>
-        <span className="text-[#267451] dark:text-emerald-400 font-medium hidden sm:inline">Non-Custodial Smart Contract Escrow</span>
+        <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
+        <span className="font-mono text-[#087f5b] dark:text-emerald-400">ETH: {ethPrice}</span>
+        <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
+        <span className="font-mono text-[#087f5b] dark:text-emerald-400">Gas: {gasPrice}</span>
+        <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
+        <span className="text-[#087f5b] dark:text-emerald-400 font-medium hidden sm:inline">Non-Custodial Smart Contract Escrow</span>
       </div>
 
       <div className="flex items-center gap-4 text-[10px]">
-        <span className="hidden lg:inline text-[#8a9d90] dark:text-[#8b949e]">Fixed Rate P2P NFT Lending</span>
+        <span className="hidden lg:inline text-[#8a9d90] dark:text-[#8b9e95]">Fixed Rate P2P NFT Lending</span>
         <a
           href={explorerUrl}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Blockscout Explorer"
-          className="text-[#4d7a99] dark:text-[#58a6ff] hover:underline flex items-center gap-1"
+          className="text-[#286a9b] dark:text-emerald-400 hover:underline flex items-center gap-1"
         >
           <span>Blockscout Explorer</span>
           <span>↗</span>
         </a>
-        <Link href="/activity" className="text-[#4d7a99] dark:text-[#58a6ff] hover:underline">
+        <Link href="/activity" className="text-[#286a9b] dark:text-emerald-400 hover:underline">
           About Pledge ↗
         </Link>
       </div>

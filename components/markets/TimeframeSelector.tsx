@@ -25,7 +25,7 @@ export function TimeframeSelector({
     <div
       role="group"
       aria-label="Filter timeframe"
-      className={`inline-flex items-center p-1 bg-[#f3f5f4] dark:bg-[#161b22] border border-[#e2e8e5] dark:border-[#30363d] rounded-xl gap-1 ${className}`}
+      className={`inline-flex items-center p-1 bg-[#f0f4f2] dark:bg-[#14221e] border border-[#e2e8e5] dark:border-[#1e332c] rounded-xl gap-1 ${className}`}
     >
       {options.map((opt) => {
         const isSelected = timeframe === opt.id;
@@ -37,8 +37,8 @@ export function TimeframeSelector({
             aria-pressed={isSelected}
             className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg transition-all cursor-pointer ${
               isSelected
-                ? 'bg-white dark:bg-[#21262d] text-[#174732] dark:text-[#f0f6fc] shadow-xs border border-[#dce6e1] dark:border-[#30363d]'
-                : 'text-[#61736b] dark:text-[#8b949e] hover:text-[#174732] dark:hover:text-white'
+                ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] shadow-xs border border-[#dce6e1] dark:border-[#1e332c]'
+                : 'text-[#61736b] dark:text-[#8b949e] hover:text-[#142d2b] dark:hover:text-white'
             }`}
           >
             {opt.label}

@@ -85,7 +85,7 @@ export function CollectionLoanHistoryTable({
               return (
                 <tr
                   key={loan.loanId}
-                  className="hover:bg-[#F0F7F7] transition-colors"
+                  className="hover:bg-[#F0F7F7] dark:hover:bg-[#14221e] transition-colors"
                 >
                   <td className="py-3.5 px-4 font-mono font-bold text-[var(--text)]">
                     #{loan.loanId}
