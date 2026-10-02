@@ -6,7 +6,16 @@ export { robinhoodTestnet, robinhoodMainnet, SUPPORTED_CHAINS };
 
 export const config = createConfig({
   chains: SUPPORTED_CHAINS,
+  multiInjectedProviderDiscovery: true,
   connectors: [
+    injected({
+      target: 'phantom',
+      shimDisconnect: true,
+    }),
+    injected({
+      target: 'metaMask',
+      shimDisconnect: true,
+    }),
     injected({
       shimDisconnect: true,
     }),

@@ -32,20 +32,35 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
   if (!isOpen) return null;
 
   const handleConnect = (walletType: WalletType) => {
-    const injectedConnector =
+    if (walletType === 'phantom' && !availability.phantom) {
+      window.open('https://phantom.app/', '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (walletType === 'metamask' && !availability.metamask) {
+      window.open('https://metamask.io/download/', '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (walletType === 'injected' && !availability.injected) {
+      window.open('https://rabby.io/', '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    const targetConnector =
       connectors.find((c) => {
+        const id = c.id.toLowerCase();
+        const name = c.name.toLowerCase();
         if (walletType === 'phantom') {
-          return c.id.toLowerCase().includes('phantom') || c.name.toLowerCase().includes('phantom') || c.type === 'injected';
+          return id.includes('phantom') || name.includes('phantom');
         }
         if (walletType === 'metamask') {
-          return c.id.toLowerCase().includes('metamask') || c.name.toLowerCase().includes('metamask') || c.type === 'injected';
+          return id.includes('metamask') || name.includes('metamask') || id.includes('io.metamask');
         }
-        return c.type === 'injected' || c.id === 'injected';
+        return c.type === 'injected' || id === 'injected';
       }) || connectors[0];
 
-    if (injectedConnector) {
+    if (targetConnector) {
       connect(
-        { connector: injectedConnector },
+        { connector: targetConnector },
         {
           onSuccess: () => {
             onClose();
@@ -95,11 +110,13 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
                   Phantom Wallet
                 </div>
                 <div className="text-xs text-muted">
-                  {availability.phantom ? 'Detected & Ready' : 'Multi-chain EVM Wallet'}
+                  {availability.phantom ? 'Detected & Ready' : 'Install Phantom Extension →'}
                 </div>
               </div>
             </div>
-            <span className="text-xs text-muted group-hover:text-text">→</span>
+            <span className="text-xs text-muted group-hover:text-text">
+              {availability.phantom ? 'Connect →' : 'Install ↗'}
+            </span>
           </button>
 
           <button
@@ -116,11 +133,13 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
                   MetaMask
                 </div>
                 <div className="text-xs text-muted">
-                  {availability.metamask ? 'Detected & Ready' : 'Browser Extension'}
+                  {availability.metamask ? 'Detected & Ready' : 'Install MetaMask Extension →'}
                 </div>
               </div>
             </div>
-            <span className="text-xs text-muted group-hover:text-text">→</span>
+            <span className="text-xs text-muted group-hover:text-text">
+              {availability.metamask ? 'Connect →' : 'Install ↗'}
+            </span>
           </button>
 
           <button
@@ -136,10 +155,14 @@ export function ConnectWalletModal({ isOpen, onClose }: ConnectWalletModalProps)
                 <div className="text-sm font-medium text-text group-hover:text-lime transition-colors">
                   Browser Wallet
                 </div>
-                <div className="text-xs text-muted">Rabby, Coinbase, or Injected Provider</div>
+                <div className="text-xs text-muted">
+                  {availability.injected ? 'Detected (Rabby / Injected)' : 'Install Rabby / Browser Wallet →'}
+                </div>
               </div>
             </div>
-            <span className="text-xs text-muted group-hover:text-text">→</span>
+            <span className="text-xs text-muted group-hover:text-text">
+              {availability.injected ? 'Connect →' : 'Install ↗'}
+            </span>
           </button>
         </div>
 
