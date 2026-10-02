@@ -5,6 +5,7 @@ import { useAccount, useDisconnect, useChainId } from 'wagmi';
 import { truncateAddress } from '@/lib/web3/wallet';
 import { ConnectWalletModal } from './ConnectWalletModal';
 import { WalletDropdownMenu } from './WalletDropdownMenu';
+import { Toast, type ToastType } from '@/components/ui/Toast';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
@@ -18,6 +19,7 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
   const chainId = useChainId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [toast, setToast] = useState<{ type: ToastType; message: string } | null>(null);
   const mounted = useMounted();
 
   if (!mounted) {
@@ -37,6 +39,12 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
 
   const isSupportedChain = chainId === TESTNET_CHAIN_ID || chainId === MAINNET_CHAIN_ID;
   const activeChain = getActiveChain(chainId);
+
+  const handleDisconnect = () => {
+    disconnect();
+    setMenuOpen(false);
+    setToast({ type: 'info', message: 'Wallet disconnected.' });
+  };
 
   if (!isConnected || !address) {
     return (
@@ -58,7 +66,30 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
           </span>
         </button>
 
-        <ConnectWalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+        <ConnectWalletModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={(walletName) => {
+            setToast({
+              type: 'success',
+              message: walletName ? `Connected to ${walletName} successfully!` : 'Wallet connected successfully!',
+            });
+          }}
+          onError={(err) => {
+            setToast({
+              type: 'error',
+              message: err.message || 'Failed to connect wallet. Please try again.',
+            });
+          }}
+        />
+
+        {toast && (
+          <Toast
+            type={toast.type}
+            message={toast.message}
+            onClose={() => setToast(null)}
+          />
+        )}
       </>
     );
   }
@@ -94,10 +125,33 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
         onClose={() => setMenuOpen(false)}
         address={address}
         chainId={chainId}
-        onDisconnect={disconnect}
+        onDisconnect={handleDisconnect}
       />
 
-      <ConnectWalletModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <ConnectWalletModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={(walletName) => {
+          setToast({
+            type: 'success',
+            message: walletName ? `Connected to ${walletName} successfully!` : 'Wallet connected successfully!',
+          });
+        }}
+        onError={(err) => {
+          setToast({
+            type: 'error',
+            message: err.message || 'Failed to connect wallet. Please try again.',
+          });
+        }}
+      />
+
+      {toast && (
+        <Toast
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

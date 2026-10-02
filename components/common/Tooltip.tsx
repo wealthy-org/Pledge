@@ -55,7 +55,7 @@ export function Tooltip({
         <button
           type="button"
           aria-describedby={isVisible ? tooltipId : undefined}
-          className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full text-[10px] text-[#627478] hover:text-[#142d2b] dark:text-[#8b949e] dark:hover:text-white bg-[#e8eded] dark:bg-[#21262d] transition-colors cursor-help"
+          className="inline-flex items-center justify-center w-4 h-4 rounded-md text-[10px] font-mono text-[var(--muted)] hover:text-[var(--text)] bg-[var(--panel)] border border-[var(--line)] transition-colors cursor-help"
         >
           ?
         </button>
@@ -65,7 +65,7 @@ export function Tooltip({
         <div
           id={tooltipId}
           role="tooltip"
-          className={`absolute z-50 px-2.5 py-1.5 text-[11px] font-normal text-white dark:text-[#f0f6fc] bg-[#162722] dark:bg-[#1f242c] rounded-md shadow-lg border border-[#2b4c3e] dark:border-[#30363d] whitespace-normal max-w-xs pointer-events-none transition-opacity duration-150 ${getPositionClasses()}`}
+          className={`absolute z-50 px-2.5 py-1.5 text-xs font-normal text-[var(--text)] bg-[var(--surface)] rounded-md shadow-lg border border-[var(--line)] whitespace-normal max-w-xs pointer-events-none transition-opacity duration-150 ${getPositionClasses()}`}
         >
           {content}
         </div>

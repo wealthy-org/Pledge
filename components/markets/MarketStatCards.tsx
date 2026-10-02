@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 
 export interface MarketStats {
@@ -18,55 +17,55 @@ export interface MarketStatCardsProps {
 export function MarketStatCards({ stats, isLoading = false }: MarketStatCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-[var(--surface)] border border-[var(--line)] rounded-xl p-5">
         {[1, 2, 3].map((i) => (
-          <Card key={i} className="p-5 flex flex-col justify-between">
-            <Skeleton width="120px" height="14px" className="mb-2" />
-            <Skeleton width="160px" height="28px" className="mb-1" />
+          <div key={i} className="flex flex-col justify-between space-y-2">
+            <Skeleton width="120px" height="14px" />
+            <Skeleton width="160px" height="28px" />
             <Skeleton width="100px" height="12px" />
-          </Card>
+          </div>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <Card className="p-5 flex flex-col justify-between hover:border-[var(--line-strong)] transition-all">
-        <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--muted)]">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6">
+      <div className="flex flex-col justify-between space-y-1">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--muted)]">
           Total Pool Size
         </div>
-        <div className="text-2xl font-bold font-mono text-[var(--text)] mt-1.5">
+        <div className="text-2xl font-bold font-mono text-[var(--text)]">
           {stats?.totalPoolSizeEth || '0.00'} ETH
         </div>
-        <div className="text-xs text-[var(--primary)] font-medium mt-1">
+        <div className="text-xs text-[var(--accent-primary)] font-medium">
           Available liquidity across pools
         </div>
-      </Card>
+      </div>
 
-      <Card className="p-5 flex flex-col justify-between hover:border-[var(--line-strong)] transition-all">
-        <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--muted)]">
+      <div className="flex flex-col justify-between space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--muted)]">
           Total Active Loans
         </div>
-        <div className="text-2xl font-bold font-mono text-[var(--text)] mt-1.5">
+        <div className="text-2xl font-bold font-mono text-[var(--text)]">
           {stats?.totalActiveLoans ?? 0} Loans
         </div>
-        <div className="text-xs text-[var(--muted)] mt-1">
+        <div className="text-xs text-[var(--muted)]">
           Currently collateralized & active
         </div>
-      </Card>
+      </div>
 
-      <Card className="p-5 flex flex-col justify-between hover:border-[var(--line-strong)] transition-all">
-        <div className="text-[11px] font-mono uppercase tracking-wider text-[var(--muted)]">
+      <div className="flex flex-col justify-between space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
+        <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--muted)]">
           Total Volume
         </div>
-        <div className="text-2xl font-bold font-mono text-[var(--text)] mt-1.5">
+        <div className="text-2xl font-bold font-mono text-[var(--text)]">
           {stats?.totalVolumeEth || '0.00'} ETH
         </div>
-        <div className="text-xs text-[var(--success)] font-medium mt-1">
+        <div className="text-xs text-[var(--accent-primary)] font-medium">
           Cumulative loan origination
         </div>
-      </Card>
+      </div>
     </div>
   );
 }

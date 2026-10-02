@@ -19,7 +19,7 @@ const NAV_ITEMS: NavItem[] = [
     name: 'Markets',
     href: '/',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[23px] h-[23px]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
         <path d="m3 10 9-7 9 7v10H6V10m4 10v-7h5v7" />
       </svg>
     ),
@@ -28,7 +28,7 @@ const NAV_ITEMS: NavItem[] = [
     name: 'Borrow',
     href: '/borrow',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[23px] h-[23px]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
         <rect x="4" y="4" width="16" height="16" rx="3" />
         <path d="M12 7v10m-4-4 4 4 4-4" />
       </svg>
@@ -38,7 +38,7 @@ const NAV_ITEMS: NavItem[] = [
     name: 'Lend',
     href: '/lend',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[23px] h-[23px]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
         <path d="m4 15 4-4 4 3 8-9M14 5h6v6M4 20h16" />
       </svg>
     ),
@@ -47,7 +47,7 @@ const NAV_ITEMS: NavItem[] = [
     name: 'Collections',
     href: '/collections',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[23px] h-[23px]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
         <rect x="3" y="3" width="7" height="7" rx="1.5" />
         <rect x="14" y="3" width="7" height="7" rx="1.5" />
         <rect x="14" y="14" width="7" height="7" rx="1.5" />
@@ -59,7 +59,7 @@ const NAV_ITEMS: NavItem[] = [
     name: 'Portfolio',
     href: '/portfolio',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[23px] h-[23px]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
         <rect x="3" y="7" width="18" height="14" rx="3" />
         <path d="M8 7V4h8v3M3 12h18m-12 0v3h6v-3" />
       </svg>
@@ -69,7 +69,7 @@ const NAV_ITEMS: NavItem[] = [
     name: 'Activity',
     href: '/activity',
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[23px] h-[23px]">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
         <path d="M3 12h4l3-8 4 16 3-8h4" />
       </svg>
     ),
@@ -86,19 +86,19 @@ export function Sidebar() {
     <aside
       aria-label="Main navigation"
       data-expanded={isExpanded ? 'true' : 'false'}
-      className="hidden md:flex fixed left-0 top-0 bottom-0 w-[var(--rail-width)] z-40 bg-[#183d30] dark:bg-[#0d1714] text-[#eef6ee] dark:text-[#f0f6fc] border-r border-[#133328] dark:border-[#182c24] flex-col items-center justify-between select-none transition-colors duration-150"
+      className="hidden md:flex fixed left-0 top-0 bottom-0 w-[var(--rail-width)] z-40 bg-[var(--surface)] text-[var(--text)] border-r border-[var(--line)] flex-col items-center justify-between select-none transition-colors duration-150"
     >
       <div className="w-full flex flex-col items-center">
         <div className="w-full h-[var(--header-height)] flex items-center justify-center relative">
           <Link
             href="/"
-            className="grid place-items-center text-[#e8f6e9] dark:text-emerald-400 hover:opacity-90 transition-opacity"
+            className="grid place-items-center text-[var(--accent-primary)] hover:opacity-90 transition-opacity"
             title="Pledge home"
             aria-label="Pledge home"
           >
             <svg viewBox="0 0 32 32" fill="none" className="w-7 h-7">
               <path d="M5 27V5h12a8 8 0 0 1 0 16h-5v6H5Z" fill="currentColor" />
-              <path d="M12 11h5a2 2 0 0 1 0 4h-5v-4Z" fill="#183d30" className="dark:fill-[#0d1714]" />
+              <path d="M12 11h5a2 2 0 0 1 0 4h-5v-4Z" fill="var(--surface)" />
             </svg>
           </Link>
           <button
@@ -111,7 +111,7 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav aria-label="Main Navigation" className="flex flex-col gap-3.5 w-full items-center pt-3">
+        <nav aria-label="Main Navigation" className="flex flex-col gap-3 w-full items-center pt-3">
           {NAV_ITEMS.map((item) => {
             const isActive =
               item.href === '/'
@@ -125,10 +125,10 @@ export function Sidebar() {
                 aria-label={item.name}
                 title={item.name}
                 data-active={isActive ? 'true' : 'false'}
-                className={`flex items-center justify-center w-[43px] h-[43px] rounded-[9px] transition-all duration-150 cursor-pointer ${
+                className={`flex items-center justify-center w-11 h-11 rounded-lg transition-colors duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-[#ffffff1c] text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12)]'
-                    : 'text-[#d7e6d9] hover:bg-[#ffffff1c] hover:text-white'
+                    ? 'bg-[var(--panel)] text-[var(--accent-primary)] border border-[var(--line)]'
+                    : 'text-[var(--muted)] hover:bg-[var(--panel)] hover:text-[var(--text)]'
                 }`}
               >
                 {item.icon}
@@ -145,7 +145,7 @@ export function Sidebar() {
             href="/portfolio"
             data-testid="sidebar-wallet-avatar"
             title={`Connected as ${truncateAddress(address)}`}
-            className="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 border border-white/20 flex items-center justify-center text-[10px] font-mono font-bold text-white shadow-xs hover:scale-105 transition-transform"
+            className="w-8 h-8 rounded-md bg-[var(--panel)] border border-[var(--line)] flex items-center justify-center text-[10px] font-mono font-medium text-[var(--accent-primary)] hover:border-[var(--line-strong)] transition-colors"
           >
             {address.slice(2, 4).toUpperCase()}
           </Link>
@@ -157,9 +157,9 @@ export function Sidebar() {
           href="/activity"
           title="About & Help"
           aria-label="How it works"
-          className="flex items-center justify-center w-[43px] h-[43px] rounded-[9px] text-[#d7e6d9] hover:bg-[#ffffff1c] hover:text-white transition-all cursor-pointer"
+          className="flex items-center justify-center w-11 h-11 rounded-lg text-[var(--muted)] hover:bg-[var(--panel)] hover:text-[var(--text)] transition-colors cursor-pointer"
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[22px] h-[22px]">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px]">
             <circle cx="12" cy="12" r="9" />
             <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-1.3.9-1.7 1.2-1.7 2.7m0 2.5v1" />
           </svg>

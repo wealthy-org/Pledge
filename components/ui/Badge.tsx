@@ -35,10 +35,10 @@ export function Badge({
     <span
       role="status"
       data-status={status}
-      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono font-semibold uppercase tracking-wider border ${statusStyles[status]} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold uppercase tracking-wider border ${statusStyles[status]} ${className}`}
       {...props}
     >
-      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-75" />
+      <span className="w-1.5 h-1.5 rounded-xs bg-current opacity-75" />
       {children}
     </span>
   );

@@ -35,6 +35,7 @@
   --disabled-bg: #edf2f3;
   --disabled-text: #879a9d;
   --disabled-border: #d2dcdf;
+  --accent-primary: #087f5b;
   --radius: 16px;
   --rail-width: 68px;
   --rail-expanded-width: 220px;
@@ -60,6 +61,7 @@
   --text: #f0f6fc;
   --text-heading: #ffffff;
   --muted: #8b949e;
+  --accent-primary: #3fb950;
   --primary: #3fb950;
   --primary-dark: #2ea043;
   --primary-hover-bg: #238636;
@@ -80,6 +82,7 @@
   --color-background: var(--bg);
   --color-foreground: var(--text);
   --color-primary: var(--primary);
+  --color-accent-primary: var(--accent-primary);
   --color-primary-dark: var(--primary-dark);
   --color-primary-soft: var(--primary-soft);
   --color-panel: var(--panel);

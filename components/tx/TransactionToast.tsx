@@ -38,9 +38,9 @@ export function TransactionToast({
       <div className="flex items-start gap-3">
         <div className="shrink-0 mt-0.5">
           {isPending && (
-            <div className="w-6 h-6 rounded-full bg-[var(--primary-soft)] border border-[var(--primary50)] flex items-center justify-center">
+            <div className="w-5 h-5 rounded-md bg-[var(--primary-soft)] border border-[var(--primary50)] flex items-center justify-center">
               <svg
-                className="animate-spin h-3.5 w-3.5 text-[var(--primary)]"
+                className="animate-spin h-3 w-3 text-[var(--primary)]"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -51,7 +51,7 @@ export function TransactionToast({
                   cy="12"
                   r="10"
                   stroke="currentColor"
-                  strokeWidth="4"
+                  strokeWidth="3"
                 />
                 <path
                   className="opacity-75"
@@ -63,14 +63,19 @@ export function TransactionToast({
           )}
 
           {isSuccess && (
-            <div className="w-6 h-6 rounded-full bg-[var(--green-soft)] border border-[var(--success)]/30 text-[var(--success)] flex items-center justify-center text-xs font-bold">
-              ✓
+            <div className="w-5 h-5 rounded-md bg-[var(--green-soft)] border border-[var(--success)]/30 text-[var(--success)] flex items-center justify-center">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
           )}
 
           {isError && (
-            <div className="w-6 h-6 rounded-full bg-red-50 border border-red-200 text-[var(--error)] flex items-center justify-center text-xs font-bold">
-              ✕
+            <div className="w-5 h-5 rounded-md bg-red-500/10 border border-red-500/30 text-[var(--error)] flex items-center justify-center">
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </div>
           )}
         </div>

@@ -56,9 +56,9 @@ export function TransactionModal({
       <div className="w-full max-w-md rounded-2xl bg-[var(--surface)] border border-[var(--line)] shadow-2xl p-6 text-center space-y-5 animate-in zoom-in-95 duration-200">
         <div className="flex justify-center">
           {isPending && (
-            <div className="w-16 h-16 rounded-full bg-[var(--primary-soft)] border border-[var(--primary50)] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[var(--primary-soft)] border border-[var(--primary50)] flex items-center justify-center">
               <svg
-                className="animate-spin h-8 w-8 text-[var(--primary)]"
+                className="animate-spin h-6 w-6 text-[var(--primary)]"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -69,7 +69,7 @@ export function TransactionModal({
                   cy="12"
                   r="10"
                   stroke="currentColor"
-                  strokeWidth="4"
+                  strokeWidth="3"
                 />
                 <path
                   className="opacity-75"
@@ -81,14 +81,19 @@ export function TransactionModal({
           )}
 
           {isSuccess && (
-            <div className="w-16 h-16 rounded-full bg-[var(--green-soft)] border border-[var(--success)]/30 text-[var(--success)] flex items-center justify-center text-3xl">
-              ✓
+            <div className="w-12 h-12 rounded-xl bg-[var(--green-soft)] border border-[var(--success)]/30 text-[var(--success)] flex items-center justify-center">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
           )}
 
           {isError && (
-            <div className="w-16 h-16 rounded-full bg-red-50 border border-red-200 text-[var(--error)] flex items-center justify-center text-3xl font-bold">
-              ✕
+            <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/30 text-[var(--error)] flex items-center justify-center">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
             </div>
           )}
         </div>

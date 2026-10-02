@@ -105,8 +105,8 @@ export function LoanCountdown({
           </span>
           <span className="text-xs text-[var(--muted)]">Until Repayment Deadline</span>
         </div>
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-semibold">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-semibold">
+          <span className="w-1.5 h-1.5 rounded-xs bg-emerald-500" />
           <span>Active Accrual</span>
         </div>
       </div>

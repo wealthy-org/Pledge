@@ -47,6 +47,20 @@ export default function PortfolioPage() {
     return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.00';
   }, [userBorrowingLoans]);
 
+  const totalLentEth = useMemo(() => {
+    const totalWei = userLentLoans.reduce((sum: bigint, l: LoanItem) => sum + BigInt(l.principalWei || '0'), 0n);
+    const eth = Number(formatUnits(totalWei, 18));
+    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.00';
+  }, [userLentLoans]);
+
+  const totalEarnedEth = useMemo(() => {
+    const totalEarnedWei = userLentLoans
+      .filter((l: LoanItem) => l.status === 'repaid')
+      .reduce((sum: bigint, l: LoanItem) => sum + BigInt(l.interestWei || '0'), 0n);
+    const eth = Number(formatUnits(totalEarnedWei, 18));
+    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.00';
+  }, [userLentLoans]);
+
   const totalRepaymentDueEth = useMemo(() => {
     const totalWei = userBorrowingLoans.reduce((sum: bigint, l: LoanItem) => {
       const principal = BigInt(l.principalWei || '0');
@@ -106,40 +120,40 @@ export default function PortfolioPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-150">
-      <div className="space-y-2 border-b border-[#e1ebe6] dark:border-[#1e332c] pb-4">
-        <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-[#58a6ff] flex items-center gap-2">
-          <span className="w-5 h-[1px] bg-[#4d93be] inline-block" />
-          <span>Portfolio Overview · Everything, in one place</span>
+      <div className="space-y-2 border-b border-[var(--line)] pb-4">
+        <div className="text-[10px] uppercase font-semibold tracking-wider text-[var(--accent-primary)] flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-[var(--accent-primary)] inline-block" />
+          <span>Portfolio Overview</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0f6fc]">
-          Your positions.
+        <h1 className="text-3xl font-semibold tracking-tight text-[var(--text)]">
+          Your positions
         </h1>
 
-        <p className="text-xs sm:text-sm text-[var(--muted)] dark:text-[#8ca197]">
+        <p className="text-xs text-[var(--muted)]">
           Manage borrowed ETH, lending offers, and upcoming repayments.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 bg-[#f0f5f3] dark:bg-[#111a17] border border-[#e1ebe6] dark:border-[#1e332c] rounded-xl p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6">
         <div className="space-y-1">
-          <span className="text-[10px] text-[#637878] dark:text-[#8ca197] block">Borrowed ETH</span>
-          <div className="text-2xl font-normal tracking-[-0.7px] text-[#183c35] dark:text-emerald-400 font-mono">
-            {totalBorrowedEth} <small className="text-xs text-[#607579] dark:text-[#8ca197]">ETH</small>
+          <span className="text-[10px] text-[var(--muted)] block uppercase font-mono">Borrowed ETH</span>
+          <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+            {totalBorrowedEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
 
-        <div className="space-y-1 sm:border-l sm:border-[#e1ebe6] dark:sm:border-[#1e332c] sm:pl-6">
-          <span className="text-[10px] text-[#637878] dark:text-[#8ca197] block">Total repayment due</span>
-          <div className="text-2xl font-normal tracking-[-0.7px] text-[#183c35] dark:text-emerald-400 font-mono">
-            {totalRepaymentDueEth} <small className="text-xs text-[#607579] dark:text-[#8ca197]">ETH</small>
+        <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
+          <span className="text-[10px] text-[var(--muted)] block uppercase font-mono">Total repayment due</span>
+          <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+            {totalRepaymentDueEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
 
-        <div className="space-y-1 sm:border-l sm:border-[#e1ebe6] dark:sm:border-[#1e332c] sm:pl-6">
-          <span className="text-[10px] text-[#637878] dark:text-[#8ca197] block">Open offer principal</span>
-          <div className="text-2xl font-normal tracking-[-0.7px] text-[#183c35] dark:text-emerald-400 font-mono">
-            {totalOpenOfferEth} <small className="text-xs text-[#607579] dark:text-[#8ca197]">ETH</small>
+        <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
+          <span className="text-[10px] text-[var(--muted)] block uppercase font-mono">Open offer principal</span>
+          <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+            {totalOpenOfferEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
       </div>
@@ -148,19 +162,22 @@ export default function PortfolioPage() {
         claimableWei={effectiveClaimableWei}
         onWithdraw={handleWithdraw}
         isWithdrawing={isWithdrawing}
+        totalBorrowedEth={totalBorrowedEth}
+        totalLentEth={totalLentEth}
+        totalEarnedEth={totalEarnedEth}
       />
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-[#e1ebe6] dark:border-[#1e332c]">
-          <div role="tablist" className="bg-[#f0f4f2] dark:bg-[#14221e] p-[3px] rounded-[7px] flex gap-1 border border-[#e1ebe6] dark:border-[#1e332c]">
+        <div className="flex items-center justify-between pb-2 border-b border-[var(--line)]">
+          <div role="tablist" className="bg-[var(--panel)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
             <button
               role="tab"
               aria-selected={activeTab === 'loans'}
               onClick={() => setActiveTab('loans')}
-              className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
                 activeTab === 'loans'
-                  ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
               }`}
             >
               Borrowing
@@ -169,10 +186,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'offers'}
               onClick={() => setActiveTab('offers')}
-              className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
                 activeTab === 'offers'
-                  ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
               }`}
             >
               Offers
@@ -181,10 +198,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'lending'}
               onClick={() => setActiveTab('lending')}
-              className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
                 activeTab === 'lending'
-                  ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
               }`}
             >
               Lending
@@ -193,10 +210,10 @@ export default function PortfolioPage() {
               role="tab"
               aria-selected={activeTab === 'history'}
               onClick={() => setActiveTab('history')}
-              className={`text-[11px] font-medium py-1.5 px-3 rounded-[5px] transition-all cursor-pointer ${
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-all cursor-pointer ${
                 activeTab === 'history'
-                  ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e3e9e6] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(25,63,41,0.06)]'
-                  : 'text-[#607169] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
               }`}
             >
               History

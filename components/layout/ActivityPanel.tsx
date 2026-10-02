@@ -36,7 +36,6 @@ export function ActivityPanel() {
         setActivities(data.items || []);
       }
     } catch {
-      // ignore
     } finally {
       setLoading(false);
     }
@@ -102,103 +101,103 @@ export function ActivityPanel() {
 
   const getStatusColor = (type: string) => {
     const t = type.toLowerCase();
-    if (t.includes('repaid')) return 'text-[#61856d]';
-    if (t.includes('loan') || t.includes('started') || t.includes('filled')) return 'text-[#5487ad]';
+    if (t.includes('repaid')) return 'text-[var(--accent-primary)]';
+    if (t.includes('loan') || t.includes('started') || t.includes('filled')) return 'text-[var(--text)]';
     if (t.includes('foreclose')) return 'text-red-500';
-    return 'text-[var(--lime)]';
+    return 'text-[var(--accent-primary)]';
   };
 
   return (
     <aside
       aria-label="Activity feed"
       data-open={isOpen ? 'true' : 'false'}
-      className="hidden xl:flex fixed right-0 top-[var(--header-height)] bottom-[var(--footer-bar-height)] w-[var(--feed-width)] p-[18px_15px] overflow-y-auto border-l border-[#e1ebe6] bg-white dark:bg-[#0d1714] dark:border-[#1e332c] z-20 flex-col select-none transition-colors duration-150"
+      className="hidden xl:flex fixed right-0 top-[var(--header-height)] bottom-[var(--footer-bar-height)] w-[var(--feed-width)] p-4 overflow-y-auto border-l border-[var(--line)] bg-[var(--surface)] text-[var(--text)] z-20 flex-col select-none transition-colors duration-150"
     >
-      <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#eef1ef] dark:border-[#1e332c]">
-        <div className="text-[12px] font-semibold text-[#142d2b] dark:text-[#f0f6fc] flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-[#087f5b] animate-pulse" />
+      <div className="flex items-center justify-between pb-2 mb-2 border-b border-[var(--line)]">
+        <div className="text-xs font-semibold text-[var(--text)] flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)]" />
           <span>Recent Activity</span>
         </div>
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-label="Toggle activity panel"
-          className="text-xs text-[var(--muted)] hover:text-[#142d2b] dark:hover:text-white p-1 cursor-pointer"
+          className="text-xs text-[var(--muted)] hover:text-[var(--text)] p-1 cursor-pointer"
         >
           {isOpen ? '✕' : '☰'}
         </button>
       </div>
 
-      <div className="flex bg-[#f0f4f2] dark:bg-[#14221e] rounded-[7px] p-[3px] mb-[13px] gap-[3px]">
+      <div className="flex bg-[var(--panel)] rounded-lg p-1 mb-3 gap-1 border border-[var(--line)]">
         <button
           onClick={() => setFeedScope('all')}
-          className={`flex-1 text-[11px] font-medium rounded-[5px] py-[9px] px-[5px] transition-all cursor-pointer ${
+          className={`flex-1 text-xs font-medium rounded-md py-1.5 px-2 transition-colors cursor-pointer ${
             feedScope === 'all'
-              ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e0e7e3] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(40,76,41,0.06)]'
-              : 'text-[#536b5e] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+              ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+              : 'text-[var(--muted)] hover:text-[var(--text)]'
           }`}
         >
           All Activity
         </button>
         <button
           onClick={() => setFeedScope('watch')}
-          className={`flex-1 text-[11px] font-medium rounded-[5px] py-[9px] px-[5px] transition-all cursor-pointer ${
+          className={`flex-1 text-xs font-medium rounded-md py-1.5 px-2 transition-colors cursor-pointer ${
             feedScope === 'watch'
-              ? 'bg-white dark:bg-[#192b25] text-[#142d2b] dark:text-[#f0f6fc] border border-[#e0e7e3] dark:border-[#1e332c] shadow-[0_1px_3px_rgba(40,76,41,0.06)]'
-              : 'text-[#536b5e] dark:text-[#8ca197] hover:text-[#142d2b] dark:hover:text-white'
+              ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+              : 'text-[var(--muted)] hover:text-[var(--text)]'
           }`}
         >
-          ☆ Watchlist
+          Watchlist
         </button>
       </div>
 
-      <div className="flex items-center justify-between gap-2 mb-[17px]">
+      <div className="flex items-center justify-between gap-2 mb-4">
         <div className="flex gap-1">
           <button
             onClick={() => setFeedType('all')}
-            className={`py-[5px] px-[9px] text-[10px] rounded-[5px] border transition-all cursor-pointer ${
+            className={`py-1 px-2.5 text-xs rounded-md border transition-colors cursor-pointer ${
               feedType === 'all'
-                ? 'bg-[#183d30] dark:bg-emerald-600 text-white border-[#183d30] dark:border-emerald-600'
-                : 'bg-white dark:bg-[#14221e] text-[#617266] dark:text-[#8ca197] border-[#e2e8e5] dark:border-[#1e332c] hover:bg-[#f3f5f4] dark:hover:bg-[#192b25]'
+                ? 'bg-[var(--panel)] text-[var(--text)] border-[var(--line-strong)]'
+                : 'bg-[var(--surface)] text-[var(--muted)] border-[var(--line)] hover:text-[var(--text)]'
             }`}
           >
             Feed
           </button>
           <button
             onClick={() => setFeedType('loan')}
-            className={`py-[5px] px-[9px] text-[10px] rounded-[5px] border transition-all cursor-pointer ${
+            className={`py-1 px-2.5 text-xs rounded-md border transition-colors cursor-pointer ${
               feedType === 'loan'
-                ? 'bg-[#183d30] dark:bg-emerald-600 text-white border-[#183d30] dark:border-emerald-600'
-                : 'bg-white dark:bg-[#14221e] text-[#617266] dark:text-[#8ca197] border-[#e2e8e5] dark:border-[#1e332c] hover:bg-[#f3f5f4] dark:hover:bg-[#192b25]'
+                ? 'bg-[var(--panel)] text-[var(--text)] border-[var(--line-strong)]'
+                : 'bg-[var(--surface)] text-[var(--muted)] border-[var(--line)] hover:text-[var(--text)]'
             }`}
           >
             Loans
           </button>
           <button
             onClick={() => setFeedType('repaid')}
-            className={`py-[5px] px-[9px] text-[10px] rounded-[5px] border transition-all cursor-pointer ${
+            className={`py-1 px-2.5 text-xs rounded-md border transition-colors cursor-pointer ${
               feedType === 'repaid'
-                ? 'bg-[#183d30] dark:bg-emerald-600 text-white border-[#183d30] dark:border-emerald-600'
-                : 'bg-white dark:bg-[#14221e] text-[#617266] dark:text-[#8ca197] border-[#e2e8e5] dark:border-[#1e332c] hover:bg-[#f3f5f4] dark:hover:bg-[#192b25]'
+                ? 'bg-[var(--panel)] text-[var(--text)] border-[var(--line-strong)]'
+                : 'bg-[var(--surface)] text-[var(--muted)] border-[var(--line)] hover:text-[var(--text)]'
             }`}
           >
             Repaid
           </button>
         </div>
-        <span className="text-[9px] font-mono font-bold text-[#608390] dark:text-emerald-400 tracking-wider uppercase">
-          LIVE
+        <span className="text-[10px] font-mono font-bold text-[var(--accent-primary)] tracking-wider uppercase">
+          Live
         </span>
       </div>
 
-      <div className="flex-1 space-y-1 divide-y divide-[#eef1ef] dark:divide-[#1e332c]">
+      <div className="flex-1 space-y-1 divide-y divide-[var(--line)]">
         {loading ? (
           <div className="space-y-3 py-2">
             {[1, 2, 3, 4].map((n) => (
               <div key={n} className="flex items-center gap-3 animate-pulse">
-                <div className="w-[35px] h-[35px] rounded bg-[#f0f3f1] dark:bg-[#192b25]" />
+                <div className="w-9 h-9 rounded bg-[var(--panel)]" />
                 <div className="flex-1 space-y-1.5">
-                  <div className="w-24 h-3 bg-[#f0f3f1] dark:bg-[#192b25] rounded" />
-                  <div className="w-16 h-2 bg-[#f0f3f1] dark:bg-[#192b25] rounded" />
+                  <div className="w-24 h-3 bg-[var(--panel)] rounded" />
+                  <div className="w-16 h-2 bg-[var(--panel)] rounded" />
                 </div>
               </div>
             ))}
@@ -217,27 +216,27 @@ export function ActivityPanel() {
               <Link
                 key={e.id}
                 href={`/borrow?collection=${e.collection || col?.addresses[46630] || ''}`}
-                className="flex items-center gap-2.5 w-full text-left py-3 hover:bg-[#f7faf8] dark:hover:bg-[#14221e] transition-colors rounded-lg px-1.5 cursor-pointer group"
+                className="flex items-center gap-2.5 w-full text-left py-2.5 hover:bg-[var(--panel)] transition-colors rounded-lg px-2 cursor-pointer group"
               >
-                <div className="w-[35px] h-[35px] rounded-[3px] bg-[#f4f7f5] dark:bg-[#111a17] border border-[#e1e8e9] dark:border-[#1e332c] shrink-0 overflow-hidden flex items-center justify-center font-mono font-bold text-[10px] text-[#214e3b] dark:text-emerald-400">
+                <div className="w-9 h-9 rounded-md bg-[var(--panel)] border border-[var(--line)] shrink-0 overflow-hidden flex items-center justify-center font-mono font-bold text-xs text-[var(--accent-primary)]">
                   {symbol.slice(0, 2)}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <strong className="text-[11px] font-medium text-[#142d2b] dark:text-[#f0f6fc] block truncate group-hover:text-[var(--lime)] transition-colors">
+                  <strong className="text-xs font-medium text-[var(--text)] block truncate group-hover:text-[var(--accent-primary)] transition-colors">
                     {colName} {e.tokenId ? `#${e.tokenId}` : ''}
                   </strong>
-                  <small className="text-[9px] text-[#869087] dark:text-[#8ca197] block mt-0.5">
+                  <small className="text-[10px] text-[var(--muted)] block mt-0.5 font-mono">
                     {e.userAddress ? `${e.userAddress.slice(0, 6)}...${e.userAddress.slice(-4)}` : 'On-chain'}{' '}
-                    <span className="text-[#83a999]">↗</span>
+                    <span>↗</span>
                   </small>
                 </div>
 
                 <div className="text-right whitespace-nowrap">
-                  <strong className="text-[11px] font-medium font-mono text-[#142d2b] dark:text-[#f0f6fc] block">
-                    {getAmountDisplay(e)} <small className="text-[8px] font-normal text-[#75837a] dark:text-[#8ca197]">ETH</small>
+                  <strong className="text-xs font-medium font-mono text-[var(--text)] block">
+                    {getAmountDisplay(e)} <small className="text-[9px] font-normal text-[var(--muted)]">ETH</small>
                   </strong>
-                  <small className={`text-[9px] font-medium block mt-0.5 ${getStatusColor(e.type)}`}>
+                  <small className={`text-[10px] font-medium block mt-0.5 ${getStatusColor(e.type)}`}>
                     {getStatusLabel(e.type)} · {formatTimeAgo(e.timestamp)}
                   </small>
                 </div>
@@ -247,26 +246,24 @@ export function ActivityPanel() {
         )}
       </div>
 
-      <div className="flex items-center gap-1.5 text-[#7c8c81] dark:text-[#8ca197] text-[9px] py-3 border-t border-[#eef1ef] dark:border-[#1e332c]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#5185ad] inline-block" />
-        <span>Live Smart Contract Protocol Events</span>
+      <div className="flex items-center gap-1.5 text-[var(--muted)] text-[10px] py-3 border-t border-[var(--line)]">
+        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] inline-block" />
+        <span>Live Protocol Contract Events</span>
       </div>
 
-      <div className="border border-[#dce9e2] dark:border-[#1e332c] rounded-[9px] p-[18px_16px] mt-2 bg-gradient-to-br from-[#f0f8f2] to-[#f0f6fd] dark:from-[#111f1a] dark:to-[#0f1a24]">
-        <span className="text-[8px] tracking-[1.2px] text-[#548369] dark:text-emerald-400 font-bold uppercase block">
-          YOUR COLLECTION, UNLOCKED
+      <div className="border border-[var(--line)] rounded-xl p-4 mt-2 bg-[var(--panel)]">
+        <span className="text-[10px] tracking-wider text-[var(--accent-primary)] font-semibold uppercase block">
+          Curated NFT Liquidity
         </span>
-        <h3 className="text-[18px] font-normal tracking-[-0.6px] leading-snug my-2 text-[#142d2b] dark:text-[#f0f6fc]">
-          A new use for
-          <br />
-          what you already own.
+        <h3 className="text-sm font-semibold leading-snug my-1.5 text-[var(--text)]">
+          Instant liquidity for verified collections
         </h3>
-        <p className="text-[10px] text-[#738575] dark:text-[#8ca197] leading-relaxed mb-3">
-          Explore instant liquidity offers without selling your NFT collateral.
+        <p className="text-xs text-[var(--muted)] leading-relaxed mb-3">
+          Borrow ETH against your collateral without selling your assets.
         </p>
         <Link
           href="/borrow"
-          className="w-full flex items-center justify-center py-2.5 px-3 rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white text-[11px] font-semibold transition-colors shadow-xs"
+          className="w-full flex items-center justify-center py-2 px-3 rounded-lg bg-[var(--accent-primary)] hover:opacity-90 text-white text-xs font-medium transition-opacity"
         >
           Explore borrowing ↗
         </Link>

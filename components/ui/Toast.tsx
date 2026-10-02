@@ -26,30 +26,53 @@ export function Toast({
 
   const typeConfig: Record<
     ToastType,
-    { icon: string; bg: string; border: string; text: string }
+    { icon: React.ReactNode; bg: string; border: string; text: string }
   > = {
     success: {
-      icon: '✅',
-      bg: 'bg-[var(--green-soft)]',
+      icon: (
+        <svg className="w-4 h-4 text-[var(--success)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      ),
+      bg: 'bg-[var(--surface)]',
       border: 'border-[var(--primary)]',
       text: 'text-[var(--text)]',
     },
     error: {
-      icon: '⚠️',
-      bg: 'bg-red-50',
-      border: 'border-[var(--error)]',
-      text: 'text-red-950',
+      icon: (
+        <svg className="w-4 h-4 text-[var(--error)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      ),
+      bg: 'bg-[var(--surface)]',
+      border: 'border-[var(--error)]/40',
+      text: 'text-[var(--text)]',
     },
     warning: {
-      icon: '⚡',
-      bg: 'bg-[var(--warning-bg)]',
+      icon: (
+        <svg className="w-4 h-4 text-[var(--warning-text)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      ),
+      bg: 'bg-[var(--surface)]',
       border: 'border-[var(--warning-border)]',
-      text: 'text-[var(--warning-text)]',
+      text: 'text-[var(--text)]',
     },
     info: {
-      icon: 'ℹ️',
-      bg: 'bg-[var(--blue-soft)]',
-      border: 'border-[var(--blue)]',
+      icon: (
+        <svg className="w-4 h-4 text-[var(--blue)] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+      ),
+      bg: 'bg-[var(--surface)]',
+      border: 'border-[var(--line-strong)]',
       text: 'text-[var(--text)]',
     },
   };
@@ -59,17 +82,19 @@ export function Toast({
   return (
     <div
       role="alert"
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl border shadow-xl ${config.bg} ${config.border} ${config.text} animate-in slide-in-from-bottom-5 duration-200`}
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} ${config.text} animate-in slide-in-from-bottom-5 duration-200`}
     >
-      <span className="text-base">{config.icon}</span>
+      {config.icon}
       <span className="text-xs font-medium leading-tight max-w-sm">{message}</span>
       <button
         type="button"
         onClick={onClose}
         aria-label="Close notification"
-        className="ml-2 p-1 rounded-md text-[var(--muted)] hover:text-[var(--text)] hover:bg-black/5 transition-colors cursor-pointer"
+        className="ml-2 p-1 rounded-md text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--raised)] transition-colors cursor-pointer"
       >
-        ✕
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
       </button>
     </div>
   );

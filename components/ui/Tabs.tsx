@@ -40,7 +40,7 @@ export function Tabs({ tabs, activeTab, onChange, className = '' }: TabsProps) {
             <span>{tab.label}</span>
             {typeof tab.count === 'number' && (
               <span
-                className={`px-1.5 py-0.2 text-[10px] font-mono rounded-full ${
+                className={`px-1.5 py-0.2 text-[10px] font-mono rounded-sm ${
                   isActive
                     ? 'bg-[var(--primary-soft)] text-[var(--primary)]'
                     : 'bg-[var(--panel)] text-[var(--muted)]'
