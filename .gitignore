@@ -40,6 +40,9 @@ yarn-error.log*
 cache/
 out/
 broadcast/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
 
 # vercel
 .vercel
