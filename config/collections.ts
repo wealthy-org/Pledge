@@ -1,5 +1,11 @@
 import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from './chains';
 
+export interface CollectionSocials {
+  website?: string;
+  twitter?: string;
+  discord?: string;
+}
+
 export interface CuratedCollectionDefinition {
   id: string;
   name: string;
@@ -13,6 +19,7 @@ export interface CuratedCollectionDefinition {
   floorPriceEth: string;
   imageUrl: string;
   riskNotes?: string;
+  socials?: CollectionSocials;
   addresses: {
     [TESTNET_CHAIN_ID]: `0x${string}`;
     [MAINNET_CHAIN_ID]: `0x${string}`;
@@ -38,6 +45,11 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
     floorPriceEth: '1.25',
     imageUrl: 'https://ipfs.io/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi',
     riskNotes: 'High liquidity Genesis Tier pass with historical stable valuation on Robinhood Chain. Verified contract with active community collateralization.',
+    socials: {
+      website: 'https://robinhood.com',
+      twitter: 'https://x.com/robinhoodapp',
+      discord: 'https://discord.gg/robinhood',
+    },
     addresses: {
       [TESTNET_CHAIN_ID]: '0x1111111111111111111111111111111111111111',
       [MAINNET_CHAIN_ID]: '0x4444444444444444444444444444444444444444',
@@ -56,6 +68,11 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
     floorPriceEth: '0.65',
     imageUrl: 'https://ipfs.io/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco',
     riskNotes: 'Medium liquidity avatar collection. Borrower default risk should be mitigated with conservative loan terms and appropriate LTV margins.',
+    socials: {
+      website: 'https://sherwoodrangers.io',
+      twitter: 'https://x.com/sherwoodrangers',
+      discord: 'https://discord.gg/sherwoodrangers',
+    },
     addresses: {
       [TESTNET_CHAIN_ID]: '0x2222222222222222222222222222222222222222',
       [MAINNET_CHAIN_ID]: '0x5555555555555555555555555555555555555555',
@@ -74,6 +91,11 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
     floorPriceEth: '0.45',
     imageUrl: 'https://ipfs.io/ipfs/bafybeif43gq2qj6tfe2eeb3aeqbkmr23vx4zdfhshuv5b3z24o2eqk55ye',
     riskNotes: 'Art generative collection. Market depth may fluctuate during high volatility. Lender consideration of floor price variance is recommended.',
+    socials: {
+      website: 'https://nottinghamguild.org',
+      twitter: 'https://x.com/nottinghamguild',
+      discord: 'https://discord.gg/nottinghamguild',
+    },
     addresses: {
       [TESTNET_CHAIN_ID]: '0x3333333333333333333333333333333333333333',
       [MAINNET_CHAIN_ID]: '0x6666666666666666666666666666666666666666',

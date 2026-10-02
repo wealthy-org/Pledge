@@ -99,7 +99,40 @@ export function CollectionHeader({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {collection.socials?.website && (
+            <a
+              href={collection.socials.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Website"
+              className="p-2 rounded-lg bg-[var(--raised)] border border-[var(--line)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--primary)] transition-all text-xs font-semibold"
+            >
+              🌐 Website
+            </a>
+          )}
+          {collection.socials?.twitter && (
+            <a
+              href={collection.socials.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Twitter"
+              className="p-2 rounded-lg bg-[var(--raised)] border border-[var(--line)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--primary)] transition-all text-xs font-semibold"
+            >
+              𝕏 Twitter
+            </a>
+          )}
+          {collection.socials?.discord && (
+            <a
+              href={collection.socials.discord}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Discord"
+              className="p-2 rounded-lg bg-[var(--raised)] border border-[var(--line)] text-[var(--muted)] hover:text-[var(--text)] hover:border-[var(--primary)] transition-all text-xs font-semibold"
+            >
+              💬 Discord
+            </a>
+          )}
           <a
             href={explorerUrl}
             target="_blank"
@@ -107,7 +140,7 @@ export function CollectionHeader({
             className="w-full sm:w-auto"
           >
             <Button variant="secondary" size="sm" className="w-full sm:w-auto">
-              View on Explorer ↗
+              Explorer ↗
             </Button>
           </a>
         </div>
