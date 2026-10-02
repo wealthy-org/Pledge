@@ -63,13 +63,13 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
 
       <div className="flex items-center gap-3 sm:gap-4">
         {mounted && (
-          <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-[var(--muted)] whitespace-nowrap">
+          <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
             <span
               className={`w-2 h-2 rounded-full ${
-                isSupportedChain ? 'bg-[var(--accent-primary)]' : 'bg-red-500'
+                isSupportedChain ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
               }`}
             />
-            <span>{isSupportedChain ? `${activeChain.name} (${activeChain.id})` : 'Wrong Network'}</span>
+            <span className="font-mono text-[11px]">{isSupportedChain ? `${activeChain.name} (${activeChain.id})` : 'Wrong Network'}</span>
           </div>
         )}
 

@@ -28,9 +28,9 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
         <button
           type="button"
           style={{ color: '#ffffff' }}
-          className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white shadow-sm flex items-center gap-2 cursor-pointer select-none"
+          className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs flex items-center gap-2 cursor-pointer select-none"
         >
-          <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-purple-400 to-indigo-300 inline-block shadow-xs" />
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 inline-block shadow-xs animate-pulse" />
           <span className="text-white font-semibold" style={{ color: '#ffffff' }}>Connect Wallet</span>
         </button>
       </div>
@@ -54,12 +54,12 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
           onClick={() => setIsModalOpen(true)}
           disabled={isConnecting}
           style={{ color: '#ffffff' }}
-          className={`px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white shadow-sm transition-all duration-150 cursor-pointer flex items-center gap-2 select-none ${className}`}
+          className={`px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-colors duration-150 cursor-pointer flex items-center gap-2 select-none ${className}`}
         >
           {isConnecting ? (
             <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-purple-400 to-indigo-300 inline-block shadow-xs" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 inline-block shadow-xs" />
           )}
           <span className="text-white font-semibold" style={{ color: '#ffffff' }}>
             {isConnecting ? 'Connecting...' : 'Connect Wallet'}

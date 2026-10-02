@@ -53,7 +53,7 @@ export function FooterStatusBar() {
       data-testid="footer-status-bar"
     >
       <div className="flex items-center gap-2 truncate">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#087f5b] inline-block animate-pulse" />
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
         <span className="font-medium text-[#142d2b] dark:text-[#f0f6fc]">{activeChain.name}</span>
         <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
         <span className="font-mono text-[#556e64] dark:text-[#8b9e95]">
@@ -64,11 +64,11 @@ export function FooterStatusBar() {
             : 'Block synced'}
         </span>
         <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
-        <span className="font-mono text-[#087f5b] dark:text-emerald-400">ETH: {ethPrice}</span>
+        <span className="font-mono font-medium text-amber-600 dark:text-amber-400">ETH: {ethPrice}</span>
         <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
-        <span className="font-mono text-[#087f5b] dark:text-emerald-400">Gas: {gasPrice}</span>
+        <span className="font-mono font-medium text-violet-600 dark:text-violet-400">Gas: {gasPrice}</span>
         <span className="text-[#d0dbd3] dark:text-[#1e332c]">|</span>
-        <span className="text-[#087f5b] dark:text-emerald-400 font-medium hidden sm:inline">Non-Custodial Smart Contract Escrow</span>
+        <span className="text-emerald-600 dark:text-emerald-400 font-medium hidden sm:inline">Non-Custodial Smart Contract Escrow</span>
       </div>
 
       <div className="flex items-center gap-4 text-[10px]">
@@ -78,12 +78,12 @@ export function FooterStatusBar() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Blockscout Explorer"
-          className="text-[#286a9b] dark:text-emerald-400 hover:underline flex items-center gap-1"
+          className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium"
         >
           <span>Blockscout Explorer</span>
           <span>↗</span>
         </a>
-        <Link href="/activity" className="text-[#286a9b] dark:text-emerald-400 hover:underline">
+        <Link href="/activity" className="text-sky-600 dark:text-sky-400 hover:underline font-medium">
           About Pledge ↗
         </Link>
       </div>

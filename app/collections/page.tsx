@@ -34,8 +34,8 @@ export default function CollectionsPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2 border-b border-[var(--line)] pb-4">
-        <div className="text-[10px] uppercase font-semibold tracking-wider text-[var(--accent-primary)] flex items-center gap-2">
-          <span className="w-5 h-[1px] bg-[var(--accent-primary)] inline-block" />
+        <div className="text-[10px] uppercase font-semibold tracking-wider text-violet-600 dark:text-violet-400 flex items-center gap-2">
+          <span className="w-5 h-[1px] bg-violet-600 dark:bg-violet-400 inline-block" />
           <span>Curated Market Directory</span>
         </div>
 
@@ -52,13 +52,13 @@ export default function CollectionsPage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/borrow"
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs"
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-colors shadow-xs"
             >
               Borrow Against NFT
             </Link>
             <Link
               href="/lend"
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[#edf7f2] dark:bg-[#142e24] hover:bg-[#e1f1e9] dark:hover:bg-[#1a3d30] border border-[#cfe4dc] dark:border-[#1e4537] text-[#142d2b] dark:text-[#f0fdf4] transition-colors"
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-white dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition-colors shadow-xs"
             >
               Create Offer +
             </Link>

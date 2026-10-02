@@ -1,6 +1,7 @@
 import { getCuratedCollections, getCollectionByAddress } from '@/config/collections';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 import { indexerStore } from '@/lib/indexer/store';
+import { syncOnChainLogs } from '@/lib/indexer/sync';
 import {
   CollectionItemResponse,
   CollectionDetailResponse,
@@ -17,6 +18,7 @@ import {
 import { OfferStatus, LoanStatus } from '@/types/database';
 
 export async function getLastIndexedBlock(chainId = TESTNET_CHAIN_ID): Promise<number> {
+  await syncOnChainLogs(chainId);
   let highest = 120;
   for (const checkpoint of indexerStore.checkpoints.values()) {
     if (checkpoint.chain_id === chainId && checkpoint.last_block_number > highest) {
@@ -292,6 +294,7 @@ export async function fetchActivityFeed(
   limit = 20,
   cursor?: string
 ): Promise<ActivityResponse> {
+  await syncOnChainLogs();
   const allActivity: ActivityItem[] = [];
 
   for (const eventRow of indexerStore.events) {

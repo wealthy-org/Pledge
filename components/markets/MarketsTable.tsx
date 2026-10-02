@@ -146,7 +146,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                   : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              All markets <span className="text-[10px] text-[var(--muted)] ml-1">{collections.length}</span>
+              All markets <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-violet-500/15 text-violet-700 dark:text-violet-300 font-semibold ml-1">{collections.length}</span>
             </button>
             <button
               onClick={() => setActiveTab('watchlist')}
@@ -156,7 +156,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                   : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              Watchlist <span className="text-[10px] text-[var(--muted)] ml-1">{watchlist.length}</span>
+              Watchlist <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold ml-1">{watchlist.length}</span>
             </button>
           </div>
 
@@ -194,13 +194,13 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                 <th scope="col" className="py-2.5 px-3">Collection</th>
                 <th scope="col" className="py-2.5 px-3">
                   <div className="flex items-center gap-1">
-                    <span>Best Offer</span>
+                    <span className="text-sky-600 dark:text-sky-400 font-medium">Best Offer</span>
                     <Tooltip content="Highest available borrower offer ready to accept immediately" />
                   </div>
                 </th>
                 <th scope="col" className="py-2.5 px-3">
                   <div className="flex items-center gap-1">
-                    <span>Pool Size</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-medium">Pool Size</span>
                     <Tooltip content="Total available liquidity across all active lending offers" />
                   </div>
                 </th>
@@ -217,6 +217,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
             <tbody>
               {filteredAndSorted.map((c, index) => {
                 const isStarred = watchlist.includes(c.address);
+                const ltvVal = c.maxLtvBps ? c.maxLtvBps / 100 : 70;
 
                 return (
                   <tr
@@ -277,24 +278,30 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                     </td>
 
                     <td className="py-3.5 px-3">
-                      <span className="font-mono font-medium text-xs text-sky-600 dark:text-sky-400">
+                      <span className="font-mono font-semibold text-xs text-sky-600 dark:text-sky-400">
                         {formatEthValue(c.bestOfferWei)}
                       </span>
                     </td>
 
                     <td className="py-3.5 px-3">
-                      <span className="font-mono font-medium text-xs text-emerald-600 dark:text-emerald-400">
+                      <span className="font-mono font-semibold text-xs text-emerald-600 dark:text-emerald-400">
                         {formatEthValue(c.poolSizeWei)}
                       </span>
                     </td>
 
                     <td className="py-3.5 px-3 text-xs text-[var(--text)]">
-                      <span className="font-mono">{c.offerCount}</span>
+                      <span className="font-mono font-medium">{c.offerCount}</span>
                     </td>
 
                     <td className="py-3.5 px-3 font-medium text-xs">
-                      <span className="font-mono text-emerald-600 dark:text-emerald-400">
-                        {c.maxLtvBps ? `${(c.maxLtvBps / 100).toFixed(0)}%` : '70%'}
+                      <span className={`font-mono font-semibold ${
+                        ltvVal <= 65
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : ltvVal <= 75
+                          ? 'text-amber-600 dark:text-amber-400'
+                          : 'text-rose-600 dark:text-rose-400'
+                      }`}>
+                        {ltvVal.toFixed(0)}%
                       </span>
                     </td>
 

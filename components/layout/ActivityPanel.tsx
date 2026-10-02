@@ -101,10 +101,10 @@ export function ActivityPanel() {
 
   const getStatusColor = (type: string) => {
     const t = type.toLowerCase();
-    if (t.includes('repaid')) return 'text-[var(--accent-primary)]';
-    if (t.includes('loan') || t.includes('started') || t.includes('filled')) return 'text-[var(--text)]';
-    if (t.includes('foreclose')) return 'text-red-500';
-    return 'text-[var(--accent-primary)]';
+    if (t.includes('repaid')) return 'text-emerald-600 dark:text-emerald-400';
+    if (t.includes('loan') || t.includes('started') || t.includes('filled')) return 'text-sky-600 dark:text-sky-400';
+    if (t.includes('foreclose')) return 'text-rose-600 dark:text-rose-400';
+    return 'text-violet-600 dark:text-violet-400';
   };
 
   return (
@@ -258,12 +258,12 @@ export function ActivityPanel() {
       </div>
 
       <div className="flex items-center gap-1.5 text-[var(--muted)] text-[10px] py-3 border-t border-[var(--line)]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] inline-block" />
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
         <span>Live Protocol Contract Events</span>
       </div>
 
       <div className="border border-[var(--line)] rounded-xl p-4 mt-2 bg-[var(--panel)]">
-        <span className="text-[10px] tracking-wider text-[var(--accent-primary)] font-semibold uppercase block">
+        <span className="text-[10px] tracking-wider text-violet-600 dark:text-violet-400 font-semibold uppercase block">
           Curated NFT Liquidity
         </span>
         <h3 className="text-sm font-semibold leading-snug my-1.5 text-[var(--text)]">
@@ -274,7 +274,7 @@ export function ActivityPanel() {
         </p>
         <Link
           href="/borrow"
-          className="w-full flex items-center justify-center py-2 px-3 rounded-lg bg-[var(--accent-primary)] hover:opacity-90 text-white text-xs font-medium transition-opacity"
+          className="w-full flex items-center justify-center py-2 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-xs transition-colors"
         >
           Explore borrowing ↗
         </Link>
