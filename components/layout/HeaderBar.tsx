@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAccount, useChainId, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { ConnectWallet } from '@/components/web3/ConnectWallet';
+import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
@@ -60,7 +61,7 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
         </button>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 sm:gap-4">
         {mounted && (
           <div className="hidden sm:flex items-center gap-2 text-[11px] font-medium text-[#54716a] dark:text-[#8ca197] whitespace-nowrap">
             <span
@@ -81,6 +82,7 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
           </div>
         )}
 
+        <ThemeToggle variant="header" />
         <ConnectWallet />
       </div>
     </header>

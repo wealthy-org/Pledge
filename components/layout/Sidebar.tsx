@@ -151,7 +151,7 @@ export function Sidebar() {
           </Link>
         )}
 
-        <ThemeToggle />
+        <ThemeToggle variant="sidebar" />
 
         <Link
           href="/activity"
