@@ -3,7 +3,6 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CURATED_COLLECTIONS } from '@/config/collections';
-import { MOCK_WALLET_NFTS, MOCK_OFFERS, MOCK_LOANS, getMockCollectionStats } from '@/lib/mock/fixtures';
 import { NFTGrid, type BorrowableNft } from '@/components/borrow/NFTGrid';
 import { OfferComparisonList } from '@/components/borrow/OfferComparisonList';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
@@ -11,6 +10,10 @@ import { BorrowConfirmationModal } from '@/components/borrow/BorrowConfirmationM
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
 import { useAcceptOffer } from '@/hooks/transactions/useAcceptOffer';
+import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
+import { useCollections } from '@/hooks/api/useCollections';
+import { useOffers } from '@/hooks/api/useOffers';
+import { useLoans } from '@/hooks/api/useLoans';
 import { useAccount } from 'wagmi';
 import type { OfferItem } from '@/types/api';
 
@@ -18,8 +21,12 @@ function BorrowContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const collectionParam = searchParams.get('collection');
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const { state: txState, checkIsApproved, approveNFT, acceptOffer, reset: resetTx } = useAcceptOffer();
+
+  const { nfts: rawWalletNfts } = useEligibleNfts(address);
+  const { data: collectionsData } = useCollections();
+  const { data: userLoansData } = useLoans({ borrower: address, status: 'active' });
 
   const [selectedNft, setSelectedNft] = useState<BorrowableNft | null>(null);
   const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
@@ -29,28 +36,57 @@ function BorrowContent() {
   const [isApproved, setIsApproved] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const { data: offersData } = useOffers({
+    collection: selectedNft?.contractAddress,
+    status: 'open',
+  });
+
+  const activeCollectionOffers = offersData?.offers || [];
+
   const borrowableNfts: BorrowableNft[] = useMemo(() => {
-    return MOCK_WALLET_NFTS.map((nft) => {
-      const stats = getMockCollectionStats(nft.contractAddress);
-      const activeLoan = MOCK_LOANS.find(
-        (l) =>
-          l.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
-          l.tokenId === nft.tokenId &&
-          l.status === 'active'
+    if (rawWalletNfts.length > 0) {
+      return rawWalletNfts.map((nft) => {
+        const remoteStats = collectionsData?.collections?.find(
+          (c) => c.address.toLowerCase() === nft.contractAddress.toLowerCase()
+        );
+        const activeLoan = userLoansData?.loans?.find(
+          (l) =>
+            l.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
+            l.tokenId === nft.tokenId &&
+            l.status === 'active'
+        );
+
+        return {
+          contractAddress: nft.contractAddress,
+          tokenId: nft.tokenId,
+          collectionName: nft.collectionName,
+          name: nft.name,
+          imageUrl: nft.imageUrl,
+          bestOfferWei: remoteStats?.bestOfferWei || undefined,
+          offerCount: remoteStats?.offerCount || 0,
+          isInLoan: Boolean(activeLoan),
+        };
+      });
+    }
+
+    return CURATED_COLLECTIONS.map((col, idx) => {
+      const colAddress = col.addresses[46630];
+      const remoteStats = collectionsData?.collections?.find(
+        (c) => c.address.toLowerCase() === colAddress.toLowerCase()
       );
 
       return {
-        contractAddress: nft.contractAddress,
-        tokenId: nft.tokenId,
-        collectionName: nft.collectionName,
-        name: nft.name,
-        imageUrl: nft.imageUrl,
-        bestOfferWei: stats.bestOfferWei || undefined,
-        offerCount: stats.offerCount,
-        isInLoan: Boolean(activeLoan),
+        contractAddress: colAddress,
+        tokenId: String(idx + 1),
+        collectionName: col.name,
+        name: `${col.name} #${idx + 1}`,
+        imageUrl: col.imageUrl,
+        bestOfferWei: remoteStats?.bestOfferWei || undefined,
+        offerCount: remoteStats?.offerCount || 0,
+        isInLoan: false,
       };
     });
-  }, []);
+  }, [rawWalletNfts, collectionsData, userLoansData]);
 
   const filteredNfts = useMemo(() => {
     if (!collectionParam) return borrowableNfts;
@@ -58,15 +94,6 @@ function BorrowContent() {
       (n) => n.contractAddress.toLowerCase() === collectionParam.toLowerCase()
     );
   }, [borrowableNfts, collectionParam]);
-
-  const activeCollectionOffers: OfferItem[] = useMemo(() => {
-    if (!selectedNft) return [];
-    return MOCK_OFFERS.filter(
-      (o) =>
-        o.collection.toLowerCase() === selectedNft.contractAddress.toLowerCase() &&
-        o.status === 'open'
-    );
-  }, [selectedNft]);
 
   const handleSelectOffer = (offer: OfferItem) => {
     setSelectedOffer(offer);
@@ -162,7 +189,7 @@ function BorrowContent() {
           selectedNft={selectedNft}
           onSelectNft={(nft) => {
             setSelectedNft(nft);
-            const offers = MOCK_OFFERS.filter(
+            const offers = activeCollectionOffers.filter(
               (o) =>
                 o.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
                 o.status === 'open'

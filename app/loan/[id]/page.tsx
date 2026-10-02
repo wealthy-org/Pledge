@@ -1,8 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { MOCK_LOANS, MOCK_WALLET_NFTS } from '@/lib/mock/fixtures';
-import { getCollectionByAddress } from '@/config/collections';
-import { TESTNET_CHAIN_ID } from '@/config/chains';
+import { fetchLoanDetail } from '@/lib/db/queries';
 import { LoanDetailClient } from './LoanDetailClient';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -15,9 +13,9 @@ export default async function LoanDetailPage({ params }: LoanPageProps) {
   const { id } = await params;
   const loanIdNumber = parseInt(id, 10);
 
-  const loan = MOCK_LOANS.find((l) => l.loanId === loanIdNumber);
+  const detail = await fetchLoanDetail(loanIdNumber);
 
-  if (!loan) {
+  if (!detail || !detail.loan) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
         <EmptyState
@@ -35,19 +33,9 @@ export default async function LoanDetailPage({ params }: LoanPageProps) {
     );
   }
 
-  const collectionDef = getCollectionByAddress(loan.collection, TESTNET_CHAIN_ID);
-  const collectionName = collectionDef?.name || 'Verified Collection';
-
-  const walletNft = MOCK_WALLET_NFTS.find(
-    (n) =>
-      n.contractAddress.toLowerCase() === loan.collection.toLowerCase() &&
-      n.tokenId === loan.tokenId
-  );
-
-  const imageUrl =
-    walletNft?.imageUrl ||
-    collectionDef?.imageUrl ||
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
+  const { loan } = detail;
+  const collectionName = loan.nftMetadata?.collectionName || 'Verified Collection';
+  const imageUrl = loan.nftMetadata?.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
 
   return (
     <LoanDetailClient

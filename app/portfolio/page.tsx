@@ -14,61 +14,53 @@ import { Toast } from '@/components/ui/Toast';
 import { useWithdrawProceeds } from '@/hooks/transactions/useWithdrawProceeds';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { usePortfolio } from '@/hooks/api/usePortfolio';
-import { MOCK_LOANS, MOCK_OFFERS } from '@/lib/mock/fixtures';
+import { useLoans } from '@/hooks/api/useLoans';
+import { useOffers } from '@/hooks/api/useOffers';
 import type { OfferItem, LoanItem } from '@/types/api';
 
 export default function PortfolioPage() {
   const { address: userAddress } = useAccount();
   const effectiveAddress = userAddress || '';
-  const normalizedUser = effectiveAddress.toLowerCase();
 
-  const { data: apiPortfolio } = usePortfolio(effectiveAddress);
+  const { data: apiPortfolio, refetch: refetchPortfolio } = usePortfolio(effectiveAddress);
+  const { data: allUserLoans } = useLoans({ borrower: effectiveAddress });
+  const { data: allUserOffers } = useOffers({ lender: effectiveAddress });
 
   const { state: withdrawTxState, withdrawProceeds, reset: resetWithdrawTx } = useWithdrawProceeds();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
   const [activeTab, setActiveTab] = useState<'loans' | 'offers' | 'lending' | 'history'>('loans');
-  const [claimableWei, setClaimableWei] = useState<string>('520000000000000000');
+  const [claimableWei, setClaimableWei] = useState<string>('0');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [cancellingOffer, setCancellingOffer] = useState<OfferItem | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
-  const effectiveClaimableWei = apiPortfolio?.claimableWei || claimableWei;
-
-  const userBorrowingLoans = useMemo(() => {
-    return MOCK_LOANS.filter((l) => {
-      const isBorrower = l.borrower.toLowerCase() === normalizedUser;
-      return isBorrower && l.status === 'active';
-    });
-  }, [normalizedUser]);
-
-  const userOffers = useMemo(() => {
-    return MOCK_OFFERS.filter((o) => {
-      return o.lender.toLowerCase() === normalizedUser && o.status === 'open';
-    });
-  }, [normalizedUser]);
+  const effectiveClaimableWei = apiPortfolio?.claimableProceedsWei || claimableWei;
+  const userBorrowingLoans = apiPortfolio?.borrowedLoans || [];
+  const userLentLoans = apiPortfolio?.lentLoans || [];
+  const userOffers = apiPortfolio?.activeOffers || [];
 
   const totalBorrowedEth = useMemo(() => {
-    const totalWei = userBorrowingLoans.reduce((sum, l) => sum + BigInt(l.principalWei || '0'), 0n);
+    const totalWei = userBorrowingLoans.reduce((sum: bigint, l: LoanItem) => sum + BigInt(l.principalWei || '0'), 0n);
     const eth = Number(formatUnits(totalWei, 18));
-    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.800';
+    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.00';
   }, [userBorrowingLoans]);
 
   const totalRepaymentDueEth = useMemo(() => {
-    const totalWei = userBorrowingLoans.reduce((sum, l) => {
+    const totalWei = userBorrowingLoans.reduce((sum: bigint, l: LoanItem) => {
       const principal = BigInt(l.principalWei || '0');
       const interest = l.interestWei ? BigInt(l.interestWei) : 0n;
       return sum + principal + interest;
     }, 0n);
     const eth = Number(formatUnits(totalWei, 18));
-    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.840';
+    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.00';
   }, [userBorrowingLoans]);
 
   const totalOpenOfferEth = useMemo(() => {
-    const totalWei = userOffers.reduce((sum, o) => sum + BigInt(o.principalWei || '0'), 0n);
+    const totalWei = userOffers.reduce((sum: bigint, o: OfferItem) => sum + BigInt(o.principalWei || '0'), 0n);
     const eth = Number(formatUnits(totalWei, 18));
-    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '1.500';
+    return eth.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') || '0.00';
   }, [userOffers]);
 
   const handleWithdraw = async () => {
@@ -78,9 +70,8 @@ export default function PortfolioPage() {
       });
       setClaimableWei('0');
       setToastMessage('Proceeds successfully withdrawn to your wallet!');
-    } catch {
-      // Handled by modal
-    }
+      refetchPortfolio();
+    } catch {}
   };
 
   const handleOpenCancelOffer = (offer: OfferItem) => {
@@ -98,9 +89,8 @@ export default function PortfolioPage() {
         principalWei: cancellingOffer.principalWei,
       });
       setToastMessage(`Offer #${cancellingOffer.offerId} successfully cancelled. Funds credited to Claimable Vault.`);
-    } catch {
-      // Handled by modal
-    }
+      refetchPortfolio();
+    } catch {}
   };
 
   const handleRepayLoan = (loan: LoanItem) => {
@@ -216,7 +206,7 @@ export default function PortfolioPage() {
 
         {activeTab === 'loans' && (
           <BorrowingTab
-            loans={MOCK_LOANS}
+            loans={userBorrowingLoans}
             userAddress={effectiveAddress}
             onRepay={handleRepayLoan}
           />
@@ -224,7 +214,7 @@ export default function PortfolioPage() {
 
         {activeTab === 'offers' && (
           <OffersTab
-            offers={MOCK_OFFERS}
+            offers={userOffers}
             userAddress={effectiveAddress}
             onCancelOffer={handleOpenCancelOffer}
           />
@@ -232,15 +222,15 @@ export default function PortfolioPage() {
 
         {activeTab === 'lending' && (
           <LendingTab
-            loans={MOCK_LOANS}
+            loans={userLentLoans}
             userAddress={effectiveAddress}
           />
         )}
 
         {activeTab === 'history' && (
           <HistoryTab
-            loans={MOCK_LOANS}
-            offers={MOCK_OFFERS}
+            loans={allUserLoans?.loans || []}
+            offers={allUserOffers?.offers || []}
             userAddress={effectiveAddress}
           />
         )}

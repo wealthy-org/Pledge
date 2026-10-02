@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useSafeQueryClient } from './useSafeQueryClient';
 import type { WalletLoansResponse, LoanDetailResponse } from '@/types/api';
 
 export interface UseLoansParams {
@@ -11,32 +12,37 @@ export interface UseLoansParams {
 }
 
 export function useLoans(params?: UseLoansParams) {
-  const query = useQuery<WalletLoansResponse>({
-    queryKey: ['loans', params],
-    queryFn: async () => {
-      const searchParams = new URLSearchParams();
-      if (params?.collection) searchParams.set('collection', params.collection);
-      if (params?.borrower) searchParams.set('borrower', params.borrower);
-      if (params?.lender) searchParams.set('lender', params.lender);
-      if (params?.status) searchParams.set('status', params.status);
+  const queryClient = useSafeQueryClient();
 
-      const qs = searchParams.toString();
-      const url = qs ? `/api/loans?${qs}` : '/api/loans';
+  const query = useQuery<WalletLoansResponse>(
+    {
+      queryKey: ['loans', params],
+      queryFn: async () => {
+        const searchParams = new URLSearchParams();
+        if (params?.collection) searchParams.set('collection', params.collection);
+        if (params?.borrower) searchParams.set('borrower', params.borrower);
+        if (params?.lender) searchParams.set('lender', params.lender);
+        if (params?.status) searchParams.set('status', params.status);
 
-      const res = await fetch(url);
-      if (!res.ok) {
-        let errJson: { error?: string } = {};
-        try {
-          errJson = await res.json();
-        } catch {}
-        throw new Error(errJson.error || `Failed to fetch loans: HTTP ${res.status}`);
-      }
+        const qs = searchParams.toString();
+        const url = qs ? `/api/loans?${qs}` : '/api/loans';
 
-      return res.json();
+        const res = await fetch(url);
+        if (!res.ok) {
+          let errJson: { error?: string } = {};
+          try {
+            errJson = await res.json();
+          } catch {}
+          throw new Error(errJson.error || `Failed to fetch loans: HTTP ${res.status}`);
+        }
+
+        return res.json();
+      },
+      staleTime: 10000,
+      refetchInterval: 20000,
     },
-    staleTime: 10000,
-    refetchInterval: 20000,
-  });
+    queryClient
+  );
 
   return {
     data: query.data,
@@ -49,25 +55,30 @@ export function useLoans(params?: UseLoansParams) {
 }
 
 export function useLoan(id: number | string | null | undefined) {
-  const query = useQuery<LoanDetailResponse>({
-    queryKey: ['loans', id],
-    queryFn: async () => {
-      if (!id) throw new Error('Loan ID is required');
-      const res = await fetch(`/api/loans/${id}`);
-      if (!res.ok) {
-        let errJson: { error?: string } = {};
-        try {
-          errJson = await res.json();
-        } catch {}
-        throw new Error(errJson.error || `Failed to fetch loan details: HTTP ${res.status}`);
-      }
+  const queryClient = useSafeQueryClient();
 
-      return res.json();
+  const query = useQuery<LoanDetailResponse>(
+    {
+      queryKey: ['loans', id],
+      queryFn: async () => {
+        if (!id) throw new Error('Loan ID is required');
+        const res = await fetch(`/api/loans/${id}`);
+        if (!res.ok) {
+          let errJson: { error?: string } = {};
+          try {
+            errJson = await res.json();
+          } catch {}
+          throw new Error(errJson.error || `Failed to fetch loan details: HTTP ${res.status}`);
+        }
+
+        return res.json();
+      },
+      enabled: Boolean(id),
+      staleTime: 10000,
+      refetchInterval: 15000,
     },
-    enabled: Boolean(id),
-    staleTime: 10000,
-    refetchInterval: 15000,
-  });
+    queryClient
+  );
 
   return {
     data: query.data,

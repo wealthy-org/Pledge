@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET as getCollections } from '@/app/api/collections/route';
 import { GET as getCollectionDetail } from '@/app/api/collections/[address]/route';
 import { GET as getBestOffer } from '@/app/api/collections/[address]/best-offer/route';
@@ -10,16 +10,148 @@ import { GET as getWalletOffers } from '@/app/api/wallets/[address]/offers/route
 import { GET as getLoanDetail } from '@/app/api/loans/[id]/route';
 import { GET as getActivity } from '@/app/api/activity/route';
 import { GET as getMarketStats } from '@/app/api/stats/market/route';
+import { indexerStore } from '@/lib/indexer/store';
+import * as blockscoutModule from '@/lib/blockscout';
+import { TESTNET_CHAIN_ID } from '@/config/chains';
 import { NextRequest } from 'next/server';
 
 function createRequest(url: string): NextRequest {
   return new NextRequest(new URL(url, 'http://localhost:3000'));
 }
 
-describe('TICKET-21: Mock API Route Handlers Test Suite', () => {
+describe('TICKET-21: Live API Route Handlers Test Suite', () => {
   const RHG_ADDRESS = '0x1111111111111111111111111111111111111111';
   const WALLET_A = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
   const WALLET_B = '0xfB5870428d00B1a18274737609825b74c8C12e2B';
+
+  beforeEach(() => {
+    indexerStore.reset();
+
+    indexerStore.upsertOffer({
+      offer_id: 1,
+      chain_id: TESTNET_CHAIN_ID,
+      lender: WALLET_A,
+      collection: RHG_ADDRESS,
+      principal_wei: '1500000000000000000',
+      term_interest_bps: 400,
+      fee_bps_snapshot: 200,
+      duration_seconds: 604800,
+      expires_at: '2026-10-15T00:00:00Z',
+      status: 'open',
+      block_number: 100,
+      tx_hash: '0x1',
+      indexed_at: '2026-10-01T12:00:00Z',
+    });
+
+    indexerStore.upsertOffer({
+      offer_id: 2,
+      chain_id: TESTNET_CHAIN_ID,
+      lender: WALLET_A,
+      collection: RHG_ADDRESS,
+      principal_wei: '2000000000000000000',
+      term_interest_bps: 400,
+      fee_bps_snapshot: 200,
+      duration_seconds: 604800,
+      expires_at: '2026-10-15T00:00:00Z',
+      status: 'open',
+      block_number: 101,
+      tx_hash: '0x2',
+      indexed_at: '2026-10-01T12:00:00Z',
+    });
+
+    indexerStore.upsertOffer({
+      offer_id: 3,
+      chain_id: TESTNET_CHAIN_ID,
+      lender: WALLET_B,
+      collection: '0x2222222222222222222222222222222222222222',
+      principal_wei: '750000000000000000',
+      term_interest_bps: 500,
+      fee_bps_snapshot: 200,
+      duration_seconds: 604800,
+      expires_at: '2026-10-15T00:00:00Z',
+      status: 'open',
+      block_number: 102,
+      tx_hash: '0x3',
+      indexed_at: '2026-10-01T12:00:00Z',
+    });
+
+    indexerStore.upsertLoan({
+      loan_id: 1,
+      offer_id: 1,
+      chain_id: TESTNET_CHAIN_ID,
+      lender: WALLET_A,
+      borrower: WALLET_B,
+      collection: RHG_ADDRESS,
+      token_id: '42',
+      principal_wei: '1000000000000000000',
+      interest_wei: '40000000000000000',
+      fee_bps_snapshot: 200,
+      started_at: '2026-10-01T10:00:00Z',
+      due_at: '2026-10-08T10:00:00Z',
+      status: 'active',
+      block_number: 90,
+      tx_hash: '0xloan1',
+      indexed_at: '2026-10-01T10:00:00Z',
+    });
+
+    indexerStore.upsertLoan({
+      loan_id: 2,
+      offer_id: 2,
+      chain_id: TESTNET_CHAIN_ID,
+      lender: WALLET_A,
+      borrower: WALLET_B,
+      collection: RHG_ADDRESS,
+      token_id: '101',
+      principal_wei: '500000000000000000',
+      interest_wei: '15000000000000000',
+      fee_bps_snapshot: 200,
+      started_at: '2026-09-10T10:00:00Z',
+      due_at: '2026-09-17T10:00:00Z',
+      status: 'repaid',
+      block_number: 70,
+      tx_hash: '0xloan2',
+      indexed_at: '2026-09-10T10:00:00Z',
+    });
+
+    indexerStore.insertEventIdempotent({
+      chainId: TESTNET_CHAIN_ID,
+      contractAddress: RHG_ADDRESS,
+      blockNumber: 90,
+      blockHash: '0xblock90',
+      txHash: '0xloan1',
+      logIndex: 0,
+      eventType: 'LoanStarted',
+      args: { loanId: 1 },
+      timestamp: '2026-10-01T10:00:00Z',
+    });
+
+    indexerStore.insertEventIdempotent({
+      chainId: TESTNET_CHAIN_ID,
+      contractAddress: RHG_ADDRESS,
+      blockNumber: 100,
+      blockHash: '0xblock100',
+      txHash: '0xoffer1',
+      logIndex: 0,
+      eventType: 'OfferCreated',
+      args: { offerId: 1 },
+      timestamp: '2026-10-01T12:00:00Z',
+    });
+
+    vi.spyOn(blockscoutModule.getBlockscoutClient(), 'fetchWalletNFTs').mockResolvedValue({
+      items: [
+        {
+          tokenId: '42',
+          collectionAddress: RHG_ADDRESS,
+          collectionName: 'Robinhood Genesis Pass',
+          name: 'RHG #42',
+          description: 'A Genesis Pass NFT',
+          imageUrl: 'https://images.unsplash.com/photo-1',
+          attributes: [],
+        },
+      ],
+      nextPageParams: null,
+    });
+  });
 
   describe('TS-01: All 11 Endpoints Happy Path', () => {
     it('1. GET /api/collections returns collections list with calculated stats', async () => {

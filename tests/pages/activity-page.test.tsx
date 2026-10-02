@@ -54,6 +54,26 @@ const mockActivities: ActivityItem[] = [
   },
 ];
 
+vi.mock('@/hooks/api/useActivity', () => ({
+  useActivity: (params?: { eventType?: string; collection?: string }) => {
+    let items = mockActivities;
+    if (params?.eventType && params.eventType !== 'all') {
+      items = items.filter((a) => a.eventType === params.eventType);
+    }
+    if (params?.collection && params.collection !== 'all') {
+      items = items.filter((a) => a.contractAddress.toLowerCase() === params.collection?.toLowerCase());
+    }
+    return {
+      data: { activity: items, total: items.length, nextCursor: null },
+      isLoading: false,
+      isError: false,
+      error: null,
+      isSuccess: true,
+      refetch: vi.fn(),
+    };
+  },
+}));
+
 describe('TICKET-41: Activity Feed Page Suite', () => {
   describe('TS-01: ActivityItemRow Component', () => {
     it('renders event type badge, actor, principal ETH, and explorer proof link', () => {

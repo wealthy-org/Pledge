@@ -75,9 +75,7 @@ export function LoanDetailClient({
         collectionName,
         tokenId: loan.tokenId,
       });
-    } catch {
-      // Handled by modal
-    }
+    } catch {}
   };
 
   const handleOpenForeclose = () => {
@@ -97,9 +95,7 @@ export function LoanDetailClient({
         collectionName,
         tokenId: loan.tokenId,
       });
-    } catch {
-      // Handled by modal
-    }
+    } catch {}
   };
 
   return (

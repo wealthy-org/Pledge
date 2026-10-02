@@ -73,9 +73,30 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+import { indexerStore } from '@/lib/indexer/store';
+
 describe('TICKET-39: Loan Detail Page & Components', () => {
   beforeEach(() => {
     currentConnectedAddress = mockBorrower;
+    indexerStore.reset();
+    indexerStore.upsertLoan({
+      loan_id: mockActiveLoan.loanId,
+      offer_id: mockActiveLoan.offerId,
+      chain_id: mockActiveLoan.chainId,
+      lender: mockActiveLoan.lender,
+      borrower: mockActiveLoan.borrower,
+      collection: mockActiveLoan.collection,
+      token_id: mockActiveLoan.tokenId,
+      principal_wei: mockActiveLoan.principalWei,
+      interest_wei: mockActiveLoan.interestWei,
+      fee_bps_snapshot: mockActiveLoan.feeBpsSnapshot,
+      started_at: mockActiveLoan.startedAt,
+      due_at: mockActiveLoan.dueAt,
+      status: mockActiveLoan.status,
+      block_number: mockActiveLoan.blockNumber,
+      tx_hash: mockActiveLoan.txHash,
+      indexed_at: '2026-10-01T10:00:00Z',
+    });
   });
 
   describe('TS-01: LoanTermsCard & Collateral Display', () => {

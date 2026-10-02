@@ -1,36 +1,26 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { ActivityFilterBar } from '@/components/activity/ActivityFilterBar';
 import { ActivityStream } from '@/components/activity/ActivityStream';
-import { MOCK_ACTIVITY } from '@/lib/mock/fixtures';
+import { useActivity } from '@/hooks/api/useActivity';
 
 export default function ActivityPage() {
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedCollection, setSelectedCollection] = useState<string>('all');
-  const [displayCount, setDisplayCount] = useState<number>(10);
+  const [limit, setLimit] = useState<number>(20);
 
-  const filteredActivities = useMemo(() => {
-    return MOCK_ACTIVITY.filter((item) => {
-      const matchesType =
-        selectedType === 'all' || item.eventType === selectedType;
+  const { data: activityData, isLoading } = useActivity({
+    eventType: selectedType === 'all' ? undefined : selectedType,
+    collection: selectedCollection === 'all' ? undefined : selectedCollection,
+  });
 
-      const matchesCollection =
-        selectedCollection === 'all' ||
-        item.contractAddress.toLowerCase() === selectedCollection.toLowerCase();
-
-      return matchesType && matchesCollection;
-    });
-  }, [selectedType, selectedCollection]);
-
-  const visibleActivities = useMemo(() => {
-    return filteredActivities.slice(0, displayCount);
-  }, [filteredActivities, displayCount]);
-
-  const hasMore = displayCount < filteredActivities.length;
+  const activities = activityData?.activity || [];
+  const visibleActivities = activities.slice(0, limit);
+  const hasMore = limit < activities.length;
 
   const handleLoadMore = () => {
-    setDisplayCount((prev) => prev + 10);
+    setLimit((prev) => prev + 20);
   };
 
   return (
@@ -56,19 +46,25 @@ export default function ActivityPage() {
           selectedCollection={selectedCollection}
           onTypeChange={(type) => {
             setSelectedType(type);
-            setDisplayCount(10);
+            setLimit(20);
           }}
           onCollectionChange={(col) => {
             setSelectedCollection(col);
-            setDisplayCount(10);
+            setLimit(20);
           }}
         />
 
-        <ActivityStream
-          activities={visibleActivities}
-          hasMore={hasMore}
-          onLoadMore={handleLoadMore}
-        />
+        {isLoading && activities.length === 0 ? (
+          <div className="py-12 text-center text-xs font-mono text-[var(--muted)]">
+            Loading real-time protocol activity...
+          </div>
+        ) : (
+          <ActivityStream
+            activities={visibleActivities}
+            hasMore={hasMore}
+            onLoadMore={handleLoadMore}
+          />
+        )}
       </div>
     </div>
   );

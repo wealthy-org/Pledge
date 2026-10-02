@@ -3,27 +3,33 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { CURATED_COLLECTIONS } from '@/config/collections';
-import { getMockCollectionStats } from '@/lib/mock/fixtures';
+import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 
 export default function CollectionsPage() {
+  const { data: apiData } = useCollections();
+
   const collections: MarketCollectionItem[] = useMemo(() => {
     return CURATED_COLLECTIONS.map((col) => {
-      const colStats = getMockCollectionStats(col.addresses[46630]);
+      const address = col.addresses[46630];
+      const remote = apiData?.collections?.find(
+        (c) => c.address.toLowerCase() === address.toLowerCase()
+      );
+
       return {
-        address: col.addresses[46630],
+        address,
         name: col.name,
         symbol: col.symbol,
         imageUrl: col.imageUrl,
         floorPriceEth: col.floorPriceEth,
-        bestOfferWei: colStats.bestOfferWei || undefined,
-        poolSizeWei: colStats.poolSizeWei,
-        offerCount: colStats.offerCount,
-        activeLoansCount: colStats.activeLoansCount,
+        bestOfferWei: remote?.bestOfferWei || undefined,
+        poolSizeWei: remote?.poolSizeWei || '0',
+        offerCount: remote?.offerCount || 0,
+        activeLoansCount: remote?.activeLoansCount || 0,
         maxLtvBps: col.maxLtvBps,
       };
     });
-  }, []);
+  }, [apiData]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-150">

@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
-import { getMockCollectionStats } from '@/lib/mock/fixtures';
+import { getCollectionStatsFromStore } from '@/lib/db/queries';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
-import { CollectionStatsResponse } from '@/types/api';
 
 export async function GET(
   request: NextRequest,
@@ -17,6 +16,10 @@ export async function GET(
     );
   }
 
-  const stats: CollectionStatsResponse = getMockCollectionStats(address);
+  const { searchParams } = new URL(request.url);
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
+
+  const stats = await getCollectionStatsFromStore(address, chainId);
   return jsonResponse(stats);
 }

@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
-import { MOCK_OFFERS } from '@/lib/mock/fixtures';
+import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
-import { OffersListResponse } from '@/types/api';
+import { OffersListResponse, OfferItem } from '@/types/api';
 
 export async function GET(
   request: NextRequest,
@@ -23,8 +23,29 @@ export async function GET(
   const cursor = searchParams.get('cursor');
 
   const target = address.toLowerCase();
-  let filtered = MOCK_OFFERS.filter((o) => o.lender.toLowerCase() === target);
+  const allOffers: OfferItem[] = [];
 
+  for (const row of indexerStore.offers.values()) {
+    if (row.lender.toLowerCase() === target) {
+      allOffers.push({
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        collection: row.collection,
+        principalWei: row.principal_wei,
+        termInterestBps: row.term_interest_bps,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        durationSeconds: row.duration_seconds,
+        expiresAt: row.expires_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
+        createdAt: row.indexed_at,
+      });
+    }
+  }
+
+  let filtered = allOffers;
   if (statusParam) {
     filtered = filtered.filter((o) => o.status === statusParam);
   }

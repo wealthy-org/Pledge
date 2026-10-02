@@ -1,8 +1,7 @@
-import { getMockMarketStats } from '@/lib/mock/fixtures';
+import { fetchMarketStats } from '@/lib/db/queries';
 import { jsonResponse } from '@/lib/api/response';
-import { MarketStatsResponse } from '@/types/api';
 
 export async function GET() {
-  const stats: MarketStatsResponse = getMockMarketStats();
+  const stats = await fetchMarketStats();
   return jsonResponse(stats);
 }

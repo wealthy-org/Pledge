@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
-import { MOCK_LOANS } from '@/lib/mock/fixtures';
-import { getCollectionByAddress } from '@/config/collections';
+import { fetchLoanDetail } from '@/lib/db/queries';
 import { jsonResponse, errorResponse } from '@/lib/api/response';
-import { LoanDetailResponse } from '@/types/api';
 
 export async function GET(
   _request: NextRequest,
@@ -19,8 +17,8 @@ export async function GET(
     );
   }
 
-  const loan = MOCK_LOANS.find((l) => l.loanId === loanId);
-  if (!loan) {
+  const detail = await fetchLoanDetail(loanId);
+  if (!detail) {
     return errorResponse(
       `Loan with ID ${loanId} not found`,
       'LOAN_NOT_FOUND',
@@ -28,20 +26,5 @@ export async function GET(
     );
   }
 
-  const collection = getCollectionByAddress(loan.collection);
-  const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
-
-  const response: LoanDetailResponse = {
-    loan: {
-      ...loan,
-      nftMetadata: {
-        name: `${collection ? collection.name : 'NFT'} #${loan.tokenId}`,
-        imageUrl: collection ? collection.imageUrl : '',
-        collectionName: collection ? collection.name : 'Unknown Collection',
-      },
-      totalRepaymentWei: totalRepayment.toString(),
-    },
-  };
-
-  return jsonResponse(response);
+  return jsonResponse(detail);
 }

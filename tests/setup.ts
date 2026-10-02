@@ -13,3 +13,21 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+vi.mock('wagmi', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>().catch(() => ({}));
+  return {
+    ...actual,
+    useAccount: () => ({
+      address: undefined,
+      isConnected: false,
+    }),
+    useConnection: () => ({
+      address: undefined,
+      isConnected: false,
+    }),
+    usePublicClient: () => undefined,
+    useWalletClient: () => ({ data: undefined }),
+    useConfig: () => ({}),
+  };
+});

@@ -4,31 +4,36 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CURATED_COLLECTIONS } from '@/config/collections';
-import { getMockCollectionStats } from '@/lib/mock/fixtures';
+import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
 
 export default function HomePage() {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'has_offers'>('all');
   const [loanMarketTab, setLoanMarketTab] = useState<'offers' | 'active'>('offers');
+  const { data: apiData } = useCollections();
 
   const collections: MarketCollectionItem[] = useMemo(() => {
     return CURATED_COLLECTIONS.map((col) => {
-      const colStats = getMockCollectionStats(col.addresses[46630]);
+      const address = col.addresses[46630];
+      const remote = apiData?.collections?.find(
+        (c) => c.address.toLowerCase() === address.toLowerCase()
+      );
+
       return {
-        address: col.addresses[46630],
+        address,
         name: col.name,
         symbol: col.symbol,
         imageUrl: col.imageUrl,
         floorPriceEth: col.floorPriceEth,
-        bestOfferWei: colStats.bestOfferWei || undefined,
-        poolSizeWei: colStats.poolSizeWei,
-        offerCount: colStats.offerCount,
-        activeLoansCount: colStats.activeLoansCount,
+        bestOfferWei: remote?.bestOfferWei || undefined,
+        poolSizeWei: remote?.poolSizeWei || '0',
+        offerCount: remote?.offerCount || 0,
+        activeLoansCount: remote?.activeLoansCount || 0,
         maxLtvBps: col.maxLtvBps,
       };
     });
-  }, []);
+  }, [apiData]);
 
   const filteredCollections = useMemo(() => {
     if (selectedFilter === 'has_offers') {
@@ -44,7 +49,7 @@ export default function HomePage() {
     return {
       totalPoolSizeEth: totalPoolEth,
       totalActiveLoans: totalActive,
-      totalVolumeEth: '42.50',
+      totalVolumeEth: '0.00',
     };
   }, [collections]);
 

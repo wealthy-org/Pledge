@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useConnection } from 'wagmi';
 import { CollectionHeader, type CollectionHeaderStats } from '@/components/collection/CollectionHeader';
 import { CollectionOffersTable } from '@/components/collection/CollectionOffersTable';
 import { CollectionLoanHistoryTable } from '@/components/collection/CollectionLoanHistoryTable';
@@ -10,7 +11,9 @@ import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
-import { MOCK_OFFERS, MOCK_LOANS, MOCK_WALLET_NFTS } from '@/lib/mock/fixtures';
+import { useOffers } from '@/hooks/api/useOffers';
+import { useLoans } from '@/hooks/api/useLoans';
+import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
 import type { ActiveCuratedCollection } from '@/config/collections';
 import type { OfferItem } from '@/types/api';
 
@@ -19,6 +22,7 @@ export interface CollectionDetailClientProps {
 }
 
 export function CollectionDetailClient({ collection }: CollectionDetailClientProps) {
+  const { address } = useConnection();
   const [activeTab, setActiveTab] = useState<string>('offers');
   const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
@@ -26,23 +30,21 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
 
   const targetAddress = collection.contractAddress.toLowerCase();
 
+  const { data: offersData } = useOffers({ collection: targetAddress });
+  const { data: loansData } = useLoans({ collection: targetAddress });
+  const { nfts: userNfts } = useEligibleNfts(address);
+
   const openOffers = useMemo(() => {
-    return MOCK_OFFERS.filter(
-      (o) => o.collection.toLowerCase() === targetAddress && o.status === 'open'
-    );
-  }, [targetAddress]);
+    return (offersData?.offers || []).filter((o) => o.status === 'open');
+  }, [offersData]);
 
   const activeLoans = useMemo(() => {
-    return MOCK_LOANS.filter(
-      (l) => l.collection.toLowerCase() === targetAddress && l.status === 'active'
-    );
-  }, [targetAddress]);
+    return (loansData?.loans || []).filter((l) => l.status === 'active');
+  }, [loansData]);
 
   const historyLoans = useMemo(() => {
-    return MOCK_LOANS.filter(
-      (l) => l.collection.toLowerCase() === targetAddress && l.status !== 'active'
-    );
-  }, [targetAddress]);
+    return (loansData?.loans || []).filter((l) => l.status !== 'active');
+  }, [loansData]);
 
   const stats: CollectionHeaderStats = useMemo(() => {
     let poolSizeBigInt = 0n;
@@ -81,7 +83,7 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
   }, [openOffers, activeLoans]);
 
   const eligibleWalletNft = useMemo(() => {
-    const found = MOCK_WALLET_NFTS.find(
+    const found = userNfts.find(
       (n) => n.contractAddress.toLowerCase() === targetAddress
     );
     if (found) {
@@ -104,7 +106,7 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
       bestOfferWei: stats.bestOfferWei || undefined,
       offerCount: stats.offerCount,
     };
-  }, [collection, targetAddress, stats]);
+  }, [collection, targetAddress, userNfts, stats]);
 
   const handleBorrow = (offer: OfferItem) => {
     setSelectedOffer(offer);

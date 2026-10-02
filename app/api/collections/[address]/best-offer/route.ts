@@ -1,10 +1,10 @@
 import { NextRequest } from 'next/server';
-import { MOCK_OFFERS } from '@/lib/mock/fixtures';
+import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
 import { BestOfferResponse, OfferItem } from '@/types/api';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   context: { params: Promise<{ address: string }> }
 ) {
   const { address } = await context.params;
@@ -18,18 +18,30 @@ export async function GET(
   }
 
   const target = address.toLowerCase();
-  const openOffers = MOCK_OFFERS.filter(
-    (o) => o.collection.toLowerCase() === target && o.status === 'open'
-  );
-
   let bestOffer: OfferItem | null = null;
   let highestPrincipal = 0n;
 
-  for (const offer of openOffers) {
-    const principal = BigInt(offer.principalWei);
-    if (principal > highestPrincipal) {
-      highestPrincipal = principal;
-      bestOffer = offer;
+  for (const row of indexerStore.offers.values()) {
+    if (row.collection.toLowerCase() === target && row.status === 'open') {
+      const principal = BigInt(row.principal_wei);
+      if (principal > highestPrincipal) {
+        highestPrincipal = principal;
+        bestOffer = {
+          offerId: row.offer_id,
+          chainId: row.chain_id,
+          lender: row.lender,
+          collection: row.collection,
+          principalWei: row.principal_wei,
+          termInterestBps: row.term_interest_bps,
+          feeBpsSnapshot: row.fee_bps_snapshot,
+          durationSeconds: row.duration_seconds,
+          expiresAt: row.expires_at,
+          status: row.status,
+          blockNumber: row.block_number,
+          txHash: row.tx_hash,
+          createdAt: row.indexed_at,
+        };
+      }
     }
   }
 

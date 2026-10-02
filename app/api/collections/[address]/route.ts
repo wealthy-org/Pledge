@@ -1,8 +1,6 @@
 import { NextRequest } from 'next/server';
-import { getCollectionByAddress } from '@/config/collections';
-import { getMockCollectionStats } from '@/lib/mock/fixtures';
+import { fetchCollectionDetail } from '@/lib/db/queries';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
-import { CollectionDetailResponse } from '@/types/api';
 
 export async function GET(
   request: NextRequest,
@@ -22,8 +20,8 @@ export async function GET(
   const chainIdParam = searchParams.get('chainId');
   const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
 
-  const collection = getCollectionByAddress(address, chainId);
-  if (!collection) {
+  const detail = await fetchCollectionDetail(address, chainId);
+  if (!detail) {
     return errorResponse(
       `Collection with address ${address} not found in allowlist`,
       'COLLECTION_NOT_FOUND',
@@ -31,23 +29,5 @@ export async function GET(
     );
   }
 
-  const stats = getMockCollectionStats(address);
-
-  const response: CollectionDetailResponse = {
-    collection: {
-      address: collection.contractAddress,
-      name: collection.name,
-      symbol: collection.symbol,
-      imageUrl: collection.imageUrl,
-      description: collection.description,
-      floorPriceEth: collection.floorPriceEth,
-      bestOfferWei: stats.bestOfferWei,
-      poolSizeWei: stats.poolSizeWei,
-      offerCount: stats.offerCount,
-      activeLoansCount: stats.activeLoansCount,
-    },
-    stats,
-  };
-
-  return jsonResponse(response);
+  return jsonResponse(detail);
 }

@@ -61,9 +61,7 @@ export async function GET() {
           content: `⚠️ **Pledge Indexer Lag Alert**\n- Chain ID: \`${chain.id}\`\n- Latest RPC Block: \`${Number(latestRpcBlock)}\`\n- Last Indexed Block: \`${lastIndexedBlock}\`\n- Lag: \`${lagBlocks} blocks\`\n- Timestamp: \`${new Date().toISOString()}\``,
         }),
       });
-    } catch {
-      // Gracefully ignore webhook dispatch errors
-    }
+    } catch {}
   }
 
   if (isLagging) {

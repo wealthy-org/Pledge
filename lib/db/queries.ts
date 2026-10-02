@@ -1,7 +1,6 @@
 import { getCuratedCollections, getCollectionByAddress } from '@/config/collections';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 import { indexerStore } from '@/lib/indexer/store';
-import { MOCK_OFFERS, MOCK_LOANS, MOCK_ACTIVITY } from '@/lib/mock/fixtures';
 import {
   CollectionItemResponse,
   CollectionDetailResponse,
@@ -11,7 +10,9 @@ import {
   WalletLoansResponse,
   ActivityResponse,
   MarketStatsResponse,
+  OfferItem,
   LoanItem,
+  ActivityItem,
 } from '@/types/api';
 import { OfferStatus, LoanStatus } from '@/types/database';
 
@@ -30,31 +31,27 @@ export async function getCollectionStatsFromStore(
   chainId = TESTNET_CHAIN_ID
 ): Promise<CollectionStatsResponse> {
   const target = collectionAddress.toLowerCase();
-  const allOffers = [...MOCK_OFFERS];
+  const openOffers: OfferItem[] = [];
 
-  for (const offerRow of indexerStore.offers.values()) {
-    if (offerRow.chain_id === chainId && !allOffers.some((o) => o.offerId === offerRow.offer_id)) {
-      allOffers.push({
-        offerId: offerRow.offer_id,
-        chainId: offerRow.chain_id,
-        lender: offerRow.lender,
-        collection: offerRow.collection,
-        principalWei: offerRow.principal_wei,
-        termInterestBps: offerRow.term_interest_bps,
-        feeBpsSnapshot: offerRow.fee_bps_snapshot,
-        durationSeconds: offerRow.duration_seconds,
-        expiresAt: offerRow.expires_at,
-        status: offerRow.status,
-        blockNumber: offerRow.block_number,
-        txHash: offerRow.tx_hash,
-        createdAt: offerRow.indexed_at,
+  for (const row of indexerStore.offers.values()) {
+    if (row.chain_id === chainId && row.collection.toLowerCase() === target && row.status === 'open') {
+      openOffers.push({
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        collection: row.collection,
+        principalWei: row.principal_wei,
+        termInterestBps: row.term_interest_bps,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        durationSeconds: row.duration_seconds,
+        expiresAt: row.expires_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
+        createdAt: row.indexed_at,
       });
     }
   }
-
-  const openOffers = allOffers.filter(
-    (o) => o.collection.toLowerCase() === target && o.status === 'open'
-  );
 
   let bestOfferBigInt = 0n;
   let poolSizeBigInt = 0n;
@@ -67,32 +64,12 @@ export async function getCollectionStatsFromStore(
     }
   }
 
-  const allLoans = [...MOCK_LOANS];
-  for (const loanRow of indexerStore.loans.values()) {
-    if (loanRow.chain_id === chainId && !allLoans.some((l) => l.loanId === loanRow.loan_id)) {
-      allLoans.push({
-        loanId: loanRow.loan_id,
-        offerId: loanRow.offer_id,
-        chainId: loanRow.chain_id,
-        lender: loanRow.lender,
-        borrower: loanRow.borrower,
-        collection: loanRow.collection,
-        tokenId: loanRow.token_id,
-        principalWei: loanRow.principal_wei,
-        interestWei: loanRow.interest_wei,
-        feeBpsSnapshot: loanRow.fee_bps_snapshot,
-        startedAt: loanRow.started_at,
-        dueAt: loanRow.due_at,
-        status: loanRow.status,
-        blockNumber: loanRow.block_number,
-        txHash: loanRow.tx_hash,
-      });
+  let activeLoansCount = 0;
+  for (const row of indexerStore.loans.values()) {
+    if (row.chain_id === chainId && row.collection.toLowerCase() === target && row.status === 'active') {
+      activeLoansCount++;
     }
   }
-
-  const activeLoans = allLoans.filter(
-    (l) => l.collection.toLowerCase() === target && l.status === 'active'
-  );
 
   const lastBlock = await getLastIndexedBlock(chainId);
 
@@ -100,7 +77,7 @@ export async function getCollectionStatsFromStore(
     bestOfferWei: bestOfferBigInt > 0n ? bestOfferBigInt.toString() : null,
     poolSizeWei: poolSizeBigInt.toString(),
     offerCount: openOffers.length,
-    activeLoansCount: activeLoans.length,
+    activeLoansCount,
     lastIndexedBlock: lastBlock,
   };
 }
@@ -159,32 +136,33 @@ export async function fetchCollectionOffers(
   status: OfferStatus = 'open',
   sort = 'principal',
   limit = 20,
-  cursor?: string
+  cursor?: string,
+  chainId = TESTNET_CHAIN_ID
 ): Promise<OffersListResponse> {
   const target = address.toLowerCase();
-  const allOffers = [...MOCK_OFFERS];
+  const allOffers: OfferItem[] = [];
 
-  for (const offerRow of indexerStore.offers.values()) {
-    if (!allOffers.some((o) => o.offerId === offerRow.offer_id)) {
+  for (const row of indexerStore.offers.values()) {
+    if (row.chain_id === chainId && row.collection.toLowerCase() === target) {
       allOffers.push({
-        offerId: offerRow.offer_id,
-        chainId: offerRow.chain_id,
-        lender: offerRow.lender,
-        collection: offerRow.collection,
-        principalWei: offerRow.principal_wei,
-        termInterestBps: offerRow.term_interest_bps,
-        feeBpsSnapshot: offerRow.fee_bps_snapshot,
-        durationSeconds: offerRow.duration_seconds,
-        expiresAt: offerRow.expires_at,
-        status: offerRow.status,
-        blockNumber: offerRow.block_number,
-        txHash: offerRow.tx_hash,
-        createdAt: offerRow.indexed_at,
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        collection: row.collection,
+        principalWei: row.principal_wei,
+        termInterestBps: row.term_interest_bps,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        durationSeconds: row.duration_seconds,
+        expiresAt: row.expires_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
+        createdAt: row.indexed_at,
       });
     }
   }
 
-  let filtered = allOffers.filter((o) => o.collection.toLowerCase() === target);
+  let filtered = allOffers;
   if (status) {
     filtered = filtered.filter((o) => o.status === status);
   }
@@ -196,6 +174,9 @@ export async function fetchCollectionOffers(
     }
     if (sort === 'interest') {
       return a.termInterestBps - b.termInterestBps;
+    }
+    if (sort === 'expiry') {
+      return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
     }
     return b.offerId - a.offerId;
   });
@@ -212,32 +193,26 @@ export async function fetchCollectionOffers(
 }
 
 export async function fetchLoanDetail(loanId: number, chainId = TESTNET_CHAIN_ID): Promise<LoanDetailResponse | null> {
-  let loan: LoanItem | undefined = MOCK_LOANS.find((l) => l.loanId === loanId);
+  const fromStore = indexerStore.getLoan(chainId, loanId);
+  if (!fromStore) return null;
 
-  if (!loan) {
-    const fromStore = indexerStore.getLoan(chainId, loanId);
-    if (fromStore) {
-      loan = {
-        loanId: fromStore.loan_id,
-        offerId: fromStore.offer_id,
-        chainId: fromStore.chain_id,
-        lender: fromStore.lender,
-        borrower: fromStore.borrower,
-        collection: fromStore.collection,
-        tokenId: fromStore.token_id,
-        principalWei: fromStore.principal_wei,
-        interestWei: fromStore.interest_wei,
-        feeBpsSnapshot: fromStore.fee_bps_snapshot,
-        startedAt: fromStore.started_at,
-        dueAt: fromStore.due_at,
-        status: fromStore.status,
-        blockNumber: fromStore.block_number,
-        txHash: fromStore.tx_hash,
-      };
-    }
-  }
-
-  if (!loan) return null;
+  const loan: LoanItem = {
+    loanId: fromStore.loan_id,
+    offerId: fromStore.offer_id,
+    chainId: fromStore.chain_id,
+    lender: fromStore.lender,
+    borrower: fromStore.borrower,
+    collection: fromStore.collection,
+    tokenId: fromStore.token_id,
+    principalWei: fromStore.principal_wei,
+    interestWei: fromStore.interest_wei,
+    feeBpsSnapshot: fromStore.fee_bps_snapshot,
+    startedAt: fromStore.started_at,
+    dueAt: fromStore.due_at,
+    status: fromStore.status,
+    blockNumber: fromStore.block_number,
+    txHash: fromStore.tx_hash,
+  };
 
   const collection = getCollectionByAddress(loan.collection, chainId);
   const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
@@ -260,29 +235,30 @@ export async function fetchWalletLoans(
   status?: LoanStatus,
   role?: string,
   limit = 20,
-  cursor?: string
+  cursor?: string,
+  chainId = TESTNET_CHAIN_ID
 ): Promise<WalletLoansResponse> {
   const target = address.toLowerCase();
-  const allLoans = [...MOCK_LOANS];
+  const allLoans: LoanItem[] = [];
 
-  for (const loanRow of indexerStore.loans.values()) {
-    if (!allLoans.some((l) => l.loanId === loanRow.loan_id)) {
+  for (const row of indexerStore.loans.values()) {
+    if (row.chain_id === chainId) {
       allLoans.push({
-        loanId: loanRow.loan_id,
-        offerId: loanRow.offer_id,
-        chainId: loanRow.chain_id,
-        lender: loanRow.lender,
-        borrower: loanRow.borrower,
-        collection: loanRow.collection,
-        tokenId: loanRow.token_id,
-        principalWei: loanRow.principal_wei,
-        interestWei: loanRow.interest_wei,
-        feeBpsSnapshot: loanRow.fee_bps_snapshot,
-        startedAt: loanRow.started_at,
-        dueAt: loanRow.due_at,
-        status: loanRow.status,
-        blockNumber: loanRow.block_number,
-        txHash: loanRow.tx_hash,
+        loanId: row.loan_id,
+        offerId: row.offer_id,
+        chainId: row.chain_id,
+        lender: row.lender,
+        borrower: row.borrower,
+        collection: row.collection,
+        tokenId: row.token_id,
+        principalWei: row.principal_wei,
+        interestWei: row.interest_wei,
+        feeBpsSnapshot: row.fee_bps_snapshot,
+        startedAt: row.started_at,
+        dueAt: row.due_at,
+        status: row.status,
+        blockNumber: row.block_number,
+        txHash: row.tx_hash,
       });
     }
   }
@@ -316,23 +292,21 @@ export async function fetchActivityFeed(
   limit = 20,
   cursor?: string
 ): Promise<ActivityResponse> {
-  const allActivity = [...MOCK_ACTIVITY];
+  const allActivity: ActivityItem[] = [];
 
   for (const eventRow of indexerStore.events) {
-    if (!allActivity.some((a) => a.id === eventRow.id)) {
-      allActivity.push({
-        id: eventRow.id,
-        eventType: eventRow.event_type,
-        contractAddress: eventRow.contract_address,
-        blockNumber: eventRow.block_number,
-        txHash: eventRow.tx_hash,
-        timestamp: eventRow.indexed_at,
-        data: eventRow.data as Record<string, unknown>,
-      });
-    }
+    allActivity.push({
+      id: eventRow.id,
+      eventType: eventRow.event_type,
+      contractAddress: eventRow.contract_address,
+      blockNumber: eventRow.block_number,
+      txHash: eventRow.tx_hash,
+      timestamp: eventRow.indexed_at,
+      data: eventRow.data as Record<string, unknown>,
+    });
   }
 
-  let filtered = [...allActivity];
+  let filtered = allActivity;
 
   if (collection) {
     const target = collection.toLowerCase();
@@ -359,29 +333,22 @@ export async function fetchActivityFeed(
 export async function fetchMarketStats(): Promise<MarketStatsResponse> {
   let totalPoolSize = 0n;
   let totalVolume = 0n;
+  let activeLoansCount = 0;
+  let totalOffersCount = 0;
 
-  for (const offer of MOCK_OFFERS) {
-    if (offer.status === 'open') {
-      totalPoolSize += BigInt(offer.principalWei);
-    }
-  }
   for (const offerRow of indexerStore.offers.values()) {
+    totalOffersCount++;
     if (offerRow.status === 'open') {
       totalPoolSize += BigInt(offerRow.principal_wei);
     }
   }
 
-  for (const loan of MOCK_LOANS) {
-    totalVolume += BigInt(loan.principalWei);
-  }
   for (const loanRow of indexerStore.loans.values()) {
     totalVolume += BigInt(loanRow.principal_wei);
+    if (loanRow.status === 'active') {
+      activeLoansCount++;
+    }
   }
-
-  const activeLoansCount = MOCK_LOANS.filter((l) => l.status === 'active').length +
-    Array.from(indexerStore.loans.values()).filter((l) => l.status === 'active').length;
-
-  const totalOffersCount = MOCK_OFFERS.length + indexerStore.offers.size;
 
   return {
     totalPoolSizeWei: totalPoolSize.toString(),

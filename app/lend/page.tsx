@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { CURATED_COLLECTIONS, type CuratedCollectionDefinition } from '@/config/collections';
-import { MOCK_OFFERS, getMockCollectionStats } from '@/lib/mock/fixtures';
 import { LendCollectionCard } from '@/components/lend/LendCollectionCard';
 import { MyOpenOffersList } from '@/components/lend/MyOpenOffersList';
 import { CreateOfferDrawer, type CreateOfferFormData } from '@/components/lend/CreateOfferDrawer';
@@ -13,12 +12,14 @@ import { Toast } from '@/components/ui/Toast';
 import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { useOffers } from '@/hooks/api/useOffers';
+import { useCollections } from '@/hooks/api/useCollections';
 import { useAccount } from 'wagmi';
 import type { OfferItem } from '@/types/api';
 
 export default function LendPage() {
   const { address } = useAccount();
-  const { data: apiOffers } = useOffers({ lender: address });
+  const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
+  const { data: collectionsData } = useCollections();
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
@@ -31,26 +32,36 @@ export default function LendPage() {
   const [cancellingOffer, setCancellingOffer] = useState<OfferItem | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
-  const [localOffers, setLocalOffers] = useState<OfferItem[]>(() => {
-    return MOCK_OFFERS.filter((o) => o.status === 'open');
-  });
+  const [localOffers, setLocalOffers] = useState<OfferItem[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const displayOffers = (apiOffers?.offers && apiOffers.offers.length > 0) ? apiOffers.offers : localOffers;
+  const displayOffers = useMemo(() => {
+    const fromApi = apiOffers?.offers || [];
+    const combined = [...localOffers, ...fromApi];
+    const seen = new Set<number>();
+    return combined.filter((o) => {
+      if (seen.has(o.offerId)) return false;
+      seen.add(o.offerId);
+      return o.status === 'open';
+    });
+  }, [apiOffers, localOffers]);
 
   const collectionStats = useMemo(() => {
     const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
     for (const col of CURATED_COLLECTIONS) {
-      const stats = getMockCollectionStats(col.addresses[46630]);
+      const colAddress = col.addresses[46630];
+      const remote = collectionsData?.collections?.find(
+        (c) => c.address.toLowerCase() === colAddress.toLowerCase()
+      );
       map[col.id] = {
-        poolSizeEth: stats.poolSizeWei !== '0'
-          ? (Number(stats.poolSizeWei) / 1e18).toFixed(2)
+        poolSizeEth: remote?.poolSizeWei && remote.poolSizeWei !== '0'
+          ? (Number(remote.poolSizeWei) / 1e18).toFixed(2)
           : '0.00',
-        activeLoansCount: stats.activeLoansCount,
+        activeLoansCount: remote?.activeLoansCount || 0,
       };
     }
     return map;
-  }, []);
+  }, [collectionsData]);
 
   const selectedCol = useMemo(() => {
     return CURATED_COLLECTIONS.find((c) => c.id === selectedCollectionId) || CURATED_COLLECTIONS[0];
@@ -101,9 +112,8 @@ export default function LendPage() {
       setLocalOffers((prev) => [newOffer, ...prev]);
       setIsTxModalOpen(false);
       setToastMessage('Lending offer created successfully! Capital committed to escrow.');
-    } catch {
-      // Handled by modal
-    }
+      refetchOffers();
+    } catch {}
   };
 
   const handleOpenCancelModal = (offerId: number) => {
@@ -126,9 +136,8 @@ export default function LendPage() {
 
       setLocalOffers((prev) => prev.filter((o) => o.offerId !== cancellingOffer.offerId));
       setToastMessage(`Offer #${cancellingOffer.offerId} cancelled. Capital returned to claimable proceeds.`);
-    } catch {
-      // Handled by modal
-    }
+      refetchOffers();
+    } catch {}
   };
 
   return (
