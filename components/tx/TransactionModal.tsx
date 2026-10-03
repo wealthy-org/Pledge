@@ -298,42 +298,50 @@ export function TransactionModal({
           </div>
         )}
 
-        <div className="flex items-center justify-center gap-3 pt-2">
+        <div className="pt-2">
           {isSuccess && (
-            <Button variant="primary" onClick={onClose} className="w-full">
+            <Button variant="primary" onClick={onClose} className="w-full h-11">
               Done
             </Button>
           )}
 
           {isError && (
-            <>
+            <div className="grid grid-cols-2 gap-3">
               {isChainMismatch ? (
                 <Button
                   variant="primary"
                   loading={isSwitching}
                   onClick={handleSwitchNetwork}
-                  className="flex-1"
+                  className="w-full h-11 whitespace-nowrap text-xs sm:text-sm font-medium"
                 >
-                  Switch to {targetChain.name}
+                  <span className="truncate">Switch to {targetChain.name}</span>
                 </Button>
               ) : (
                 onRetry &&
                 !state.isUserRejection &&
                 state.errorCode !== 'RECEIPT_TIMEOUT' && (
-                  <Button variant="primary" onClick={onRetry} className="flex-1">
+                  <Button
+                    variant="primary"
+                    onClick={onRetry}
+                    className="w-full h-11 text-xs sm:text-sm font-medium"
+                  >
                     Try Again
                   </Button>
                 )
               )}
-              <Button variant="secondary" onClick={onClose} className="flex-1">
+              <Button
+                variant="secondary"
+                onClick={onClose}
+                className="w-full h-11 text-xs sm:text-sm font-medium"
+              >
                 Close
               </Button>
-            </>
+            </div>
           )}
 
           {isPending && (
             <div className="w-full space-y-2">
-              <Button variant="secondary" onClick={onClose} className="w-full text-xs">
+              <Button variant="secondary" onClick={onClose} className="w-full h-11 text-xs">
                 {state.txHash ? 'Close (Transaction continues in background)' : 'Dismiss'}
               </Button>
               <p className="text-[10px] font-mono text-[var(--muted)] animate-pulse">
