@@ -121,10 +121,10 @@ export function HistoryTab({
 
   if (historyEntries.length === 0) {
     return (
-      <div className="py-16 px-6 border border-dashed border-[var(--line)] rounded-xl text-center bg-[var(--surface)]">
-        <div className="text-2xl text-[var(--accent-primary)] mb-2 font-mono">◈</div>
-        <h3 className="text-sm font-semibold text-[var(--text)]">A fresh start</h3>
-        <p className="text-xs text-[var(--muted)] mt-1">
+      <div className="py-16 px-6 border border-dashed border-[#e1ebe6] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17]">
+        <div className="text-3xl text-[var(--lime)] dark:text-emerald-400 mb-2 font-mono">◈</div>
+        <h3 className="text-base font-medium text-[#142d2b] dark:text-[#f0f6fc]">A fresh start</h3>
+        <p className="text-xs text-[var(--muted)] dark:text-[#8ca197] mt-1">
           Repaid loans and cancelled offers will appear here.
         </p>
       </div>

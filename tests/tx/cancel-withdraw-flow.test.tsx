@@ -119,9 +119,7 @@ describe('TICKET-50: Cancel Offer & Withdraw Proceeds Flow Test Suite', () => {
         await result.current.withdrawProceeds({
           claimableWei: '0',
         });
-      } catch {
-        // Expected
-      }
+      } catch {}
     });
 
     expect(mockSimulateContract).not.toHaveBeenCalled();

@@ -8,6 +8,7 @@ import { OffersTab } from '@/components/portfolio/OffersTab';
 import { LendingTab } from '@/components/portfolio/LendingTab';
 import { HistoryTab } from '@/components/portfolio/HistoryTab';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
+import { CURATED_COLLECTIONS } from '@/config/collections';
 import type { LoanItem, OfferItem } from '@/types/api';
 
 const mockUserAddress = '0xfB5870428d00B1a18274737609825b74c8C12e2B';
@@ -20,7 +21,7 @@ const mockLoans: LoanItem[] = [
     chainId: TESTNET_CHAIN_ID,
     lender: mockLenderAddress,
     borrower: mockUserAddress,
-    collection: '0x1111111111111111111111111111111111111111',
+    collection: CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID],
     tokenId: '42',
     principalWei: '1000000000000000000',
     interestWei: '40000000000000000',
@@ -37,7 +38,7 @@ const mockLoans: LoanItem[] = [
     chainId: TESTNET_CHAIN_ID,
     lender: mockUserAddress,
     borrower: '0x3333333333333333333333333333333333333333',
-    collection: '0x2222222222222222222222222222222222222222',
+    collection: CURATED_COLLECTIONS[1].addresses[TESTNET_CHAIN_ID],
     tokenId: '101',
     principalWei: '500000000000000000',
     interestWei: '15000000000000000',
@@ -55,7 +56,7 @@ const mockOffers: OfferItem[] = [
     offerId: 1,
     chainId: TESTNET_CHAIN_ID,
     lender: mockUserAddress,
-    collection: '0x1111111111111111111111111111111111111111',
+    collection: CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID],
     principalWei: '1500000000000000000',
     termInterestBps: 500,
     feeBpsSnapshot: 200,

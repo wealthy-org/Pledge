@@ -4,6 +4,8 @@ import { render, screen } from '@testing-library/react';
 import { CollectionHeader, type CollectionHeaderStats } from '@/components/collection/CollectionHeader';
 import { CURATED_COLLECTIONS, type ActiveCuratedCollection } from '@/config/collections';
 
+import { TESTNET_CHAIN_ID } from '@/config/chains';
+
 describe('TICKET-73: Collection Detail Social Links & Metadata Test Suite', () => {
   const mockStats: CollectionHeaderStats = {
     bestOfferWei: '1000000000000000000',
@@ -15,7 +17,7 @@ describe('TICKET-73: Collection Detail Social Links & Metadata Test Suite', () =
 
   const sampleCollection: ActiveCuratedCollection = {
     ...CURATED_COLLECTIONS[0],
-    contractAddress: '0x1111111111111111111111111111111111111111',
+    contractAddress: CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID],
     socials: {
       website: 'https://robinhood.com',
       twitter: 'https://x.com/robinhoodapp',
@@ -48,7 +50,7 @@ describe('TICKET-73: Collection Detail Social Links & Metadata Test Suite', () =
   it('gracefully handles missing social links without throwing error', () => {
     const colWithoutSocials: ActiveCuratedCollection = {
       ...CURATED_COLLECTIONS[0],
-      contractAddress: '0x1111111111111111111111111111111111111111',
+      contractAddress: CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID],
       socials: undefined,
     };
 

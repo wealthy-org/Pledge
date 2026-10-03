@@ -31,6 +31,60 @@ export interface ActiveCuratedCollection extends CuratedCollectionDefinition {
   contractAddress: `0x${string}`;
 }
 
+function getCollectionAddress(collectionId: string, chainId: number): `0x${string}` {
+  if (chainId === MAINNET_CHAIN_ID) {
+    let addr: string | undefined;
+    if (collectionId === 'rhg') addr = process.env.NEXT_PUBLIC_RHG_COLLECTION_MAINNET;
+    else if (collectionId === 'sfr') addr = process.env.NEXT_PUBLIC_SFR_COLLECTION_MAINNET;
+    else if (collectionId === 'ngp') addr = process.env.NEXT_PUBLIC_NGP_COLLECTION_MAINNET;
+    else throw new Error(`Unknown collection ID: ${collectionId}`);
+
+    if (!addr) {
+      throw new Error(`Mainnet collection address for ${collectionId.toUpperCase()} is not configured. NEXT_PUBLIC_${collectionId.toUpperCase()}_COLLECTION_MAINNET must be set.`);
+    }
+    return addr as `0x${string}`;
+  }
+
+  if (chainId === TESTNET_CHAIN_ID) {
+    let addr: string | undefined;
+    if (collectionId === 'rhg') addr = process.env.NEXT_PUBLIC_RHG_COLLECTION;
+    else if (collectionId === 'sfr') addr = process.env.NEXT_PUBLIC_SFR_COLLECTION;
+    else if (collectionId === 'ngp') addr = process.env.NEXT_PUBLIC_NGP_COLLECTION;
+    else throw new Error(`Unknown collection ID: ${collectionId}`);
+
+    if (!addr) {
+      throw new Error(`Testnet collection address for ${collectionId.toUpperCase()} is not configured. NEXT_PUBLIC_${collectionId.toUpperCase()}_COLLECTION must be set.`);
+    }
+    return addr as `0x${string}`;
+  }
+
+  throw new Error(`Unsupported chain ID: ${chainId}`);
+}
+
+function createCollectionAddressProxy(collectionId: string): Record<number, `0x${string}`> {
+  return new Proxy(
+    {},
+    {
+      get(_target, prop) {
+        const chainId = Number(prop);
+        if (isNaN(chainId)) {
+          return undefined;
+        }
+        return getCollectionAddress(collectionId, chainId);
+      },
+      ownKeys() {
+        return [String(TESTNET_CHAIN_ID), String(MAINNET_CHAIN_ID)];
+      },
+      getOwnPropertyDescriptor() {
+        return {
+          enumerable: true,
+          configurable: true,
+        };
+      },
+    }
+  );
+}
+
 export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
   {
     id: 'rhg',
@@ -50,10 +104,7 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
       twitter: 'https://x.com/robinhoodapp',
       discord: 'https://discord.gg/robinhood',
     },
-    addresses: {
-      [TESTNET_CHAIN_ID]: '0x1111111111111111111111111111111111111111',
-      [MAINNET_CHAIN_ID]: '0x4444444444444444444444444444444444444444',
-    },
+    addresses: createCollectionAddressProxy('rhg') as any,
   },
   {
     id: 'sfr',
@@ -73,10 +124,7 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
       twitter: 'https://x.com/sherwoodrangers',
       discord: 'https://discord.gg/sherwoodrangers',
     },
-    addresses: {
-      [TESTNET_CHAIN_ID]: '0x2222222222222222222222222222222222222222',
-      [MAINNET_CHAIN_ID]: '0x5555555555555555555555555555555555555555',
-    },
+    addresses: createCollectionAddressProxy('sfr') as any,
   },
   {
     id: 'ngp',
@@ -96,10 +144,7 @@ export const CURATED_COLLECTIONS: readonly CuratedCollectionDefinition[] = [
       twitter: 'https://x.com/nottinghamguild',
       discord: 'https://discord.gg/nottinghamguild',
     },
-    addresses: {
-      [TESTNET_CHAIN_ID]: '0x3333333333333333333333333333333333333333',
-      [MAINNET_CHAIN_ID]: '0x6666666666666666666666666666666666666666',
-    },
+    addresses: createCollectionAddressProxy('ngp') as any,
   },
 ];
 

@@ -76,6 +76,6 @@ describe('TICKET-34: Layout Mainnet Chain Switch Test Suite', () => {
 
     const explorerLink = screen.getByRole('link', { name: /blockscout explorer/i });
     expect(explorerLink).toBeDefined();
-    expect(explorerLink.getAttribute('href')).toContain('explorer.robinhood.com');
+    expect(explorerLink.getAttribute('href')).toContain('chain.robinhood.com');
   });
 });

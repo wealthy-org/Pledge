@@ -56,9 +56,7 @@ describe('TICKET-53: Negative Scenarios and Error Path Handling', () => {
           dueAt: pastTimestamp,
           status: 'active',
         });
-      } catch {
-        // Expected
-      }
+      } catch {}
     });
 
     expect(result.current.state.stage).toBe('ERROR');
@@ -78,9 +76,7 @@ describe('TICKET-53: Negative Scenarios and Error Path Handling', () => {
           destination: '0x02070747E2436d46f56A691F605A7c03332DFe8d',
           status: 'active',
         });
-      } catch {
-        // Expected
-      }
+      } catch {}
     });
 
     expect(result.current.state.stage).toBe('ERROR');
@@ -100,9 +96,7 @@ describe('TICKET-53: Negative Scenarios and Error Path Handling', () => {
           destination: '0x02070747E2436d46f56A691F605A7c03332DFe8d',
           status: 'active',
         });
-      } catch {
-        // Expected
-      }
+      } catch {}
     });
 
     expect(result.current.state.stage).toBe('ERROR');

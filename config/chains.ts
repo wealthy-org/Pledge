@@ -13,13 +13,13 @@ export const robinhoodTestnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.testnet.robinhood.com'],
+      http: ['https://rpc.testnet.chain.robinhood.com'],
     },
   },
   blockExplorers: {
     default: {
       name: 'Blockscout',
-      url: 'https://explorer.testnet.robinhood.com',
+      url: 'https://explorer.testnet.chain.robinhood.com',
     },
   },
   testnet: true,
@@ -35,13 +35,13 @@ export const robinhoodMainnet = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ['https://rpc.mainnet.robinhood.com'],
+      http: ['https://rpc.mainnet.chain.robinhood.com'],
     },
   },
   blockExplorers: {
     default: {
       name: 'Blockscout',
-      url: 'https://explorer.robinhood.com',
+      url: 'https://explorer.mainnet.chain.robinhood.com',
     },
   },
   testnet: false,

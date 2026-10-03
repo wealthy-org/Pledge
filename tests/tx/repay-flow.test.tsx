@@ -105,9 +105,7 @@ describe('TICKET-48: Repay Loan Transaction Flow Test Suite', () => {
           dueAt: futureDueAt,
           status: 'active',
         });
-      } catch {
-        // Expected
-      }
+      } catch {}
     });
 
     expect(mockSimulateContract).not.toHaveBeenCalled();
@@ -130,9 +128,7 @@ describe('TICKET-48: Repay Loan Transaction Flow Test Suite', () => {
           dueAt: pastDueAt,
           status: 'active',
         });
-      } catch {
-        // Expected
-      }
+      } catch {}
     });
 
     expect(mockSimulateContract).not.toHaveBeenCalled();

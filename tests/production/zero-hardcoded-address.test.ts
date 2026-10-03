@@ -73,8 +73,8 @@ describe('TICKET-54b: Zero Hardcoded Address & Mainnet Configuration Finalizatio
     expect(mainnetConfig.id).toBe(4663);
     expect(mainnetConfig.name).toBe('Robinhood Chain');
     expect(mainnetConfig.testnet).toBe(false);
-    expect(mainnetConfig.rpcUrls.default.http[0]).toBe('https://rpc.mainnet.robinhood.com');
-    expect(mainnetConfig.blockExplorers?.default.url).toBe('https://explorer.robinhood.com');
+    expect(mainnetConfig.rpcUrls.default.http[0]).toBe('https://rpc.mainnet.chain.robinhood.com');
+    expect(mainnetConfig.blockExplorers?.default.url).toBe('https://explorer.mainnet.chain.robinhood.com');
   });
 
   it('TS-04: getActiveChain respects process.env.NEXT_PUBLIC_CHAIN_ID for production deployment', () => {

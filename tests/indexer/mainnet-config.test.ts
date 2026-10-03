@@ -14,7 +14,7 @@ describe('TICKET-27b: Mainnet Indexer Configuration & Environment Isolation Test
     expect(config.contractAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
     expect(config.startBlock).toBeGreaterThanOrEqual(1);
     expect(config.rpcUrl).toContain('mainnet');
-    expect(config.explorerUrl).toBe('https://explorer.robinhood.com');
+    expect(config.explorerUrl).toBe('https://explorer.mainnet.chain.robinhood.com');
   });
 
   it('TS-02: Testnet indexer config reflects testnet chain parameters', () => {
@@ -22,7 +22,7 @@ describe('TICKET-27b: Mainnet Indexer Configuration & Environment Isolation Test
     expect(config.chainId).toBe(TESTNET_CHAIN_ID);
     expect(config.chainId).toBe(46630);
     expect(config.contractAddress).toMatch(/^0x[a-fA-F0-9]{40}$/);
-    expect(config.explorerUrl).toBe('https://explorer.testnet.robinhood.com');
+    expect(config.explorerUrl).toBe('https://explorer.testnet.chain.robinhood.com');
   });
 
   it('TS-03: getIndexerConfig switches between testnet and mainnet without data bleeding', () => {
