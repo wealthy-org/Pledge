@@ -40,6 +40,20 @@ export const ERC721_ABI = [
   },
   {
     type: 'function',
+    name: 'tokenURI',
+    inputs: [{ name: 'tokenId', type: 'uint256' }],
+    outputs: [{ name: '', type: 'string' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'contractURI',
+    inputs: [],
+    outputs: [{ name: '', type: 'string' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
     name: 'isApprovedForAll',
     inputs: [
       { name: 'owner', type: 'address' },

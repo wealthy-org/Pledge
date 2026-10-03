@@ -1,8 +1,8 @@
 import { isAddress, createPublicClient, http } from 'viem';
 import { NftMetadata, CachedNftRecord, MetadataFetchOptions } from '@/types/nft';
 import { TESTNET_CHAIN_ID, getActiveChain } from '@/config/chains';
-import { getCollectionByAddress } from '@/config/collections';
 import { ERC721_ABI } from '@/config/contracts';
+import { resolveNftImage } from '@/lib/nft-image';
 
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -108,23 +108,30 @@ export async function fetchNftMetadata(
     }
   }
 
-  const collectionInfo = await fetchOnChainCollectionInfo(contractAddress);
+  const [collectionInfo, resolvedImage] = await Promise.all([
+    fetchOnChainCollectionInfo(contractAddress),
+    resolveNftImage(contractAddress, tokenId, {
+      bypassCache: options.bypassCache,
+      ttlMs: options.ttlMs,
+    }),
+  ]);
+
   const name = collectionInfo.name;
-  const imageUrl = resolveCollectionImageUrl(name);
 
   const metadata: NftMetadata = {
     contractAddress: contractAddress as `0x${string}`,
     tokenId,
     name: `${name} #${tokenId}`,
     description: `${name} on Robinhood Chain`,
-    imageUrl,
-    rawImageUrl: null,
+    imageUrl: resolvedImage.url,
+    rawImageUrl: resolvedImage.rawUri,
     attributes: [
       { traitType: 'Collection', value: name },
       { traitType: 'Symbol', value: collectionInfo.symbol },
     ],
-    isFallback: false,
-    tokenUri: `ipfs://bafybeihrhgpass/${tokenId}`,
+    isFallback: resolvedImage.isFallback,
+    tokenUri: resolvedImage.rawUri || `ipfs://bafybeihrhgpass/${tokenId}`,
+    imageSource: resolvedImage.source,
   };
 
   const ttl = options.ttlMs ?? DEFAULT_TTL_MS;

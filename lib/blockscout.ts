@@ -357,6 +357,42 @@ export class BlockscoutClient {
       iconUrl,
     };
   }
+
+  public async fetchCollectionSampleImage(
+    collectionAddress: string
+  ): Promise<string | null> {
+    if (!collectionAddress || !collectionAddress.startsWith('0x')) {
+      return null;
+    }
+
+    try {
+      const res = await this.request<{ items?: BlockscoutRawNFTInstance[] }>(
+        `/tokens/${collectionAddress}/instances`,
+        { limit: '1' },
+        true
+      );
+      const first = res.items?.[0];
+      if (!first) {
+        return null;
+      }
+      const raw =
+        first.metadata?.image ||
+        first.metadata?.image_url ||
+        (first as any).image_url ||
+        (first as any).media_url ||
+        '';
+      if (raw) {
+        try {
+          return resolveMediaUrl(raw);
+        } catch {
+          return null;
+        }
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
 }
 
 const clientsMap = new Map<number, BlockscoutClient>();
