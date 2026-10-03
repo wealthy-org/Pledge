@@ -21,14 +21,17 @@ function stringToSeed(str: string): number {
   return Math.abs(hash);
 }
 
-export function generateSvgArtwork(contractAddress: string, tokenId: string): string {
+export function generateSvgArtwork(
+  contractAddress: string,
+  tokenId?: string,
+  symbolOrName?: string
+): string {
   const cleanAddr = (contractAddress || '0x0000000000000000000000000000000000000000').toLowerCase();
-  const cleanTokenId = (tokenId || '0').trim();
-  const seed = stringToSeed(`${cleanAddr}:${cleanTokenId}`);
+  const cleanTokenId = (tokenId || '').trim();
+  const seed = stringToSeed(`${cleanAddr}:${cleanTokenId || symbolOrName || '0'}`);
 
   const palette = COLOR_PALETTES[seed % COLOR_PALETTES.length];
   const shapeCount = 3 + (seed % 4);
-  const displayId = cleanTokenId.length > 8 ? `${cleanTokenId.slice(0, 6)}...` : cleanTokenId;
 
   let shapesSvg = '';
   for (let i = 0; i < shapeCount; i++) {
@@ -38,6 +41,27 @@ export function generateSvgArtwork(contractAddress: string, tokenId: string): st
     const r = 30 + (sSeed % 60);
     const opacity = (0.15 + (sSeed % 25) / 100).toFixed(2);
     shapesSvg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${palette.accent}" fill-opacity="${opacity}" filter="blur(20px)" />`;
+  }
+
+  let centerContent = '';
+  if (cleanTokenId && cleanTokenId !== '0') {
+    const displayId = cleanTokenId.length > 8 ? `${cleanTokenId.slice(0, 6)}...` : cleanTokenId;
+    centerContent = `
+      <rect x="-60" y="-60" width="120" height="120" rx="24" fill="${palette.bg1}" fill-opacity="0.6" stroke="${palette.accent}" stroke-width="1.5" stroke-opacity="0.4" />
+      <text x="0" y="8" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="${palette.text}" text-anchor="middle">#${displayId}</text>
+    `;
+  } else if (symbolOrName && symbolOrName.trim()) {
+    const cleanLabel = symbolOrName.trim().slice(0, 5).toUpperCase();
+    centerContent = `
+      <rect x="-65" y="-60" width="130" height="120" rx="24" fill="${palette.bg1}" fill-opacity="0.6" stroke="${palette.accent}" stroke-width="1.5" stroke-opacity="0.4" />
+      <text x="0" y="8" font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="bold" fill="${palette.text}" text-anchor="middle">${cleanLabel}</text>
+    `;
+  } else {
+    centerContent = `
+      <rect x="-50" y="-50" width="100" height="100" rx="24" fill="${palette.bg1}" fill-opacity="0.6" stroke="${palette.accent}" stroke-width="1.5" stroke-opacity="0.4" />
+      <polygon points="0,-25 25,0 0,25 -25,0" fill="none" stroke="${palette.accent}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+      <circle cx="0" cy="0" r="6" fill="${palette.accent}" />
+    `;
   }
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
@@ -54,8 +78,7 @@ export function generateSvgArtwork(contractAddress: string, tokenId: string): st
     <rect width="100%" height="100%" fill="url(#grid_${seed})" />
     ${shapesSvg}
     <g transform="translate(200, 200)">
-      <rect x="-60" y="-60" width="120" height="120" rx="24" fill="${palette.bg1}" fill-opacity="0.6" stroke="${palette.accent}" stroke-width="1.5" stroke-opacity="0.4" />
-      <text x="0" y="8" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="${palette.text}" text-anchor="middle">#${displayId}</text>
+      ${centerContent}
     </g>
   </svg>`;
 
@@ -64,9 +87,10 @@ export function generateSvgArtwork(contractAddress: string, tokenId: string): st
 
 export function buildGenerativeResolvedImage(
   contractAddress: string,
-  tokenId: string
+  tokenId?: string,
+  symbolOrName?: string
 ): ResolvedNftImage {
-  const url = generateSvgArtwork(contractAddress, tokenId);
+  const url = generateSvgArtwork(contractAddress, tokenId, symbolOrName);
   return {
     url,
     source: 'generative',

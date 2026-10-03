@@ -137,7 +137,7 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       address: onChain.address,
       name: onChain.name,
       symbol: onChain.symbol,
-      imageUrl: resolveCollectionImageUrl(onChain.name),
+      imageUrl: resolveCollectionImageUrl(onChain.address, onChain.symbol || onChain.name),
       description: `${onChain.name} on Robinhood Chain`,
       bestOfferWei: stats.bestOfferWei,
       poolSizeWei: stats.poolSizeWei,
@@ -178,7 +178,7 @@ export async function fetchCollectionDetail(
       address: onChain.address,
       name: onChain.name,
       symbol: onChain.symbol,
-      imageUrl: resolveCollectionImageUrl(onChain.name),
+      imageUrl: resolveCollectionImageUrl(onChain.address, onChain.symbol || onChain.name),
       description: `${onChain.name} on Robinhood Chain`,
       bestOfferWei: stats.bestOfferWei,
       poolSizeWei: stats.poolSizeWei,
@@ -276,7 +276,7 @@ export async function fetchLoanDetail(loanId: number, chainId?: number): Promise
 
   const onChain = await fetchOnChainCollectionInfo(loan.collection, targetChain);
   const collectionName = onChain.name;
-  const imageUrl = resolveCollectionImageUrl(collectionName);
+  const imageUrl = resolveCollectionImageUrl(loan.collection, onChain.symbol || collectionName);
   const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
 
   return {

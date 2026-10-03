@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { formatUnits } from 'viem';
+import { NftImage } from '@/components/nft/NftImage';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
 import { getActiveChain } from '@/config/chains';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
@@ -47,18 +47,14 @@ export function ExploreCard({ collection }: ExploreCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-lg overflow-hidden bg-[var(--raised)] border border-[var(--line)] shrink-0 relative flex items-center justify-center font-mono font-bold text-xs text-[var(--accent-primary)]">
-              {collection.imageUrl ? (
-                <Image
-                  src={collection.imageUrl}
-                  alt={collection.name}
-                  fill
-                  sizes="48px"
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
-                  unoptimized
-                />
-              ) : (
-                collection.symbol?.slice(0, 3) || 'NFT'
-              )}
+              <NftImage
+                src={collection.imageUrl}
+                alt={collection.name}
+                contractAddress={collection.address}
+                symbol={collection.symbol || collection.name}
+                tokenId=""
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
             </div>
 
             <div className="min-w-0 flex-1">

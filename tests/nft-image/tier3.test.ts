@@ -29,6 +29,19 @@ describe('Tier 3: Deterministic Generative Artwork Generator', () => {
     expect(svg.startsWith('data:image/svg+xml;utf8,')).toBe(true);
   });
 
+  it('renders symbol or emblem instead of #0 when tokenId is empty or 0', () => {
+    const svgWithSymbol = generateSvgArtwork(contractA, '', 'ROB');
+    const decoded = decodeURIComponent(svgWithSymbol);
+    expect(decoded).toContain('ROB');
+    expect(decoded).not.toContain('>#0</text>');
+    expect(decoded).not.toContain('>#</text>');
+
+    const svgZeroToken = generateSvgArtwork(contractA, '0', 'WSP');
+    const decodedZero = decodeURIComponent(svgZeroToken);
+    expect(decodedZero).toContain('WSP');
+    expect(decodedZero).not.toContain('>#0</text>');
+  });
+
   it('buildGenerativeResolvedImage returns proper ResolvedNftImage object', () => {
     const resolved = buildGenerativeResolvedImage(contractA, '100');
     expect(resolved.source).toBe('generative');

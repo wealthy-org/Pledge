@@ -8,6 +8,7 @@ export interface NftImageProps {
   alt?: string;
   contractAddress?: string;
   tokenId?: string;
+  symbol?: string;
   className?: string;
   containerClassName?: string;
   priority?: boolean;
@@ -20,7 +21,8 @@ export function NftImage({
   src,
   alt = 'NFT Asset',
   contractAddress = '',
-  tokenId = '0',
+  tokenId = '',
+  symbol = '',
   className = 'w-full h-full object-cover',
   containerClassName = 'relative w-full h-full overflow-hidden bg-slate-900',
   priority = false,
@@ -28,7 +30,7 @@ export function NftImage({
   onLoad,
   onError,
 }: NftImageProps) {
-  const fallbackSvg = generateSvgArtwork(contractAddress, tokenId);
+  const fallbackSvg = generateSvgArtwork(contractAddress, tokenId, symbol || alt);
   const initialSrc = src && src.trim() !== '' ? src : fallbackSvg;
 
   const [currentSrc, setCurrentSrc] = useState<string>(initialSrc);

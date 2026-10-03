@@ -43,7 +43,8 @@ export function LendCollectionCard({
           src={imageUrl}
           alt={collection.name}
           contractAddress={contractAddr}
-          tokenId="0"
+          tokenId=""
+          symbol={collection.symbol || collection.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>

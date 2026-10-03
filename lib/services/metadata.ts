@@ -9,8 +9,8 @@ const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 const inMemoryMetadataCache = new Map<string, CachedNftRecord>();
 const inMemoryCollectionCache = new Map<string, { name: string; symbol: string; expiresAt: number }>();
 
-export function resolveCollectionImageUrl(name: string): string {
-  return generateSvgArtwork(name, '0');
+export function resolveCollectionImageUrl(nameOrAddress: string, symbol?: string): string {
+  return generateSvgArtwork(nameOrAddress, '', symbol || nameOrAddress);
 }
 
 function getCacheKey(contractAddress: string, tokenId: string): string {
