@@ -65,6 +65,13 @@ export async function getEffectiveWalletClient(
     const provider = getPhantomProvider() || window.ethereum;
     if (provider && userAddress) {
       try {
+        const { requestNetworkSwitch } = await import('@/lib/web3/networkSwitch');
+        await requestNetworkSwitch(activeChain);
+      } catch (switchErr) {
+        console.warn('[WalletClientHelper] requestNetworkSwitch failed:', switchErr);
+      }
+
+      try {
         const viemClient = createWalletClient({
           account: userAddress,
           chain: activeChain,

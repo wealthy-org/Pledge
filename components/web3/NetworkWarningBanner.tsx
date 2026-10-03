@@ -3,12 +3,15 @@
 import React, { useState } from 'react';
 import { useConnection, useChainId, useSwitchChain } from 'wagmi';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
+import { requestNetworkSwitch } from '@/lib/web3/networkSwitch';
 import { useMounted } from '@/lib/hooks/useMounted';
 
 export function NetworkWarningBanner() {
   const { isConnected } = useConnection();
   const chainId = useChainId();
-  const { switchChain, isPending, error: switchError } = useSwitchChain();
+  const { switchChain } = useSwitchChain();
+  const [isPending, setIsPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [dismissedError, setDismissedError] = useState<string | null>(null);
   const mounted = useMounted();
 
@@ -19,15 +22,28 @@ export function NetworkWarningBanner() {
 
   const targetChain = getActiveChain();
 
-  const handleSwitch = () => {
+  const handleSwitch = async () => {
     if (!targetChain?.id) {
       throw new Error('Target chain configuration is missing or undefined.');
     }
     setDismissedError(null);
-    switchChain({ chainId: targetChain.id });
+    setErrorMessage(null);
+    setIsPending(true);
+
+    try {
+      await requestNetworkSwitch(targetChain);
+    } catch (err: any) {
+      try {
+        switchChain({ chainId: targetChain.id });
+      } catch (wagmiErr: any) {
+        setErrorMessage(err?.message || wagmiErr?.message || 'Failed to switch network.');
+      }
+    } finally {
+      setIsPending(false);
+    }
   };
 
-  const currentErrorMessage = switchError?.message || null;
+  const currentErrorMessage = errorMessage;
   const isErrorModalVisible = Boolean(currentErrorMessage && dismissedError !== currentErrorMessage);
 
   return (
