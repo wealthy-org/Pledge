@@ -97,13 +97,17 @@ export function TransactionModal({
     setIsSwitching(true);
     setSwitchError(null);
     try {
-      const success = await requestNetworkSwitch(targetChain);
+      const switchPromise = requestNetworkSwitch(targetChain);
+      const timeoutPromise = new Promise<boolean>((_, reject) =>
+        setTimeout(() => reject(new Error('Network switch timed out. Please open your wallet extension directly to approve.')), 15000)
+      );
+      const success = await Promise.race([switchPromise, timeoutPromise]);
       if (success) {
         onClose();
         if (onRetry) {
           setTimeout(() => {
             onRetry();
-          }, 350);
+          }, 200);
         }
       }
     } catch (err: any) {
@@ -306,36 +310,44 @@ export function TransactionModal({
           )}
 
           {isError && (
-            <div className="grid grid-cols-2 gap-3">
-              {isChainMismatch ? (
-                <Button
-                  variant="primary"
-                  loading={isSwitching}
-                  onClick={handleSwitchNetwork}
-                  className="w-full h-11 whitespace-nowrap text-xs sm:text-sm font-medium"
-                >
-                  <span className="truncate">Switch to {targetChain.name}</span>
-                </Button>
-              ) : (
-                onRetry &&
-                !state.isUserRejection &&
-                state.errorCode !== 'RECEIPT_TIMEOUT' && (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                {isChainMismatch ? (
                   <Button
                     variant="primary"
-                    onClick={onRetry}
-                    className="w-full h-11 text-xs sm:text-sm font-medium"
+                    loading={isSwitching}
+                    onClick={handleSwitchNetwork}
+                    className="w-full h-11 whitespace-nowrap text-xs sm:text-sm font-medium"
                   >
-                    Try Again
+                    <span className="truncate">Switch to {targetChain.name}</span>
                   </Button>
-                )
+                ) : (
+                  onRetry &&
+                  !state.isUserRejection &&
+                  state.errorCode !== 'RECEIPT_TIMEOUT' && (
+                    <Button
+                      variant="primary"
+                      onClick={onRetry}
+                      className="w-full h-11 text-xs sm:text-sm font-medium"
+                    >
+                      Try Again
+                    </Button>
+                  )
+                )}
+                <Button
+                  variant="secondary"
+                  onClick={onClose}
+                  className="w-full h-11 text-xs sm:text-sm font-medium"
+                >
+                  Close
+                </Button>
+              </div>
+
+              {isSwitching && (
+                <p className="text-[10px] font-mono text-[var(--muted)] animate-pulse text-center">
+                  Please approve the network switch in your wallet extension...
+                </p>
               )}
-              <Button
-                variant="secondary"
-                onClick={onClose}
-                className="w-full h-11 text-xs sm:text-sm font-medium"
-              >
-                Close
-              </Button>
             </div>
           )}
 

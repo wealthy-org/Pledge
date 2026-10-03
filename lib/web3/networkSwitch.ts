@@ -40,89 +40,78 @@ export async function requestNetworkSwitch(targetChain: Chain): Promise<boolean>
   const hexChainId = `0x${targetChain.id.toString(16)}` as `0x${string}`;
   const provider = await getConnectedProvider();
 
-  if (!provider || typeof provider.request !== 'function') {
-    throw new Error('No EVM wallet provider detected in browser. Please open MetaMask or Phantom.');
-  }
-
-  let switched = false;
-
+  let wagmiSwitched = false;
   try {
-    await provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: hexChainId }],
-    });
-    switched = true;
-  } catch (switchError: any) {
-    const errorCode = switchError?.code || switchError?.data?.originalError?.code;
-    const errorMessage = (switchError?.message || '').toLowerCase();
-
-    if (
-      errorCode === 4902 ||
-      errorCode === -32603 ||
-      errorMessage.includes('unrecognized') ||
-      errorMessage.includes('not added') ||
-      errorMessage.includes('add') ||
-      errorMessage.includes('could not find')
-    ) {
-      const rpcUrls = targetChain.rpcUrls?.default?.http || ['https://rpc.testnet.chain.robinhood.com'];
-      const explorerUrls = targetChain.blockExplorers?.default?.url
-        ? [targetChain.blockExplorers.default.url]
-        : [];
-
-      await provider.request({
-        method: 'wallet_addEthereumChain',
-        params: [
-          {
-            chainId: hexChainId,
-            chainName: targetChain.name,
-            nativeCurrency: {
-              name: targetChain.nativeCurrency?.name || 'Ether',
-              symbol: targetChain.nativeCurrency?.symbol || 'ETH',
-              decimals: targetChain.nativeCurrency?.decimals || 18,
-            },
-            rpcUrls: rpcUrls.filter((url) => !url.startsWith('/')),
-            blockExplorerUrls: explorerUrls.length > 0 ? explorerUrls : undefined,
-          },
-        ],
-      });
-      switched = true;
-    } else if (
-      errorCode === 4001 ||
-      errorMessage.includes('user rejected') ||
-      errorMessage.includes('cancelled') ||
-      errorMessage.includes('denied')
-    ) {
-      throw new Error(
-        'Network switch request was rejected in your wallet. Please approve switching to Robinhood Testnet in your wallet.'
-      );
-    } else {
-      throw switchError;
+    const { config } = await import('@/lib/wagmi');
+    const { switchChain } = await import('wagmi/actions');
+    if (config) {
+      await switchChain(config, { chainId: targetChain.id as any });
+      wagmiSwitched = true;
+      return true;
+    }
+  } catch (wagmiErr: any) {
+    const msg = (wagmiErr?.message || '').toLowerCase();
+    const code = wagmiErr?.code;
+    if (code === 4001 || msg.includes('user rejected') || msg.includes('denied') || msg.includes('cancelled')) {
+      throw new Error('Network switch was cancelled in wallet.');
     }
   }
 
-  if (switched) {
+  if (!wagmiSwitched && provider && typeof provider.request === 'function') {
     try {
-      const { config } = await import('@/lib/wagmi');
-      const { switchChain } = await import('wagmi/actions');
-      if (config) {
-        await switchChain(config, { chainId: targetChain.id as any });
-      }
-    } catch {}
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: hexChainId }],
+      });
+      return true;
+    } catch (switchErr: any) {
+      const errorCode = switchErr?.code || switchErr?.data?.originalError?.code;
+      const errorMessage = (switchErr?.message || '').toLowerCase();
 
-    let retries = 20;
-    while (retries > 0) {
-      try {
-        const currentChain = await provider.request({ method: 'eth_chainId' });
-        const currentId =
-          typeof currentChain === 'string'
-            ? parseInt(currentChain, 16)
-            : Number(currentChain);
-        if (currentId === targetChain.id) {
-          break;
-        }
-      } catch {}
-      await new Promise((r) => setTimeout(r, 100));
-      retries--;
+      if (
+        errorCode === 4902 ||
+        errorCode === -32603 ||
+        errorMessage.includes('unrecognized') ||
+        errorMessage.includes('not added') ||
+        errorMessage.includes('add') ||
+        errorMessage.includes('could not find')
+      ) {
+        const rawUrls = targetChain.rpcUrls?.default?.http || [];
+        const validUrls = rawUrls.filter((u) => u.startsWith('http'));
+        const rpcUrls = validUrls.length > 0 ? validUrls : ['https://rpc.testnet.chain.robinhood.com'];
+        const explorerUrls = targetChain.blockExplorers?.default?.url
+          ? [targetChain.blockExplorers.default.url]
+          : ['https://explorer.testnet.chain.robinhood.com'];
+
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: hexChainId,
+              chainName: targetChain.name,
+              nativeCurrency: {
+                name: targetChain.nativeCurrency?.name || 'Ether',
+                symbol: targetChain.nativeCurrency?.symbol || 'ETH',
+                decimals: targetChain.nativeCurrency?.decimals || 18,
+              },
+              rpcUrls,
+              blockExplorerUrls: explorerUrls,
+            },
+          ],
+        });
+        return true;
+      }
+
+      if (
+        errorCode === 4001 ||
+        errorMessage.includes('user rejected') ||
+        errorMessage.includes('denied') ||
+        errorMessage.includes('cancelled')
+      ) {
+        throw new Error('Network switch was cancelled in wallet.');
+      }
+
+      throw switchErr;
     }
   }
 
