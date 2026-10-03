@@ -190,7 +190,7 @@ export default function LendPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <Link
               href="/explore"
               className="px-3.5 py-2 text-xs font-medium rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors shrink-0"
@@ -237,7 +237,7 @@ export default function LendPage() {
             </div>
           </div>
         ) : isLoadingCollections ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
             {[1, 2, 3, 4].map((idx) => (
               <div
                 key={idx}
@@ -251,7 +251,7 @@ export default function LendPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
             {collectionsList.map((col) => (
               <LendCollectionCard
                 key={col.contractAddress || col.id}

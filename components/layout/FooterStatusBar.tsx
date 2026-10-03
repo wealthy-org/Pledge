@@ -48,7 +48,7 @@ export function FooterStatusBar() {
 
   return (
     <footer
-      className="fixed bottom-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--footer-bar-height)] z-30 bg-white dark:bg-[#09100e] border-t border-[#e1ebe6] dark:border-[#182c24] px-4 flex items-center justify-between text-[10px] text-[#556e64] dark:text-[#8b9e95] select-none shadow-xs transition-colors duration-150"
+      className="hidden md:flex fixed bottom-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--footer-bar-height)] z-30 bg-white dark:bg-[#09100e] border-t border-[#e1ebe6] dark:border-[#182c24] px-4 items-center justify-between text-[10px] text-[#556e64] dark:text-[#8b9e95] select-none shadow-xs transition-colors duration-150"
       data-testid="footer-status-bar"
     >
       <div className="flex items-center gap-2 truncate">

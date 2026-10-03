@@ -37,11 +37,8 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar />
       <HeaderBar onSearchClick={() => setSearchOpen(true)} />
 
-      <main
-        id="main-content"
-        className="pt-[calc(var(--header-height)+20px)] pb-[calc(var(--footer-bar-height)+60px)] md:pb-[calc(var(--footer-bar-height)+30px)] md:pl-[calc(var(--rail-width)+24px)] pl-4 pr-4 xl:pr-[calc(var(--feed-width)+24px)] min-h-screen bg-[var(--bg)]"
-      >
-        <div className="max-w-[1440px] mx-auto">{children}</div>
+      <main id="main-content" className="app-main-content w-full">
+        <div className="max-w-[1440px] mx-auto w-full">{children}</div>
       </main>
 
       <ActivityPanel />

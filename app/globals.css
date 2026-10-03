@@ -203,3 +203,26 @@ textarea:disabled {
   white-space: normal;
 }
 
+.app-main-content {
+  min-height: 100vh;
+  padding-top: calc(var(--header-height) + 20px);
+  padding-bottom: calc(var(--footer-bar-height) + 72px);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: var(--bg);
+}
+
+@media (min-width: 768px) {
+  .app-main-content {
+    padding-left: calc(var(--rail-width) + 24px);
+    padding-bottom: calc(var(--footer-bar-height) + 32px);
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .app-main-content {
+    padding-right: calc(var(--feed-width) + 24px);
+  }
+}
+
