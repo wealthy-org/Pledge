@@ -22,7 +22,7 @@ import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
 import type { OfferItem } from '@/types/api';
 
-const COLLECTIONS_PAGE_SIZE = 8;
+const COLLECTIONS_PAGE_SIZE = 15;
 
 export default function LendPage() {
   const chainId = useSafeChainId();
@@ -191,7 +191,7 @@ export default function LendPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
         <div className="text-[10px] uppercase font-semibold tracking-[2px] text-[#377994] dark:text-emerald-400 flex items-center gap-2">
           <span className="w-5 h-[1px] bg-[#4d93be] dark:bg-emerald-500 inline-block" />
@@ -228,7 +228,30 @@ export default function LendPage() {
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm sm:text-base font-semibold text-[#142d2b] dark:text-[#f0fdf4]">
+              Your Open Offers
+            </h2>
+            {displayOffers.length > 0 && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+                {displayOffers.length} Active
+              </span>
+            )}
+          </div>
+        </div>
+
+        <MyOpenOffersList
+          offers={displayOffers}
+          isLoading={isLoadingOffers}
+          onCancelOffer={handleOpenCancelModal}
+          isConnected={isConnected}
+          onConnect={openConnectModal}
+        />
+      </div>
+
+      <div className="space-y-4 pt-4 border-t border-[var(--line)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a collection market</h2>
@@ -277,8 +300,8 @@ export default function LendPage() {
             </div>
           </div>
         ) : isLoadingCollections ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
-            {[1, 2, 3, 4].map((idx) => (
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
+            {[1, 2, 3, 4, 5].map((idx) => (
               <div
                 key={idx}
                 className="bg-[var(--surface)] border border-[var(--line)] rounded-xl overflow-hidden p-3 sm:p-4 space-y-3"
@@ -292,7 +315,7 @@ export default function LendPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
               {paginatedCollections.map((col) => (
                 <LendCollectionCard
                   key={col.contractAddress || col.id}
@@ -313,25 +336,6 @@ export default function LendPage() {
             />
           </div>
         )}
-      </div>
-
-      <div className="space-y-4 pt-6 border-t border-[var(--line)]">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Your Open Offers</h2>
-            <p className="text-xs text-[var(--muted)]">
-              Active liquidity offers deposited into the protocol waiting to be accepted
-            </p>
-          </div>
-        </div>
-
-        <MyOpenOffersList
-          offers={displayOffers}
-          isLoading={isLoadingOffers}
-          onCancelOffer={handleOpenCancelModal}
-          isConnected={isConnected}
-          onConnect={openConnectModal}
-        />
       </div>
 
       {isDrawerOpen && (

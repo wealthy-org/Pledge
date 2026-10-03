@@ -10,9 +10,10 @@ import { useMounted } from '@/lib/hooks/useMounted';
 
 interface HeaderBarProps {
   onSearchClick?: () => void;
+  onActivityClick?: () => void;
 }
 
-export function HeaderBar({ onSearchClick }: HeaderBarProps) {
+export function HeaderBar({ onSearchClick, onActivityClick }: HeaderBarProps) {
   const { address, isConnected } = useConnection();
   const chainId = useChainId();
   const mounted = useMounted();
@@ -27,8 +28,8 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
   const activeChain = getActiveChain(isSupportedChain ? chainId : undefined);
 
   return (
-    <header className="fixed top-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--header-height)] bg-[var(--surface)] z-30 px-6 border-b border-[var(--line)] flex items-center justify-between gap-6 transition-colors duration-150">
-      <div className="flex items-center gap-6 flex-1 max-w-2xl">
+    <header className="fixed top-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--header-height)] bg-[var(--surface)] z-30 px-4 sm:px-6 border-b border-[var(--line)] flex items-center justify-between gap-3 sm:gap-6 transition-colors duration-150">
+      <div className="flex items-center gap-3 sm:gap-6 flex-1 max-w-2xl">
         <Link
           href="/"
           className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-[var(--text)] shrink-0 select-none hover:opacity-90 transition-opacity"
@@ -60,7 +61,23 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
         </button>
       </div>
 
-      <div className="flex items-center gap-3 sm:gap-4">
+      <div className="flex items-center gap-2 sm:gap-3 lg:gap-4">
+        {onActivityClick && (
+          <button
+            type="button"
+            onClick={onActivityClick}
+            className="xl:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--panel)] hover:bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] text-xs font-medium text-[var(--text)] transition-colors cursor-pointer"
+            aria-label="Open Recent Activity Feed"
+            title="Open Recent Activity"
+          >
+            <span className="w-2 h-2 rounded-full bg-[var(--accent-primary)] animate-pulse shrink-0" />
+            <span className="hidden sm:inline text-xs font-medium">Activity</span>
+            <svg className="w-3.5 h-3.5 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        )}
+
         {mounted && (
           <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
             <span

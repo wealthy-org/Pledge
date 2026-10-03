@@ -178,4 +178,41 @@ describe('TICKET-37: Lend Page & Create Offer Drawer Test Suite', () => {
     expect(screen.getByText(/choose a collection market/i)).toBeDefined();
     expect(screen.getByText(/your open offers/i)).toBeDefined();
   });
+
+  it('TS-06: LendPage places Your Open Offers before Choose a collection market in DOM hierarchy', () => {
+    const { container } = render(<LendPage />);
+    const headingOpenOffers = screen.getByText(/your open offers/i);
+    const headingMarket = screen.getByText(/choose a collection market/i);
+
+    expect(
+      headingOpenOffers.compareDocumentPosition(headingMarket) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it('TS-07: MyOpenOffersList renders compact empty and disconnected states gracefully', () => {
+    const handleConnect = vi.fn();
+    const { rerender } = render(
+      <MyOpenOffersList
+        offers={[]}
+        onCancelOffer={vi.fn()}
+        isConnected={false}
+        onConnect={handleConnect}
+      />
+    );
+
+    expect(screen.getByText(/connect your wallet to view and manage/i)).toBeDefined();
+    const connectBtn = screen.getByRole('button', { name: /connect wallet/i });
+    fireEvent.click(connectBtn);
+    expect(handleConnect).toHaveBeenCalled();
+
+    rerender(
+      <MyOpenOffersList
+        offers={[]}
+        onCancelOffer={vi.fn()}
+        isConnected={true}
+      />
+    );
+    expect(screen.getByText(/no active open offers/i)).toBeDefined();
+  });
 });

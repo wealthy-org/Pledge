@@ -22,6 +22,7 @@ export interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isActivityOpen, setIsActivityOpen] = useState(true);
+  const [isMobileActivityOpen, setIsMobileActivityOpen] = useState(false);
 
   useSearchShortcut(() => setSearchOpen(true));
 
@@ -36,7 +37,10 @@ export function AppShell({ children }: AppShellProps) {
       </a>
 
       <Sidebar />
-      <HeaderBar onSearchClick={() => setSearchOpen(true)} />
+      <HeaderBar
+        onSearchClick={() => setSearchOpen(true)}
+        onActivityClick={() => setIsMobileActivityOpen(true)}
+      />
 
       <main
         id="main-content"
@@ -56,6 +60,8 @@ export function AppShell({ children }: AppShellProps) {
       <ActivityPanel
         isOpen={isActivityOpen}
         onToggle={() => setIsActivityOpen((prev) => !prev)}
+        isMobileOpen={isMobileActivityOpen}
+        onMobileClose={() => setIsMobileActivityOpen(false)}
       />
       <FooterStatusBar />
       <MobileBottomNav onSearchClick={() => setSearchOpen(true)} />

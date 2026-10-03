@@ -240,15 +240,18 @@ textarea:disabled {
   }
 }
 
-.shimmer {
-  background: linear-gradient(
-    90deg,
-    var(--panel) 0%,
-    var(--raised) 50%,
-    var(--panel) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmerSweep 1.6s ease-in-out infinite;
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
+
+.animate-slide-in-right {
+  animation: slideInRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 
 

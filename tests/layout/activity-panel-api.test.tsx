@@ -64,4 +64,22 @@ describe('TICKET-62: Real-time ActivityPanel API Integration Test Suite', () => 
 
     expect(screen.getByText(/Sherwood Forest Rangers/i)).toBeDefined();
   });
+
+  it('renders mobile slide-over drawer overlay when isMobileOpen is true and closes via backdrop or ESC', async () => {
+    const handleClose = vi.fn();
+    const { rerender } = render(<ActivityPanel isMobileOpen={true} onMobileClose={handleClose} />);
+
+    expect(screen.getByTestId('activity-mobile-drawer')).toBeDefined();
+    expect(screen.getByTestId('activity-backdrop')).toBeDefined();
+
+    const backdrop = screen.getByTestId('activity-backdrop');
+    fireEvent.click(backdrop);
+    expect(handleClose).toHaveBeenCalledTimes(1);
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(handleClose).toHaveBeenCalledTimes(2);
+
+    rerender(<ActivityPanel isMobileOpen={false} onMobileClose={handleClose} />);
+    expect(screen.queryByTestId('activity-mobile-drawer')).toBeNull();
+  });
 });
