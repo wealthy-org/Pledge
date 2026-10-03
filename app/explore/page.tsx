@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { useExploreCollections } from '@/hooks/api/useExploreCollections';
-import { ExploreFilters } from '@/components/explore/ExploreFilters';
+import { ExploreFilters, type ExploreSortBy, type ExploreViewMode } from '@/components/explore/ExploreFilters';
 import { ExploreGrid } from '@/components/explore/ExploreGrid';
 import { Button } from '@/components/ui/Button';
 
@@ -12,6 +12,8 @@ function ExploreContent() {
   const chainId = useSafeChainId();
   const [search, setSearch] = useState('');
   const [hasOffersOnly, setHasOffersOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<ExploreSortBy>('volume');
+  const [viewMode, setViewMode] = useState<ExploreViewMode>('grid');
 
   const { data, isLoading, isError, error, refetch } = useExploreCollections({
     chainId,
@@ -19,7 +21,30 @@ function ExploreContent() {
     hasOffers: hasOffersOnly,
   });
 
-  const collections = data?.collections || [];
+  const collections = useMemo(() => {
+    const list = [...(data?.collections || [])];
+    return list.sort((a, b) => {
+      if (sortBy === 'offers') {
+        return (b.offerCount || 0) - (a.offerCount || 0);
+      }
+      if (sortBy === 'floor_asc') {
+        const valA = parseFloat(a.floorPriceEth || '0');
+        const valB = parseFloat(b.floorPriceEth || '0');
+        return valA - valB;
+      }
+      if (sortBy === 'floor_desc') {
+        const valA = parseFloat(a.floorPriceEth || '0');
+        const valB = parseFloat(b.floorPriceEth || '0');
+        return valB - valA;
+      }
+      const poolA = BigInt(a.poolSizeWei || '0');
+      const poolB = BigInt(b.poolSizeWei || '0');
+      if (poolB !== poolA) {
+        return poolB > poolA ? 1 : -1;
+      }
+      return (b.offerCount || 0) - (a.offerCount || 0);
+    });
+  }, [data, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -70,6 +95,10 @@ function ExploreContent() {
         onSearchChange={setSearch}
         hasOffersOnly={hasOffersOnly}
         onToggleHasOffers={setHasOffersOnly}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
         totalCount={data?.total || collections.length}
       />
 
@@ -84,7 +113,11 @@ function ExploreContent() {
           </Button>
         </div>
       ) : (
-        <ExploreGrid collections={collections} isLoading={isLoading} />
+        <ExploreGrid
+          collections={collections}
+          isLoading={isLoading}
+          viewMode={viewMode}
+        />
       )}
     </div>
   );

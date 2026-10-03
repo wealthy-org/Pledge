@@ -62,16 +62,18 @@ describe('TICKET-35: Markets Page & Table Component Test Suite', () => {
     expect(screen.getByText('15.00 ETH')).toBeDefined();
   });
 
-  it('TS-02: MarketsTable renders all 7 specified columns and default sorts by Pool Size DESC', () => {
+  it('TS-02: MarketsTable renders all 8 specified columns and default sorts by Pool Size DESC', () => {
     render(<MarketsTable collections={mockCollections} />);
 
     expect(screen.getByText('#')).toBeDefined();
-    expect(screen.getByText(/collection/i)).toBeDefined();
-    expect(screen.getByText(/best offer/i)).toBeDefined();
-    expect(screen.getByText(/pool size/i)).toBeDefined();
-    expect(screen.getByText(/offers/i)).toBeDefined();
-    expect(screen.getByText(/ltv/i)).toBeDefined();
-    expect(screen.getByText(/action/i)).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /collection/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /^floor/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /24h change/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /top bid/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /sales volume/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /active wallets/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /7d floor/i })).toBeDefined();
+    expect(screen.getByRole('columnheader', { name: /action/i })).toBeDefined();
 
     const rows = screen.getAllByRole('row');
     expect(rows.length).toBe(4);

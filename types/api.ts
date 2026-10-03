@@ -31,6 +31,7 @@ export interface ExploreCollectionItem {
   imageUrl?: string;
   totalSupply?: string;
   holdersCount?: number;
+  floorPriceEth?: string;
   bestOfferWei: string | null;
   poolSizeWei: string;
   offerCount: number;
