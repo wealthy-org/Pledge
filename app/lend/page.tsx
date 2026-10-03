@@ -300,7 +300,7 @@ export default function LendPage() {
             </div>
           </div>
         ) : isLoadingCollections ? (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
             {[1, 2, 3, 4, 5].map((idx) => (
               <div
                 key={idx}
@@ -315,7 +315,7 @@ export default function LendPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
               {paginatedCollections.map((col) => (
                 <LendCollectionCard
                   key={col.contractAddress || col.id}
@@ -379,9 +379,16 @@ export default function LendPage() {
         <CancelOfferModal
           isOpen={isCancelModalOpen}
           offerId={cancellingOffer.offerId}
+          collectionName={
+            collectionsList.find((c) => c.contractAddress?.toLowerCase() === cancellingOffer.collection.toLowerCase())?.name ||
+            formatShortAddress(cancellingOffer.collection)
+          }
           principalEth={(Number(cancellingOffer.principalWei) / 1e18).toFixed(2)}
           onConfirm={handleConfirmCancelOffer}
-          onClose={() => setIsCancelModalOpen(false)}
+          onClose={() => {
+            setIsCancelModalOpen(false);
+            setCancellingOffer(null);
+          }}
         />
       )}
 

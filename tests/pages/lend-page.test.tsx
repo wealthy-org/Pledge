@@ -215,4 +215,23 @@ describe('TICKET-37: Lend Page & Create Offer Drawer Test Suite', () => {
     );
     expect(screen.getByText(/no active open offers/i)).toBeDefined();
   });
+
+  it('TS-08: Clicking Cancel Offer in LendPage opens confirmation modal before executing transaction', () => {
+    render(<LendPage />);
+
+    const cancelButtons = screen.getAllByRole('button', { name: /cancel offer/i });
+    expect(cancelButtons.length).toBeGreaterThan(0);
+
+    fireEvent.click(cancelButtons[0]);
+
+    expect(screen.getByRole('dialog', { name: /cancel offer #1/i })).toBeDefined();
+    expect(screen.getByText(/withdraw liquidity offer from the order book/i)).toBeDefined();
+    expect(screen.getByRole('button', { name: /keep offer/i })).toBeDefined();
+    expect(screen.getByRole('button', { name: /confirm & cancel offer/i })).toBeDefined();
+
+    const keepOfferBtn = screen.getByRole('button', { name: /keep offer/i });
+    fireEvent.click(keepOfferBtn);
+
+    expect(screen.queryByRole('dialog', { name: /cancel offer #1/i })).toBeNull();
+  });
 });
