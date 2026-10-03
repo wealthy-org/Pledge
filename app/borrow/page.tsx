@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { getCuratedCollections, getCollectionByAddress } from '@/config/collections';
 import { NFTGrid, type BorrowableNft } from '@/components/borrow/NFTGrid';
 import { OfferComparisonList } from '@/components/borrow/OfferComparisonList';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
@@ -16,7 +15,6 @@ import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { OfferItem } from '@/types/api';
 
 function BorrowContent() {
@@ -137,7 +135,9 @@ function BorrowContent() {
   };
 
   const selectedCollectionDef = selectedNft
-    ? getCollectionByAddress(selectedNft.contractAddress, chainId)
+    ? collectionsData?.collections?.find(
+        (c) => c.address.toLowerCase() === selectedNft.contractAddress.toLowerCase()
+      )
     : null;
 
   return (

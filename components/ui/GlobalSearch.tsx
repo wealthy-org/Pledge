@@ -8,6 +8,8 @@ import { useCollections } from '@/hooks/api/useCollections';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
+import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
+
 export interface GlobalSearchProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,21 +24,21 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const chainId = useSafeChainId();
   const { data: collectionsData } = useCollections(chainId);
 
-  const collections = useMemo(() => {
+  const collections: ActiveCuratedCollection[] = useMemo(() => {
     const raw = getCuratedCollections(chainId);
     if (!collectionsData?.collections) return raw;
-    return raw.map((col) => {
-      const remote = collectionsData.collections.find(
-        (c) => c.address.toLowerCase() === col.contractAddress.toLowerCase()
-      );
-      if (!remote) return col;
-      return {
-        ...col,
-        id: remote.symbol.toLowerCase(),
-        name: remote.name,
-        symbol: remote.symbol,
-      };
-    });
+    return collectionsData.collections.map((item) => ({
+      id: item.symbol.toLowerCase(),
+      name: item.name,
+      symbol: item.symbol,
+      defaultDurations: [7, 14, 30] as [7, 14, 30],
+      addresses: {
+        [TESTNET_CHAIN_ID]: item.address as `0x${string}`,
+        [MAINNET_CHAIN_ID]: item.address as `0x${string}`,
+        [chainId]: item.address as `0x${string}`,
+      },
+      contractAddress: item.address as `0x${string}`,
+    }));
   }, [chainId, collectionsData]);
 
   useEffect(() => {

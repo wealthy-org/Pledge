@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { getCuratedCollections, type CuratedCollectionDefinition, type ActiveCuratedCollection } from '@/config/collections';
+import { type CuratedCollectionDefinition, type ActiveCuratedCollection } from '@/config/collections';
 import { LendCollectionCard } from '@/components/lend/LendCollectionCard';
 import { MyOpenOffersList } from '@/components/lend/MyOpenOffersList';
 import { CreateOfferDrawer, type CreateOfferFormData } from '@/components/lend/CreateOfferDrawer';
@@ -9,6 +9,8 @@ import { CreateOfferConfirmationModal } from '@/components/lend/CreateOfferConfi
 import { CancelOfferModal } from '@/components/lend/CancelOfferModal';
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { Button } from '@/components/ui/Button';
 import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { useOffers } from '@/hooks/api/useOffers';
@@ -17,16 +19,24 @@ import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import type { OfferItem } from '@/types/api';
 
+import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
+
 export default function LendPage() {
   const chainId = useSafeChainId();
   const { address } = useConnection();
   const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
-  const { data: collectionsData } = useCollections(chainId);
+  const {
+    data: collectionsData,
+    isLoading: isLoadingCollections,
+    isError: isErrorCollections,
+    error: errorCollections,
+    refetch: refetchCollections,
+  } = useCollections(chainId);
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('rhg');
+  const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
   const [pendingFormData, setPendingFormData] = useState<CreateOfferFormData | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
@@ -48,47 +58,47 @@ export default function LendPage() {
     });
   }, [apiOffers, localOffers]);
 
-  const curated = useMemo(() => {
-    const raw = getCuratedCollections(chainId);
-    if (!collectionsData?.collections) return raw;
-    return raw.map((col) => {
-      const remote = collectionsData.collections.find(
-        (c) => c.address.toLowerCase() === col.contractAddress.toLowerCase()
-      );
-      if (!remote) return col;
-      return {
-        ...col,
-        id: remote.symbol.toLowerCase(),
-        name: remote.name,
-        symbol: remote.symbol,
-      };
-    });
+  const curated: ActiveCuratedCollection[] = useMemo(() => {
+    if (!collectionsData?.collections) return [];
+    return collectionsData.collections.map((item) => ({
+      id: item.symbol.toLowerCase(),
+      name: item.name,
+      symbol: item.symbol,
+      defaultDurations: [7, 14, 30] as [7, 14, 30],
+      addresses: {
+        [TESTNET_CHAIN_ID]: item.address as `0x${string}`,
+        [MAINNET_CHAIN_ID]: item.address as `0x${string}`,
+        [chainId]: item.address as `0x${string}`,
+      },
+      contractAddress: item.address as `0x${string}`,
+    }));
   }, [chainId, collectionsData]);
 
   const collectionStats = useMemo(() => {
     const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
-    for (const col of curated) {
-      const colAddress = col.contractAddress;
-      const remote = collectionsData?.collections?.find(
-        (c) => c.address.toLowerCase() === colAddress.toLowerCase()
-      );
-      map[col.id] = {
-        poolSizeEth: remote?.poolSizeWei && remote.poolSizeWei !== '0'
-          ? (Number(remote.poolSizeWei) / 1e18).toFixed(2)
-          : '0.00',
-        activeLoansCount: remote?.activeLoansCount || 0,
-      };
+    if (collectionsData?.collections) {
+      for (const item of collectionsData.collections) {
+        const id = item.symbol.toLowerCase();
+        map[id] = {
+          poolSizeEth: item.poolSizeWei && item.poolSizeWei !== '0'
+            ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
+            : '0.00',
+          activeLoansCount: item.activeLoansCount || 0,
+        };
+      }
     }
     return map;
-  }, [collectionsData, curated]);
+  }, [collectionsData]);
 
   const selectedCol = useMemo(() => {
-    return curated.find((c) => c.id === selectedCollectionId) || curated[0];
+    return curated.find((c) => c.id === selectedCollectionId) || curated[0] || null;
   }, [curated, selectedCollectionId]);
 
   const handleOpenDrawer = (collection?: CuratedCollectionDefinition | ActiveCuratedCollection) => {
     if (collection) {
       setSelectedCollectionId(collection.id);
+    } else if (curated[0]) {
+      setSelectedCollectionId(curated[0].id);
     }
     setIsDrawerOpen(true);
   };
@@ -196,17 +206,52 @@ export default function LendPage() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {curated.map((col) => (
-            <LendCollectionCard
-              key={col.id}
-              collection={col}
-              poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
-              activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
-              onMakeOffer={handleOpenDrawer}
-            />
-          ))}
-        </div>
+        {isErrorCollections ? (
+          <div className="p-8 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl text-center bg-red-50/50 dark:bg-red-950/10">
+            <div className="max-w-md mx-auto space-y-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--text)]">Failed to load curated collections</h3>
+                <p className="text-xs text-[var(--muted)] mt-1">
+                  {errorCollections instanceof Error ? errorCollections.message : 'Unable to query curated collections from the RPC network.'}
+                </p>
+              </div>
+              <Button onClick={() => refetchCollections()} size="sm" variant="secondary">
+                Retry Connection
+              </Button>
+            </div>
+          </div>
+        ) : isLoadingCollections ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1, 2, 3].map((idx) => (
+              <div
+                key={idx}
+                className="bg-[var(--surface)] border border-[var(--line)] rounded-xl overflow-hidden p-4 space-y-3"
+              >
+                <Skeleton width="100%" height="160px" borderRadius="8px" />
+                <Skeleton width="120px" height="16px" />
+                <Skeleton width="80px" height="12px" />
+                <Skeleton width="100%" height="32px" borderRadius="6px" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {curated.map((col) => (
+              <LendCollectionCard
+                key={col.contractAddress}
+                collection={col}
+                poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
+                activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
+                onMakeOffer={handleOpenDrawer}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-4 pt-6 border-t border-[var(--line)]">
@@ -225,15 +270,17 @@ export default function LendPage() {
         />
       </div>
 
-      <CreateOfferDrawer
-        isOpen={isDrawerOpen}
-        collections={curated}
-        initialCollectionId={selectedCollectionId}
-        onClose={() => setIsDrawerOpen(false)}
-        onSubmit={handleDrawerSubmit}
-      />
+      {isDrawerOpen && (
+        <CreateOfferDrawer
+          isOpen={isDrawerOpen}
+          collections={curated}
+          initialCollectionId={selectedCollectionId}
+          onClose={() => setIsDrawerOpen(false)}
+          onSubmit={handleDrawerSubmit}
+        />
+      )}
 
-      {pendingFormData && (
+      {pendingFormData && selectedCol && (
         <CreateOfferConfirmationModal
           isOpen={isConfirmModalOpen}
           collectionName={selectedCol.name}

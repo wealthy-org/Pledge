@@ -2,7 +2,8 @@
 
 import React from 'react';
 import { FilterChip } from '@/components/ui/FilterChip';
-import { getCuratedCollections } from '@/config/collections';
+import { useCollections } from '@/hooks/api/useCollections';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 
 export interface ActivityFilterBarProps {
   selectedType: string;
@@ -17,7 +18,9 @@ export function ActivityFilterBar({
   onTypeChange,
   onCollectionChange,
 }: ActivityFilterBarProps) {
-  const collections = getCuratedCollections();
+  const chainId = useSafeChainId();
+  const { data: collectionsData } = useCollections(chainId);
+  const collections = collectionsData?.collections || [];
 
   const filterTypes = [
     { id: 'all', label: 'All Activity' },
@@ -53,7 +56,7 @@ export function ActivityFilterBar({
         >
           <option value="all">All Collections</option>
           {collections.map((col) => (
-            <option key={col.id} value={col.contractAddress}>
+            <option key={col.address} value={col.address}>
               {col.name}
             </option>
           ))}

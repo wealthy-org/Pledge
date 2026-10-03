@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCollectionByAddress, getCuratedCollections } from '@/config/collections';
+import { useCollections } from '@/hooks/api/useCollections';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
 interface ActivityItem {
@@ -22,6 +22,7 @@ interface ActivityItem {
 
 export function ActivityPanel() {
   const chainId = useSafeChainId();
+  const { data: collectionsData } = useCollections(chainId);
   const [isOpen, setIsOpen] = useState(true);
   const [feedScope, setFeedScope] = useState<'all' | 'watch'>('all');
   const [feedType, setFeedType] = useState<'all' | 'loan' | 'repaid'>('all');
@@ -221,10 +222,12 @@ export function ActivityPanel() {
           </div>
         ) : (
           filteredEvents.map((e) => {
-            const col = getCollectionByAddress(e.collection, chainId) || getCuratedCollections(chainId)[0];
-            const colName = e.collectionName || col?.name || 'Curated NFT';
-            const symbol = col?.symbol || 'NFT';
-            const targetCollection = e.collection || col?.contractAddress || '';
+            const remoteCol = collectionsData?.collections?.find(
+              (c) => c.address.toLowerCase() === (e.collection || '').toLowerCase()
+            );
+            const colName = e.collectionName || remoteCol?.name || 'Curated NFT';
+            const symbol = remoteCol?.symbol || 'NFT';
+            const targetCollection = e.collection || remoteCol?.address || '';
 
             return (
               <Link

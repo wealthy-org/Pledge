@@ -3,34 +3,28 @@
 import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCuratedCollections } from '@/config/collections';
 import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { Button } from '@/components/ui/Button';
 
 export default function CollectionsPage() {
   const chainId = useSafeChainId();
-  const { data: apiData } = useCollections(chainId);
+  const { data: apiData, isLoading, isError, error, refetch } = useCollections(chainId);
 
   const collections: MarketCollectionItem[] = useMemo(() => {
-    return getCuratedCollections(chainId).map((col) => {
-      const address = col.contractAddress;
-      const remote = apiData?.collections?.find(
-        (c) => c.address.toLowerCase() === address.toLowerCase()
-      );
-
-      return {
-        address,
-        name: col.name,
-        symbol: col.symbol,
-        imageUrl: remote?.imageUrl || resolveCollectionImageUrl(col.name),
-        bestOfferWei: remote?.bestOfferWei || undefined,
-        poolSizeWei: remote?.poolSizeWei || '0',
-        offerCount: remote?.offerCount || 0,
-        activeLoansCount: remote?.activeLoansCount || 0,
-      };
-    });
-  }, [apiData, chainId]);
+    if (!apiData?.collections) return [];
+    return apiData.collections.map((item) => ({
+      address: item.address,
+      name: item.name,
+      symbol: item.symbol,
+      imageUrl: item.imageUrl || resolveCollectionImageUrl(item.name),
+      bestOfferWei: item.bestOfferWei || undefined,
+      poolSizeWei: item.poolSizeWei || '0',
+      offerCount: item.offerCount || 0,
+      activeLoansCount: item.activeLoansCount || 0,
+    }));
+  }, [apiData]);
 
   return (
     <div className="space-y-8">
@@ -68,7 +62,28 @@ export default function CollectionsPage() {
       </div>
 
       <div className="space-y-4">
-        <MarketsTable collections={collections} />
+        {isError ? (
+          <div className="p-8 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl text-center bg-red-50/50 dark:bg-red-950/10">
+            <div className="max-w-md mx-auto space-y-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-[var(--text)]">Failed to load on-chain collections</h3>
+                <p className="text-xs text-[var(--muted)] mt-1">
+                  {error instanceof Error ? error.message : 'Unable to query curated collections from the RPC network.'}
+                </p>
+              </div>
+              <Button onClick={() => refetch()} size="sm" variant="secondary">
+                Retry Connection
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <MarketsTable collections={collections} isLoading={isLoading} />
+        )}
       </div>
     </div>
   );

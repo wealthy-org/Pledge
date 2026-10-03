@@ -14,29 +14,21 @@ export default function HomePage() {
   const chainId = useSafeChainId();
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'has_offers'>('all');
   const [loanMarketTab, setLoanMarketTab] = useState<'offers' | 'active'>('offers');
-  const { data: apiData } = useCollections(chainId);
+  const { data: apiData, isLoading: isLoadingCollections } = useCollections(chainId);
 
   const collections: MarketCollectionItem[] = useMemo(() => {
-    return getCuratedCollections(chainId).map((col) => {
-      const address = col.contractAddress;
-      const remote = apiData?.collections?.find(
-        (c) => c.address.toLowerCase() === address.toLowerCase()
-      );
-      const name = remote?.name || col.name;
-      const symbol = remote?.symbol || col.symbol;
-
-      return {
-        address,
-        name,
-        symbol,
-        imageUrl: remote?.imageUrl || resolveCollectionImageUrl(name),
-        bestOfferWei: remote?.bestOfferWei || undefined,
-        poolSizeWei: remote?.poolSizeWei || '0',
-        offerCount: remote?.offerCount || 0,
-        activeLoansCount: remote?.activeLoansCount || 0,
-      };
-    });
-  }, [apiData, chainId]);
+    if (!apiData?.collections) return [];
+    return apiData.collections.map((item) => ({
+      address: item.address,
+      name: item.name,
+      symbol: item.symbol,
+      imageUrl: item.imageUrl || resolveCollectionImageUrl(item.name),
+      bestOfferWei: item.bestOfferWei || undefined,
+      poolSizeWei: item.poolSizeWei || '0',
+      offerCount: item.offerCount || 0,
+      activeLoansCount: item.activeLoansCount || 0,
+    }));
+  }, [apiData]);
 
   const filteredCollections = useMemo(() => {
     if (selectedFilter === 'has_offers') {
@@ -195,7 +187,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <MarketsTable collections={filteredCollections} />
+        <MarketsTable collections={filteredCollections} isLoading={isLoadingCollections} />
       </div>
 
       <div className="border-t border-[var(--line)] pt-8 space-y-4">

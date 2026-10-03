@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCollectionByAddress } from '@/config/collections';
+import { useCollections } from '@/hooks/api/useCollections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
 import { LTVHealthBar } from '@/components/common/LTVHealthBar';
@@ -31,6 +31,7 @@ export function BorrowingTab({
   const router = useRouter();
   const hookChainId = useSafeChainId();
   const chainId = propChainId || hookChainId;
+  const { data: collectionsData } = useCollections(chainId);
   const normalizedUser = userAddress?.toLowerCase();
 
   const userBorrowingLoans = loans.filter((loan) => {
@@ -115,11 +116,13 @@ export function BorrowingTab({
   return (
     <div className="space-y-3.5">
       {userBorrowingLoans.map((loan) => {
-        const col = getCollectionByAddress(loan.collection, chainId);
+        const col = collectionsData?.collections?.find(
+          (c) => c.address.toLowerCase() === loan.collection.toLowerCase()
+        );
         const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
         const totalDueEth = calculateTotalDue(loan.principalWei, loan.interestWei);
         const tokenId = loan.tokenId || (loan as unknown as { nftId?: string }).nftId || '0';
-        const displayImage = col ? resolveCollectionImageUrl(col.name) : undefined;
+        const displayImage = col ? (col.imageUrl || resolveCollectionImageUrl(col.name)) : undefined;
 
         return (
           <article

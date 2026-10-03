@@ -102,7 +102,7 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
       contractAddress: collection.contractAddress,
       tokenId: '1',
       collectionName: collection.name,
-      name: `${collection.name} #1`,
+      name: collection.name,
       imageUrl: resolveCollectionImageUrl(collection.name),
       bestOfferWei: stats.bestOfferWei || undefined,
       offerCount: stats.offerCount,

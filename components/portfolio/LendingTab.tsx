@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCollectionByAddress } from '@/config/collections';
+import { useCollections } from '@/hooks/api/useCollections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { LoanItem } from '@/types/api';
 
@@ -24,6 +24,7 @@ export function LendingTab({
 }: LendingTabProps) {
   const hookChainId = useSafeChainId();
   const chainId = propChainId || hookChainId;
+  const { data: collectionsData } = useCollections(chainId);
   const normalizedUser = userAddress?.toLowerCase();
 
   const userLendingLoans = loans.filter((loan) => {
@@ -66,12 +67,14 @@ export function LendingTab({
   return (
     <div className="space-y-3.5">
       {userLendingLoans.map((loan) => {
-        const col = getCollectionByAddress(loan.collection, chainId);
+        const col = collectionsData?.collections?.find(
+          (c) => c.address.toLowerCase() === loan.collection.toLowerCase()
+        );
         const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
         const interestEth = `${Number(formatUnits(BigInt(loan.interestWei || '0'), 18)).toFixed(3)} ETH`;
         const isPastDue = new Date(loan.dueAt).getTime() < new Date().getTime();
         const tokenId = loan.tokenId || (loan as unknown as { nftId?: string }).nftId || '0';
-        const displayImage = col ? resolveCollectionImageUrl(col.name) : undefined;
+        const displayImage = col ? (col.imageUrl || resolveCollectionImageUrl(col.name)) : undefined;
 
         return (
           <article
