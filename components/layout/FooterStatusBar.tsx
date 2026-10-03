@@ -43,7 +43,7 @@ export function FooterStatusBar() {
   }, []);
 
   const activeChain = getActiveChain(chainId ?? TESTNET_CHAIN_ID);
-  const explorerUrl = activeChain.blockExplorers?.default.url || 'https://explorer.testnet.robinhood.com';
+  const explorerUrl = activeChain.blockExplorers?.default.url || 'https://explorer.testnet.chain.robinhood.com';
 
   return (
     <footer

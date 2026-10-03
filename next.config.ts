@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'explorer.chain.robinhood.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'explorer.testnet.chain.robinhood.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'explorer.mainnet.chain.robinhood.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'raw.githubusercontent.com',
       },
       {

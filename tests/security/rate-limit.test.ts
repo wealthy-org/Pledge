@@ -4,6 +4,7 @@ import {
   resetRateLimits,
   RATE_LIMIT_STANDARD,
   RATE_LIMIT_HEAVY,
+  RATE_LIMIT_RPC,
 } from '@/lib/api/security';
 
 describe('TICKET-23: API Rate Limiting Test Suite', () => {
@@ -49,12 +50,15 @@ describe('TICKET-23: API Rate Limiting Test Suite', () => {
       expect(allowedIp2.remaining).toBe(4);
     });
 
-    it('uses standard default limits (60/min standard, 20/min heavy)', () => {
-      expect(RATE_LIMIT_STANDARD.maxRequests).toBe(60);
+    it('uses standard default limits (180/min standard, 30/min heavy, 600/min rpc)', () => {
+      expect(RATE_LIMIT_STANDARD.maxRequests).toBe(180);
       expect(RATE_LIMIT_STANDARD.windowMs).toBe(60000);
 
-      expect(RATE_LIMIT_HEAVY.maxRequests).toBe(20);
+      expect(RATE_LIMIT_HEAVY.maxRequests).toBe(30);
       expect(RATE_LIMIT_HEAVY.windowMs).toBe(60000);
+
+      expect(RATE_LIMIT_RPC.maxRequests).toBe(600);
+      expect(RATE_LIMIT_RPC.windowMs).toBe(60000);
     });
   });
 });

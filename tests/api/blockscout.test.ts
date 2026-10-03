@@ -78,7 +78,7 @@ describe('TICKET-05b: Blockscout Client & Media Sanitization Test Suite', () => 
     });
 
     const client = new BlockscoutClient({
-      baseUrl: 'https://explorer.testnet.robinhood.com/api/v2',
+      baseUrl: 'https://explorer.testnet.chain.robinhood.com/api/v2',
       apiKey: 'test-api-key',
     });
 
@@ -99,7 +99,7 @@ describe('TICKET-05b: Blockscout Client & Media Sanitization Test Suite', () => 
     });
 
     const client = new BlockscoutClient({
-      baseUrl: 'https://explorer.testnet.robinhood.com/api/v2',
+      baseUrl: 'https://explorer.testnet.chain.robinhood.com/api/v2',
       apiKey: 'secret_sensitive_api_key_12345',
     });
 
@@ -124,7 +124,7 @@ describe('TICKET-05b: Blockscout Client & Media Sanitization Test Suite', () => 
     global.fetch = fetchMock;
 
     const client = new BlockscoutClient({
-      baseUrl: 'https://explorer.testnet.robinhood.com/api/v2',
+      baseUrl: 'https://explorer.testnet.chain.robinhood.com/api/v2',
     });
 
     await client.fetchNFTInstance('0x1234567890123456789012345678901234567890', '1');

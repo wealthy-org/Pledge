@@ -13,12 +13,17 @@ export interface RateLimitResult {
 }
 
 export const RATE_LIMIT_STANDARD: RateLimitConfig = {
-  maxRequests: 60,
+  maxRequests: 180,
   windowMs: 60000,
 };
 
 export const RATE_LIMIT_HEAVY: RateLimitConfig = {
-  maxRequests: 20,
+  maxRequests: 30,
+  windowMs: 60000,
+};
+
+export const RATE_LIMIT_RPC: RateLimitConfig = {
+  maxRequests: 600,
   windowMs: 60000,
 };
 

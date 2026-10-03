@@ -7,7 +7,7 @@ export { robinhoodTestnet, robinhoodMainnet, SUPPORTED_CHAINS };
 function getRpcUrl(defaultFallback: string): string {
   const configured = process.env.NEXT_PUBLIC_RPC_URL;
   if (configured && !configured.startsWith('/')) {
-    return configured;
+    return configured.trim();
   }
   if (typeof window !== 'undefined') {
     return '/api/rpc';
