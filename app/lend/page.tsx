@@ -25,7 +25,11 @@ export default function LendPage() {
   const chainId = useSafeChainId();
   const { address, isConnected } = useConnection();
   const { openConnectModal } = useConnectModal();
-  const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
+  const { data: apiOffers, isLoading: isLoadingOffers, refetch: refetchOffers } = useOffers({
+    lender: address,
+    chainId,
+    status: 'open',
+  });
 
   const [searchQuery, setSearchQuery] = useState('');
   const {
@@ -298,6 +302,7 @@ export default function LendPage() {
 
         <MyOpenOffersList
           offers={displayOffers}
+          isLoading={isLoadingOffers}
           onCancelOffer={handleOpenCancelModal}
           isConnected={isConnected}
           onConnect={openConnectModal}
