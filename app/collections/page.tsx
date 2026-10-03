@@ -6,6 +6,7 @@ import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCuratedCollections } from '@/config/collections';
 import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function CollectionsPage() {
   const chainId = useSafeChainId();
@@ -22,13 +23,11 @@ export default function CollectionsPage() {
         address,
         name: col.name,
         symbol: col.symbol,
-        imageUrl: col.imageUrl,
-        floorPriceEth: col.floorPriceEth,
+        imageUrl: remote?.imageUrl || resolveCollectionImageUrl(col.name),
         bestOfferWei: remote?.bestOfferWei || undefined,
         poolSizeWei: remote?.poolSizeWei || '0',
         offerCount: remote?.offerCount || 0,
         activeLoansCount: remote?.activeLoansCount || 0,
-        maxLtvBps: col.maxLtvBps,
       };
     });
   }, [apiData, chainId]);

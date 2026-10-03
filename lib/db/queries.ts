@@ -1,6 +1,7 @@
-import { getCuratedCollections, getCollectionByAddress } from '@/config/collections';
+import { getCollectionByAddress } from '@/config/collections';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
+import { fetchOnChainCollectionInfo, resolveCollectionImageUrl } from '@/lib/services/metadata';
 import {
   CollectionItemResponse,
   CollectionDetailResponse,
@@ -100,23 +101,66 @@ export async function getCollectionStatsFromStore(
 
 export async function fetchCollectionsWithStats(chainId?: number): Promise<CollectionItemResponse[]> {
   const targetChain = resolveChainId(chainId);
-  const collections = getCuratedCollections(targetChain);
+  await syncOnChainLogs(targetChain);
+
+  const addressSet = new Set<string>();
+
+  for (const colRow of indexerStore.collections.values()) {
+    if (colRow.chain_id === targetChain && colRow.is_enabled) {
+      addressSet.add(colRow.address.toLowerCase());
+    }
+  }
+
+  for (const offer of indexerStore.offers.values()) {
+    if (offer.chain_id === targetChain && offer.collection) {
+      addressSet.add(offer.collection.toLowerCase());
+    }
+  }
+
+  for (const loan of indexerStore.loans.values()) {
+    if (loan.chain_id === targetChain && loan.collection) {
+      addressSet.add(loan.collection.toLowerCase());
+    }
+  }
+
+  const envRhg = process.env.NEXT_PUBLIC_RHG_COLLECTION;
+  const envSfr = process.env.NEXT_PUBLIC_SFR_COLLECTION;
+  const envNgp = process.env.NEXT_PUBLIC_NGP_COLLECTION;
+  if (envRhg && envRhg.startsWith('0x')) addressSet.add(envRhg.toLowerCase());
+  if (envSfr && envSfr.startsWith('0x')) addressSet.add(envSfr.toLowerCase());
+  if (envNgp && envNgp.startsWith('0x')) addressSet.add(envNgp.toLowerCase());
 
   const results: CollectionItemResponse[] = [];
-  for (const col of collections) {
-    const stats = await getCollectionStatsFromStore(col.contractAddress, targetChain);
-    results.push({
-      address: col.contractAddress,
-      name: col.name,
-      symbol: col.symbol,
-      imageUrl: col.imageUrl,
-      description: col.description,
-      floorPriceEth: col.floorPriceEth,
-      bestOfferWei: stats.bestOfferWei,
-      poolSizeWei: stats.poolSizeWei,
-      offerCount: stats.offerCount,
-      activeLoansCount: stats.activeLoansCount,
-    });
+  for (const addr of addressSet) {
+    const known = getCollectionByAddress(addr, targetChain);
+    const stats = await getCollectionStatsFromStore(addr, targetChain);
+
+    if (known) {
+      results.push({
+        address: known.contractAddress,
+        name: known.name,
+        symbol: known.symbol,
+        imageUrl: resolveCollectionImageUrl(known.name),
+        description: `${known.name} on Robinhood Chain`,
+        bestOfferWei: stats.bestOfferWei,
+        poolSizeWei: stats.poolSizeWei,
+        offerCount: stats.offerCount,
+        activeLoansCount: stats.activeLoansCount,
+      });
+    } else {
+      const onChain = await fetchOnChainCollectionInfo(addr, targetChain);
+      results.push({
+        address: onChain.address,
+        name: onChain.name,
+        symbol: onChain.symbol,
+        imageUrl: resolveCollectionImageUrl(onChain.name),
+        description: `${onChain.name} on Robinhood Chain`,
+        bestOfferWei: stats.bestOfferWei,
+        poolSizeWei: stats.poolSizeWei,
+        offerCount: stats.offerCount,
+        activeLoansCount: stats.activeLoansCount,
+      });
+    }
   }
 
   return results;
@@ -127,19 +171,49 @@ export async function fetchCollectionDetail(
   chainId?: number
 ): Promise<CollectionDetailResponse | null> {
   const targetChain = resolveChainId(chainId);
-  const collection = getCollectionByAddress(address, targetChain);
-  if (!collection) return null;
+  await syncOnChainLogs(targetChain);
+
+  const target = address.toLowerCase();
+  const known = getCollectionByAddress(address, targetChain);
+  const isEnabledInStore = indexerStore.collections.get(`${targetChain}:${target}`)?.is_enabled;
+  const hasOffers = Array.from(indexerStore.offers.values()).some(
+    (o) => o.chain_id === targetChain && o.collection.toLowerCase() === target
+  );
+  const hasLoans = Array.from(indexerStore.loans.values()).some(
+    (l) => l.chain_id === targetChain && l.collection.toLowerCase() === target
+  );
+
+  if (!known && !isEnabledInStore && !hasOffers && !hasLoans) {
+    return null;
+  }
 
   const stats = await getCollectionStatsFromStore(address, targetChain);
 
+  if (known) {
+    return {
+      collection: {
+        address: known.contractAddress,
+        name: known.name,
+        symbol: known.symbol,
+        imageUrl: resolveCollectionImageUrl(known.name),
+        description: `${known.name} on Robinhood Chain`,
+        bestOfferWei: stats.bestOfferWei,
+        poolSizeWei: stats.poolSizeWei,
+        offerCount: stats.offerCount,
+        activeLoansCount: stats.activeLoansCount,
+      },
+      stats,
+    };
+  }
+
+  const onChain = await fetchOnChainCollectionInfo(address, targetChain);
   return {
     collection: {
-      address: collection.contractAddress,
-      name: collection.name,
-      symbol: collection.symbol,
-      imageUrl: collection.imageUrl,
-      description: collection.description,
-      floorPriceEth: collection.floorPriceEth,
+      address: onChain.address,
+      name: onChain.name,
+      symbol: onChain.symbol,
+      imageUrl: resolveCollectionImageUrl(onChain.name),
+      description: `${onChain.name} on Robinhood Chain`,
       bestOfferWei: stats.bestOfferWei,
       poolSizeWei: stats.poolSizeWei,
       offerCount: stats.offerCount,
@@ -234,16 +308,19 @@ export async function fetchLoanDetail(loanId: number, chainId?: number): Promise
     txHash: fromStore.tx_hash,
   };
 
-  const collection = getCollectionByAddress(loan.collection, targetChain);
+  const known = getCollectionByAddress(loan.collection, targetChain);
+  const onChain = known ? null : await fetchOnChainCollectionInfo(loan.collection, targetChain);
+  const collectionName = known ? known.name : (onChain?.name || 'NFT Collection');
+  const imageUrl = resolveCollectionImageUrl(collectionName);
   const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
 
   return {
     loan: {
       ...loan,
       nftMetadata: {
-        name: `${collection ? collection.name : 'NFT'} #${loan.tokenId}`,
-        imageUrl: collection ? collection.imageUrl : '',
-        collectionName: collection ? collection.name : 'Unknown Collection',
+        name: `${collectionName} #${loan.tokenId}`,
+        imageUrl,
+        collectionName,
       },
       totalRepaymentWei: totalRepayment.toString(),
     },

@@ -21,9 +21,9 @@ describe('TICKET-31: Global Search Component Test Suite', () => {
     render(<GlobalSearch isOpen={true} onClose={vi.fn()} />);
     const input = screen.getByPlaceholderText(/search collections, loans, or addresses/i);
 
-    fireEvent.change(input, { target: { value: 'genesis' } });
-    expect(screen.getByText(/robinhood genesis pass/i)).toBeDefined();
-    expect(screen.queryByText(/sherwood forest rangers/i)).toBeNull();
+    fireEvent.change(input, { target: { value: 'RHG' } });
+    expect(screen.getAllByText(/RHG/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/SFR/i)).toBeNull();
   });
 
   it('TS-03: Keyboard arrow navigation and Enter key triggers navigation', () => {

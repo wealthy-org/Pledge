@@ -75,8 +75,7 @@ describe('TICKET-44: Mainnet Data Integrity & Clean Production Audit', () => {
     for (const col of CURATED_COLLECTIONS) {
       expect(col.addresses[MAINNET_CHAIN_ID]).toMatch(/^0x[a-fA-F0-9]{40}$/);
       expect(col.addresses[TESTNET_CHAIN_ID]).toMatch(/^0x[a-fA-F0-9]{40}$/);
-      expect(col.maxLtvBps).toBeGreaterThan(0);
-      expect(col.maxLtvBps).toBeLessThanOrEqual(10000);
+      expect(col.defaultDurations).toEqual([7, 14, 30]);
       expect(col.symbol).toBeDefined();
       expect(col.name).toBeDefined();
     }

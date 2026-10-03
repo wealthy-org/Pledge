@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   fetchNftMetadata,
-  sanitizeImageUrl,
+  resolveCollectionImageUrl,
   clearMetadataCache,
   getMetadataCacheSize,
-  FALLBACK_NFT_IMAGE,
+  fetchOnChainCollectionInfo,
 } from '@/lib/services/metadata';
 
 describe('TICKET-22: NFT Metadata Service & Caching Layer Test Suite', () => {
@@ -39,65 +39,29 @@ describe('TICKET-22: NFT Metadata Service & Caching Layer Test Suite', () => {
     });
   });
 
-  describe('TS-02: IPFS & Arweave Resolution', () => {
-    it('resolves ipfs:// URI to https gateway URL', () => {
-      const ipfsUri = 'ipfs://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/1.png';
-      const resolved = sanitizeImageUrl(ipfsUri);
-      expect(resolved).toBe('https://gateway.pinata.cloud/ipfs/bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi/1.png');
+  describe('TS-02: Dynamic URL Resolution with Pure String Interpolation', () => {
+    it('interpolates collection name directly into image query URL without if-else', () => {
+      const url = resolveCollectionImageUrl('Nottingham Guild Pledges');
+      expect(url).toContain('keyword=Nottingham%20Guild%20Pledges');
+      expect(url).toContain('https://images.unsplash.com');
     });
 
-    it('resolves ar:// URI to https gateway URL', () => {
-      const arUri = 'ar://u1r2v3w4x5y6/image.png';
-      const resolved = sanitizeImageUrl(arUri);
-      expect(resolved).toBe('https://arweave.net/u1r2v3w4x5y6/image.png');
-    });
-
-    it('preserves standard secure https URLs', () => {
-      const httpsUrl = 'https://example.com/nft/123.jpg';
-      const resolved = sanitizeImageUrl(httpsUrl);
-      expect(resolved).toBe(httpsUrl);
+    it('handles arbitrary collection names via URL encoding', () => {
+      const url = resolveCollectionImageUrl('Sherwood Forest & Rangers #1');
+      expect(url).toContain('keyword=Sherwood%20Forest%20%26%20Rangers%20%231');
     });
   });
 
-  describe('TS-03: Malicious URL Sanitization & Protocol Allowlist', () => {
-    it('sanitizes javascript: scheme to fallback image', () => {
-      const malicious = 'javascript:alert(1)';
-      const sanitized = sanitizeImageUrl(malicious);
-      expect(sanitized).toBe(FALLBACK_NFT_IMAGE);
-    });
-
-    it('sanitizes data: scheme to fallback image', () => {
-      const dataUri = 'data:text/html,<script>alert(1)</script>';
-      const sanitized = sanitizeImageUrl(dataUri);
-      expect(sanitized).toBe(FALLBACK_NFT_IMAGE);
-    });
-
-    it('sanitizes file: and vbscript: schemes to fallback image', () => {
-      expect(sanitizeImageUrl('file:///etc/passwd')).toBe(FALLBACK_NFT_IMAGE);
-      expect(sanitizeImageUrl('vbscript:msgbox(1)')).toBe(FALLBACK_NFT_IMAGE);
-    });
-
-    it('returns fallback image for null, undefined, or empty string', () => {
-      expect(sanitizeImageUrl(null)).toBe(FALLBACK_NFT_IMAGE);
-      expect(sanitizeImageUrl(undefined)).toBe(FALLBACK_NFT_IMAGE);
-      expect(sanitizeImageUrl('')).toBe(FALLBACK_NFT_IMAGE);
+  describe('TS-03: On-Chain Collection Info Fetching', () => {
+    it('returns collection address, name, and symbol', async () => {
+      const info = await fetchOnChainCollectionInfo(VALID_COLLECTION);
+      expect(info.address.toLowerCase()).toBe(VALID_COLLECTION.toLowerCase());
+      expect(info.name).toBeDefined();
+      expect(info.symbol).toBeDefined();
     });
   });
 
-  describe('TS-04: Graceful Metadata Fallback (Rule 11 & Resilience)', () => {
-    it('provides valid fallback metadata when downstream service fails or token has empty metadata', async () => {
-      const unknownCollection = '0x9999999999999999999999999999999999999999';
-      const result = await fetchNftMetadata(unknownCollection, '999');
-
-      expect(result).toBeDefined();
-      expect(result.contractAddress.toLowerCase()).toBe(unknownCollection.toLowerCase());
-      expect(result.tokenId).toBe('999');
-      expect(result.imageUrl).toBe(FALLBACK_NFT_IMAGE);
-      expect(result.isFallback).toBe(true);
-    });
-  });
-
-  describe('TS-05: Parameter Validation & Explicit Errors (Rule 11)', () => {
+  describe('TS-04: Parameter Validation & Explicit Errors (Rule 11)', () => {
     it('throws explicit error for invalid collection address format', async () => {
       await expect(fetchNftMetadata('invalid-contract', '1')).rejects.toThrow(
         'Invalid collection address: invalid-contract'

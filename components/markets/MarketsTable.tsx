@@ -10,6 +10,7 @@ import { RankingTabs, type RankingTabType } from './RankingTabs';
 import { TimeframeSelector, type TimeframeType } from './TimeframeSelector';
 import { Tooltip } from '@/components/common/Tooltip';
 import { useWatchlist } from '@/hooks/useWatchlist';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export interface MarketCollectionItem {
   address: string;
@@ -218,6 +219,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
               {filteredAndSorted.map((c, index) => {
                 const isStarred = watchlist.includes(c.address);
                 const ltvVal = c.maxLtvBps ? c.maxLtvBps / 100 : 70;
+                const displayImage = c.imageUrl || resolveCollectionImageUrl(c.name || c.symbol);
 
                 return (
                   <tr
@@ -244,9 +246,9 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                         </button>
 
                         <div className="w-10 h-10 rounded-[8px] bg-[var(--panel)] border border-[var(--line)] overflow-hidden flex items-center justify-center shrink-0">
-                          {c.imageUrl ? (
+                          {displayImage ? (
                             <Image
-                              src={c.imageUrl}
+                              src={displayImage}
                               alt={c.name}
                               width={40}
                               height={40}

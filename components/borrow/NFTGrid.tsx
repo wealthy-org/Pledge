@@ -11,7 +11,7 @@ export interface BorrowableNft {
   tokenId: string;
   collectionName: string;
   name: string;
-  imageUrl: string;
+  imageUrl?: string;
   bestOfferWei?: string;
   offerCount: number;
   isInLoan?: boolean;

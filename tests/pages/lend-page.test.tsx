@@ -154,7 +154,7 @@ describe('TICKET-37: Lend Page & Create Offer Drawer Test Suite', () => {
       />
     );
 
-    expect(screen.getByText('Robinhood Genesis Pass')).toBeDefined();
+    expect(screen.getAllByText(mockCuratedCol.name).length).toBeGreaterThan(0);
     expect(screen.getByText('5.00 ETH')).toBeDefined();
 
     const makeOfferBtn = screen.getByRole('button', { name: /make offer/i });

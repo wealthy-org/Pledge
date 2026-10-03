@@ -2,12 +2,14 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { CuratedCollectionDefinition } from '@/config/collections';
 
 export interface LendCollectionCardProps {
   collection: CuratedCollectionDefinition;
   poolSizeEth?: string;
   activeLoansCount?: number;
+  imageUrl?: string;
   onMakeOffer: (collection: CuratedCollectionDefinition) => void;
 }
 
@@ -15,21 +17,21 @@ export function LendCollectionCard({
   collection,
   poolSizeEth,
   activeLoansCount,
+  imageUrl,
   onMakeOffer,
 }: LendCollectionCardProps) {
+  const displayImage = imageUrl || resolveCollectionImageUrl(collection.name || collection.symbol);
   const displayPool = poolSizeEth
     ? `${poolSizeEth} ETH`
-    : collection.floorPriceEth
-    ? `${(Number(collection.floorPriceEth) * 0.6).toFixed(2)} ETH`
-    : '-';
+    : '—';
   const activeCount = activeLoansCount !== undefined ? activeLoansCount : 0;
 
   return (
     <article className="flex flex-col bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] hover:-translate-y-1 hover:shadow-md rounded-xl overflow-hidden transition-all duration-200">
-      <div className="relative aspect-square w-full bg-[var(--panel)] overflow-hidden group">
-        {collection.imageUrl ? (
+      <div className="relative aspect-square w-full bg-[var(--panel)] overflow-hidden group flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
+        {displayImage ? (
           <Image
-            src={collection.imageUrl}
+            src={displayImage}
             alt={collection.name}
             fill
             sizes="(max-width: 768px) 100vw, 25vw"
@@ -37,9 +39,7 @@ export function LendCollectionCard({
             unoptimized
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
-            {collection.symbol}
-          </div>
+          collection.symbol
         )}
       </div>
 

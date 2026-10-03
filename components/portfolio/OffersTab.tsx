@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { OfferItem } from '@/types/api';
 
 export interface OffersTabProps {
@@ -58,6 +59,7 @@ export function OffersTab({
         const termPercent = (offer.termInterestBps / 100).toFixed(1);
         const colDef = getCollectionByAddress(offer.collection, chainId);
         const collectionName = colDef?.name || 'Curated Collection';
+        const displayImage = colDef ? resolveCollectionImageUrl(colDef.name) : undefined;
 
         return (
           <article
@@ -66,9 +68,9 @@ export function OffersTab({
           >
             <div className="flex items-center gap-3.5">
               <div className="w-14 h-14 rounded-lg bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] overflow-hidden flex items-center justify-center shrink-0">
-                {colDef?.imageUrl ? (
+                {displayImage ? (
                   <Image
-                    src={colDef.imageUrl}
+                    src={displayImage}
                     alt={collectionName}
                     width={56}
                     height={56}

@@ -131,7 +131,6 @@ export function LoanTermsCard({
           <div className="p-3.5 rounded-xl bg-[var(--panel)] border border-[var(--line)]">
             <LTVHealthBar
               principalEth={Number(formatUnits(BigInt(loan.principalWei), 18))}
-              floorPriceEth={getCollectionByAddress(loan.collection, activeChainId)?.floorPriceEth ? parseFloat(getCollectionByAddress(loan.collection, activeChainId)!.floorPriceEth) : undefined}
             />
           </div>
 

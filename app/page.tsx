@@ -8,6 +8,7 @@ import { getCuratedCollections } from '@/config/collections';
 import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function HomePage() {
   const chainId = useSafeChainId();
@@ -26,13 +27,11 @@ export default function HomePage() {
         address,
         name: col.name,
         symbol: col.symbol,
-        imageUrl: col.imageUrl,
-        floorPriceEth: col.floorPriceEth,
+        imageUrl: remote?.imageUrl || resolveCollectionImageUrl(col.name),
         bestOfferWei: remote?.bestOfferWei || undefined,
         poolSizeWei: remote?.poolSizeWei || '0',
         offerCount: remote?.offerCount || 0,
         activeLoansCount: remote?.activeLoansCount || 0,
-        maxLtvBps: col.maxLtvBps,
       };
     });
   }, [apiData, chainId]);
@@ -87,29 +86,32 @@ export default function HomePage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {collections.slice(0, 4).map((c, i) => (
-            <article
-              key={c.address}
-              className="group flex flex-col bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] rounded-xl p-3 transition-colors duration-150"
-            >
-              <Link
-                href={`/borrow?collection=${c.address}`}
-                className="w-full aspect-square bg-[var(--panel)] border border-[var(--line)] rounded-lg overflow-hidden relative block"
+          {collections.slice(0, 4).map((c, i) => {
+            const displayImage = c.imageUrl || resolveCollectionImageUrl(c.name);
+
+            return (
+              <article
+                key={c.address}
+                className="group flex flex-col bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] rounded-xl p-3 transition-colors duration-150"
               >
-                {c.imageUrl ? (
-                  <Image
-                    src={c.imageUrl}
-                    alt={c.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
-                    {c.symbol}
-                  </div>
-                )}
-              </Link>
+                <Link
+                  href={`/borrow?collection=${c.address}`}
+                  className="w-full aspect-square bg-[var(--panel)] border border-[var(--line)] rounded-lg overflow-hidden relative block"
+                >
+                  {displayImage ? (
+                    <Image
+                      src={displayImage}
+                      alt={c.name}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
+                      {c.symbol}
+                    </div>
+                  )}
+                </Link>
 
               <div className="flex items-center justify-between my-2.5">
                 <h3 className="text-xs font-semibold text-[var(--text)] truncate">
@@ -125,7 +127,7 @@ export default function HomePage() {
                 >
                   <span className="text-[var(--muted)]">Borrow up to</span>
                   <strong className="font-mono font-medium text-[var(--accent-primary)]">
-                    {c.floorPriceEth ? (Number(c.floorPriceEth) * 0.6).toFixed(3) : '0.800'} <small className="text-[10px] text-[var(--muted)]">ETH</small>
+                    {c.bestOfferWei ? (Number(c.bestOfferWei) / 1e18).toFixed(3) : '0.000'} <small className="text-[10px] text-[var(--muted)]">ETH</small>
                   </strong>
                 </Link>
 
@@ -138,7 +140,8 @@ export default function HomePage() {
                 </Link>
               </div>
             </article>
-          ))}
+          );
+        })}
         </div>
       </div>
 
@@ -242,9 +245,10 @@ export default function HomePage() {
 
         <div className="space-y-2">
           {collections.map((c, i) => {
-            const principalEth = c.floorPriceEth ? (Number(c.floorPriceEth) * 0.6).toFixed(3) : '0.800';
+            const principalEth = c.bestOfferWei ? (Number(c.bestOfferWei) / 1e18).toFixed(3) : '0.000';
             const interestPct = 5.0;
             const repayEth = (Number(principalEth) * (1 + interestPct / 100)).toFixed(3);
+            const displayImage = c.imageUrl || resolveCollectionImageUrl(c.name);
 
             return (
               <div
@@ -253,9 +257,9 @@ export default function HomePage() {
               >
                 <div className="flex items-center gap-2.5">
                   <div className="w-10 h-10 rounded-md bg-[var(--panel)] border border-[var(--line)] overflow-hidden flex items-center justify-center shrink-0">
-                    {c.imageUrl ? (
+                    {displayImage ? (
                       <Image
-                        src={c.imageUrl}
+                        src={displayImage}
                         alt={c.name}
                         width={40}
                         height={40}

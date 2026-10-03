@@ -31,9 +31,9 @@ describe('TICKET-63: GlobalSearch Combobox & Keyboard Navigation Test Suite', ()
     render(<GlobalSearch isOpen={true} onClose={mockClose} />);
 
     const input = screen.getByRole('combobox');
-    fireEvent.change(input, { target: { value: 'Genesis' } });
+    fireEvent.change(input, { target: { value: 'RHG' } });
 
-    expect(screen.getByText(/Robinhood Genesis Pass/i)).toBeDefined();
+    expect(screen.getAllByText(/RHG/i).length).toBeGreaterThan(0);
   });
 
   it('supports keyboard ArrowDown and Enter navigation to select collection', () => {
@@ -51,7 +51,7 @@ describe('TICKET-63: GlobalSearch Combobox & Keyboard Navigation Test Suite', ()
     render(<GlobalSearch isOpen={true} onClose={mockClose} />);
 
     const input = screen.getByRole('combobox');
-    fireEvent.change(input, { target: { value: 'Sherwood' } });
+    fireEvent.change(input, { target: { value: 'SFR' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
     const recent = JSON.parse(localStorage.getItem('pledge:recent-searches') || '[]');

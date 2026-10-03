@@ -16,9 +16,6 @@ describe('TICKET-07b: Curated Collections & Verification Test Suite', () => {
       expect(col.id).toBeTruthy();
       expect(col.name).toBeTruthy();
       expect(col.symbol).toBeTruthy();
-      expect(col.description).toBeTruthy();
-      expect(col.totalSupply).toBeGreaterThan(0);
-      expect(col.category).toBeTruthy();
       expect(col.defaultDurations).toEqual([7, 14, 30]);
 
       expect(isAddress(col.addresses[TESTNET_CHAIN_ID])).toBe(true);

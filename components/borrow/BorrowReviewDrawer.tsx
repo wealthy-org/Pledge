@@ -74,15 +74,19 @@ export function BorrowReviewDrawer({
     >
       <div className="space-y-6">
         <div className="p-4 rounded-xl bg-[var(--surface)] border border-[var(--line)] flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl overflow-hidden bg-[var(--raised)] border border-[var(--line)] shrink-0 relative">
-            <Image
-              src={nft.imageUrl}
-              alt={nft.name}
-              fill
-              sizes="64px"
-              className="object-cover"
-              unoptimized
-            />
+          <div className="w-16 h-16 rounded-xl overflow-hidden bg-[var(--raised)] border border-[var(--line)] shrink-0 relative flex items-center justify-center font-mono font-bold text-xs text-[var(--accent-primary)]">
+            {nft.imageUrl ? (
+              <Image
+                src={nft.imageUrl}
+                alt={nft.name}
+                fill
+                sizes="64px"
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              `#${nft.tokenId}`
+            )}
           </div>
           <div className="flex flex-col overflow-hidden">
             <span className="text-xs font-mono text-[var(--muted)] truncate">

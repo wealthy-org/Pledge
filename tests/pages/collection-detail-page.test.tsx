@@ -107,8 +107,8 @@ describe('TICKET-38: Collection Detail Page & Components', () => {
         />
       );
 
-      expect(screen.getByText(mockCollection.name)).toBeDefined();
-      expect(screen.getByText(mockCollection.symbol)).toBeDefined();
+      expect(screen.getAllByText(mockCollection.name).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(mockCollection.symbol).length).toBeGreaterThan(0);
       expect(screen.getByText('Verified')).toBeDefined();
       expect(screen.getByText('2.00 ETH')).toBeDefined();
       expect(screen.getByText('3.50 ETH')).toBeDefined();
@@ -189,7 +189,7 @@ describe('TICKET-38: Collection Detail Page & Components', () => {
       const pagePromise = Promise.resolve({ address: mockCollection.contractAddress });
       render(await CollectionDetailPage({ params: pagePromise }));
 
-      expect(screen.getByText(mockCollection.name)).toBeDefined();
+      expect(screen.getAllByText(mockCollection.name).length).toBeGreaterThan(0);
       expect(screen.getByRole('tab', { name: /offers/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /active loans/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /history/i })).toBeDefined();

@@ -10,6 +10,7 @@ export type OfferStatus = 'open' | 'filled' | 'cancelled';
 export type LoanStatus = 'active' | 'repaid' | 'foreclosed';
 
 export interface CollectionRow {
+  chain_id?: number;
   address: string;
   name: string;
   symbol: string | null;

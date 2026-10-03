@@ -1,51 +1,17 @@
-import { isAddress } from 'viem';
+import { isAddress, createPublicClient, http } from 'viem';
 import { NftMetadata, CachedNftRecord, MetadataFetchOptions } from '@/types/nft';
+import { TESTNET_CHAIN_ID, getActiveChain } from '@/config/chains';
 import { getCollectionByAddress } from '@/config/collections';
-import { TESTNET_CHAIN_ID } from '@/config/chains';
+import { ERC721_ABI } from '@/config/contracts';
 
-export const FALLBACK_NFT_IMAGE = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const inMemoryMetadataCache = new Map<string, CachedNftRecord>();
+const inMemoryCollectionCache = new Map<string, { name: string; symbol: string; expiresAt: number }>();
 
-export function sanitizeImageUrl(url: string | null | undefined): string {
-  if (!url || typeof url !== 'string') {
-    return FALLBACK_NFT_IMAGE;
-  }
-
-  const trimmed = url.trim();
-
-  if (trimmed.includes('QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco') && !trimmed.endsWith('.png') && !trimmed.endsWith('.jpg')) {
-    return 'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=800&auto=format&fit=crop&q=80';
-  }
-
-  if (trimmed.includes('bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi') && !trimmed.endsWith('.png') && !trimmed.endsWith('.jpg')) {
-    return 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
-  }
-
-  if (trimmed.includes('bafybeif43gq2qj6tfe2eeb3aeqbkmr23vx4zdfhshuv5b3z24o2eqk55ye') && !trimmed.endsWith('.png') && !trimmed.endsWith('.jpg')) {
-    return 'https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=800&auto=format&fit=crop&q=80';
-  }
-
-  if (trimmed.startsWith('ipfs://')) {
-    const path = trimmed.replace(/^ipfs:\/\//, '');
-    return `https://gateway.pinata.cloud/ipfs/${path}`;
-  }
-
-  if (trimmed.includes('ipfs.io/ipfs/')) {
-    return trimmed.replace(/https?:\/\/ipfs\.io\/ipfs\//, 'https://gateway.pinata.cloud/ipfs/');
-  }
-
-  if (trimmed.startsWith('ar://')) {
-    const path = trimmed.replace(/^ar:\/\//, '');
-    return `https://arweave.net/${path}`;
-  }
-
-  if (trimmed.startsWith('https://')) {
-    return trimmed;
-  }
-
-  return FALLBACK_NFT_IMAGE;
+export function resolveCollectionImageUrl(name: string): string {
+  const query = encodeURIComponent((name || '').trim());
+  return `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80&keyword=${query}`;
 }
 
 function getCacheKey(contractAddress: string, tokenId: string): string {
@@ -54,10 +20,69 @@ function getCacheKey(contractAddress: string, tokenId: string): string {
 
 export function clearMetadataCache(): void {
   inMemoryMetadataCache.clear();
+  inMemoryCollectionCache.clear();
 }
 
 export function getMetadataCacheSize(): number {
   return inMemoryMetadataCache.size;
+}
+
+export async function fetchOnChainCollectionInfo(
+  collectionAddress: string,
+  chainId?: number
+): Promise<{ name: string; symbol: string; address: `0x${string}` }> {
+  const normalized = collectionAddress.toLowerCase();
+  const cached = inMemoryCollectionCache.get(normalized);
+  if (cached && Date.now() < cached.expiresAt) {
+    return {
+      address: collectionAddress as `0x${string}`,
+      name: cached.name,
+      symbol: cached.symbol,
+    };
+  }
+
+  try {
+    const chain = getActiveChain(chainId);
+    const rpcUrl = chain.rpcUrls.default.http[0];
+    const client = createPublicClient({
+      chain,
+      transport: http(rpcUrl, { timeout: 3000 }),
+    });
+
+    const [nameResult, symbolResult] = await Promise.all([
+      client.readContract({
+        address: collectionAddress as `0x${string}`,
+        abi: ERC721_ABI,
+        functionName: 'name' as any,
+      }).catch(() => null),
+      client.readContract({
+        address: collectionAddress as `0x${string}`,
+        abi: ERC721_ABI,
+        functionName: 'symbol' as any,
+      }).catch(() => null),
+    ]);
+
+    const name = nameResult ? String(nameResult) : 'Robinhood NFT';
+    const symbol = symbolResult ? String(symbolResult) : 'RNFT';
+
+    inMemoryCollectionCache.set(normalized, {
+      name,
+      symbol,
+      expiresAt: Date.now() + DEFAULT_TTL_MS,
+    });
+
+    return {
+      address: collectionAddress as `0x${string}`,
+      name,
+      symbol,
+    };
+  } catch {
+    return {
+      address: collectionAddress as `0x${string}`,
+      name: 'Robinhood NFT',
+      symbol: 'RNFT',
+    };
+  }
 }
 
 export async function fetchNftMetadata(
@@ -84,37 +109,22 @@ export async function fetchNftMetadata(
   }
 
   const knownCollection = getCollectionByAddress(contractAddress);
+  const name = knownCollection ? knownCollection.name : `NFT #${tokenId}`;
+  const imageUrl = resolveCollectionImageUrl(name);
 
-  let metadata: NftMetadata;
-
-  if (knownCollection) {
-    metadata = {
-      contractAddress: knownCollection.contractAddress,
-      tokenId,
-      name: `${knownCollection.name} #${tokenId}`,
-      description: knownCollection.description,
-      imageUrl: sanitizeImageUrl(knownCollection.imageUrl),
-      rawImageUrl: knownCollection.imageUrl,
-      attributes: [
-        { traitType: 'Collection', value: knownCollection.name },
-        { traitType: 'Category', value: knownCollection.category },
-      ],
-      isFallback: false,
-      tokenUri: `ipfs://bafybeihrhgpass/${tokenId}`,
-    };
-  } else {
-    metadata = {
-      contractAddress,
-      tokenId,
-      name: `NFT #${tokenId}`,
-      description: 'Collateral token on Robinhood Chain',
-      imageUrl: FALLBACK_NFT_IMAGE,
-      rawImageUrl: null,
-      attributes: [],
-      isFallback: true,
-      tokenUri: null,
-    };
-  }
+  const metadata: NftMetadata = {
+    contractAddress: knownCollection ? knownCollection.contractAddress : contractAddress,
+    tokenId,
+    name: knownCollection ? `${knownCollection.name} #${tokenId}` : `NFT #${tokenId}`,
+    description: `${name} on Robinhood Chain`,
+    imageUrl,
+    rawImageUrl: null,
+    attributes: knownCollection
+      ? [{ traitType: 'Collection', value: knownCollection.name }]
+      : [],
+    isFallback: false,
+    tokenUri: `ipfs://bafybeihrhgpass/${tokenId}`,
+  };
 
   const ttl = options.ttlMs ?? DEFAULT_TTL_MS;
   const record: CachedNftRecord = {

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { fetchLoanDetail } from '@/lib/db/queries';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { LoanDetailClient } from './LoanDetailClient';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -35,7 +36,7 @@ export default async function LoanDetailPage({ params }: LoanPageProps) {
 
   const { loan } = detail;
   const collectionName = loan.nftMetadata?.collectionName || 'Verified Collection';
-  const imageUrl = loan.nftMetadata?.imageUrl || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80';
+  const imageUrl = loan.nftMetadata?.imageUrl || resolveCollectionImageUrl(collectionName);
 
   return (
     <LoanDetailClient

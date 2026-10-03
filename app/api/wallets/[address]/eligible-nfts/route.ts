@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getCuratedCollections } from '@/config/collections';
 import { getBlockscoutClient } from '@/lib/blockscout';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
 import { WalletNftsResponse, WalletNftItem } from '@/types/api';
 
@@ -38,12 +39,13 @@ export async function GET(
     for (const item of result.items) {
       const colAddr = item.collectionAddress.toLowerCase();
       if (allowlistMap.has(colAddr)) {
+        const collectionName = allowlistMap.get(colAddr) || item.collectionName;
         nfts.push({
           contractAddress: item.collectionAddress,
           tokenId: item.tokenId,
-          collectionName: allowlistMap.get(colAddr) || item.collectionName,
-          name: item.name || `${allowlistMap.get(colAddr)} #${item.tokenId}`,
-          imageUrl: item.imageUrl,
+          collectionName,
+          name: item.name || `${collectionName} #${item.tokenId}`,
+          imageUrl: item.imageUrl || resolveCollectionImageUrl(collectionName),
           tokenUri: '',
         });
       }

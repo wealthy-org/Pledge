@@ -10,9 +10,9 @@ export interface CollectionItemResponse {
   address: string;
   name: string;
   symbol: string;
-  imageUrl: string;
+  imageUrl?: string;
   description: string;
-  floorPriceEth: string;
+  floorPriceEth?: string;
   bestOfferWei: string | null;
   poolSizeWei: string;
   offerCount: number;
@@ -105,7 +105,7 @@ export interface WalletLoansResponse {
 export interface LoanDetailItem extends LoanItem {
   nftMetadata?: {
     name: string;
-    imageUrl: string;
+    imageUrl?: string;
     collectionName: string;
   };
   totalRepaymentWei: string;

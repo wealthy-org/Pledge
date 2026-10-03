@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { CountdownTimer } from '@/components/common/CountdownTimer';
 import { LTVHealthBar } from '@/components/common/LTVHealthBar';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -118,6 +119,7 @@ export function BorrowingTab({
         const principalEth = `${Number(formatUnits(BigInt(loan.principalWei), 18)).toFixed(2)} ETH`;
         const totalDueEth = calculateTotalDue(loan.principalWei, loan.interestWei);
         const tokenId = loan.tokenId || (loan as unknown as { nftId?: string }).nftId || '0';
+        const displayImage = col ? resolveCollectionImageUrl(col.name) : undefined;
 
         return (
           <article
@@ -126,10 +128,10 @@ export function BorrowingTab({
           >
             <div className="flex items-center gap-3.5">
               <div className="w-14 h-14 rounded-lg bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] overflow-hidden flex items-center justify-center shrink-0">
-                {col?.imageUrl ? (
+                {displayImage ? (
                   <Image
-                    src={col.imageUrl}
-                    alt={col.name}
+                    src={displayImage}
+                    alt={col?.name || 'NFT'}
                     width={56}
                     height={56}
                     className="w-full h-full object-cover"
@@ -177,7 +179,6 @@ export function BorrowingTab({
               <div className="w-24">
                 <LTVHealthBar
                   principalEth={Number(formatUnits(BigInt(loan.principalWei), 18))}
-                  floorPriceEth={col?.floorPriceEth ? parseFloat(col.floorPriceEth) : undefined}
                 />
               </div>
 

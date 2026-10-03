@@ -161,7 +161,7 @@ describe('TICKET-40: Portfolio Page & Proceeds Claim Suite', () => {
     it('renders BorrowingTab with active user loans and Repay action', () => {
       render(<BorrowingTab loans={mockLoans} userAddress={mockUserAddress} />);
 
-      expect(screen.getByText('#42')).toBeDefined();
+      expect(screen.getAllByText('#42').length).toBeGreaterThan(0);
       expect(screen.getByText('1.00 ETH')).toBeDefined();
       expect(screen.getByRole('button', { name: /repay/i })).toBeDefined();
     });
@@ -187,7 +187,7 @@ describe('TICKET-40: Portfolio Page & Proceeds Claim Suite', () => {
     it('renders LendingTab with loans funded by user', () => {
       render(<LendingTab loans={mockLoans} userAddress={mockLenderAddress} />);
 
-      expect(screen.getByText('#42')).toBeDefined();
+      expect(screen.getAllByText('#42').length).toBeGreaterThan(0);
       expect(screen.getByText('1.00 ETH')).toBeDefined();
     });
 

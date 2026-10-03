@@ -16,6 +16,7 @@ import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { OfferItem } from '@/types/api';
 
 function BorrowContent() {
@@ -82,7 +83,7 @@ function BorrowContent() {
         tokenId: String(idx + 1),
         collectionName: col.name,
         name: `${col.name} #${idx + 1}`,
-        imageUrl: col.imageUrl,
+        imageUrl: resolveCollectionImageUrl(col.name),
         bestOfferWei: remoteStats?.bestOfferWei || undefined,
         offerCount: remoteStats?.offerCount || 0,
         isInLoan: false,

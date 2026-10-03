@@ -9,9 +9,7 @@ describe('TICKET-19b: Mainnet Collection Admission Technical Audit Suite', () =>
       expect(isAddress(col.contractAddress)).toBe(true);
       expect(col.name).toBeDefined();
       expect(col.symbol).toBeDefined();
-      expect(col.totalSupply).toBeGreaterThan(0);
-      expect(col.maxLtvBps).toBeLessThanOrEqual(8000);
-      expect(col.minLtvBps).toBeGreaterThanOrEqual(500);
+      expect(col.defaultDurations).toEqual([7, 14, 30]);
     }
   });
 

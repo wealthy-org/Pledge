@@ -147,7 +147,7 @@ export function CreateOfferDrawer({
           >
             {collections.map((col) => (
               <option key={col.id} value={col.id}>
-                {col.name} ({col.symbol}) — Floor {col.floorPriceEth} ETH
+                {col.name} ({col.symbol})
               </option>
             ))}
           </select>

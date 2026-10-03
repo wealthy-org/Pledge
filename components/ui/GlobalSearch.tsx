@@ -1,8 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { CURATED_COLLECTIONS, type CuratedCollectionDefinition } from '@/config/collections';
+import { getCuratedCollections, type ActiveCuratedCollection } from '@/config/collections';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export interface GlobalSearchProps {
   isOpen: boolean;
@@ -15,6 +18,9 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const chainId = useSafeChainId();
+
+  const collections = getCuratedCollections(chainId);
 
   useEffect(() => {
     try {
@@ -41,14 +47,13 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     localStorage.removeItem('pledge:recent-searches');
   };
 
-  const filteredCollections = CURATED_COLLECTIONS.filter((col) => {
+  const filteredCollections = collections.filter((col) => {
     const q = query.toLowerCase().trim();
     if (!q) return true;
     return (
       col.name.toLowerCase().includes(q) ||
       col.symbol.toLowerCase().includes(q) ||
-      col.category.toLowerCase().includes(q) ||
-      Object.values(col.addresses).some((addr) => addr.toLowerCase().includes(q))
+      col.contractAddress.toLowerCase().includes(q)
     );
   });
 
@@ -78,9 +83,9 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
   if (!isOpen) return null;
 
-  const handleSelect = (col: CuratedCollectionDefinition) => {
+  const handleSelect = (col: ActiveCuratedCollection) => {
     saveRecentSearch(col.name);
-    router.push(`/collection/${col.id}`);
+    router.push(`/collection/${col.contractAddress}`);
     handleClose();
   };
 
@@ -191,19 +196,26 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-md bg-[var(--surface)] border border-[var(--line)] flex items-center justify-center text-xs font-bold font-mono text-[var(--accent-primary)]">
-                      {col.symbol.slice(0, 3)}
+                    <div className="w-8 h-8 rounded-md bg-[var(--surface)] border border-[var(--line)] overflow-hidden flex items-center justify-center text-xs font-bold font-mono text-[var(--accent-primary)] shrink-0">
+                      <Image
+                        src={resolveCollectionImageUrl(col.name)}
+                        alt={col.name}
+                        width={32}
+                        height={32}
+                        className="w-full h-full object-cover"
+                        unoptimized
+                      />
                     </div>
                     <div>
                       <div className="text-xs font-semibold leading-tight">{col.name}</div>
-                      <div className="text-[10px] text-[var(--muted)] mt-0.5">{col.category}</div>
+                      <div className="text-[10px] text-[var(--muted)] mt-0.5 font-mono">{col.symbol}</div>
                     </div>
                   </div>
 
                   <div className="text-right text-xs">
-                    <div className="font-mono font-semibold">{col.floorPriceEth} ETH</div>
+                    <div className="font-mono font-semibold">{col.symbol}</div>
                     <div className="text-[10px] text-[var(--muted)] font-mono">
-                      Max {(col.maxLtvBps / 100).toFixed(0)}% LTV
+                      {col.contractAddress.slice(0, 6)}...{col.contractAddress.slice(-4)}
                     </div>
                   </div>
                 </div>

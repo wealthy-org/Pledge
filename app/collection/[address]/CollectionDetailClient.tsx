@@ -14,6 +14,7 @@ import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { ActiveCuratedCollection } from '@/config/collections';
 import type { OfferItem } from '@/types/api';
 
@@ -102,7 +103,7 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
       tokenId: '1',
       collectionName: collection.name,
       name: `${collection.name} #1`,
-      imageUrl: collection.imageUrl,
+      imageUrl: resolveCollectionImageUrl(collection.name),
       bestOfferWei: stats.bestOfferWei || undefined,
       offerCount: stats.offerCount,
     };
@@ -133,7 +134,6 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
 
       <CollectionRiskNotes
         collectionName={collection.name}
-        notes={collection.riskNotes}
       />
 
       <div className="space-y-4">

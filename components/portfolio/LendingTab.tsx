@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
+import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { LoanItem } from '@/types/api';
 
 export interface LendingTabProps {
@@ -70,6 +71,7 @@ export function LendingTab({
         const interestEth = `${Number(formatUnits(BigInt(loan.interestWei || '0'), 18)).toFixed(3)} ETH`;
         const isPastDue = new Date(loan.dueAt).getTime() < new Date().getTime();
         const tokenId = loan.tokenId || (loan as unknown as { nftId?: string }).nftId || '0';
+        const displayImage = col ? resolveCollectionImageUrl(col.name) : undefined;
 
         return (
           <article
@@ -78,10 +80,10 @@ export function LendingTab({
           >
             <div className="flex items-center gap-3.5">
               <div className="w-14 h-14 rounded-lg bg-[#f4f7f5] dark:bg-[#14221e] border border-[#dee7e3] dark:border-[#1e332c] overflow-hidden flex items-center justify-center shrink-0">
-                {col?.imageUrl ? (
+                {displayImage ? (
                   <Image
-                    src={col.imageUrl}
-                    alt={col.name}
+                    src={displayImage}
+                    alt={col?.name || 'NFT'}
                     width={56}
                     height={56}
                     className="w-full h-full object-cover"
