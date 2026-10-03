@@ -77,7 +77,9 @@ export function LoanDetailClient({
         collectionName,
         tokenId: loan.tokenId,
       });
-    } catch {}
+    } catch (err) {
+      console.error('[LoanDetail Repay Error]:', err);
+    }
   };
 
   const handleOpenForeclose = () => {
@@ -97,7 +99,9 @@ export function LoanDetailClient({
         collectionName,
         tokenId: loan.tokenId,
       });
-    } catch {}
+    } catch (err) {
+      console.error('[LoanDetail Foreclose Error]:', err);
+    }
   };
 
   return (

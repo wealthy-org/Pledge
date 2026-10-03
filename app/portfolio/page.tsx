@@ -87,7 +87,9 @@ export default function PortfolioPage() {
       setClaimableWei('0');
       setToastMessage('Proceeds successfully withdrawn to your wallet!');
       refetchPortfolio();
-    } catch {}
+    } catch (err) {
+      console.error('[Portfolio Withdraw Error]:', err);
+    }
   };
 
   const handleOpenCancelOffer = (offer: OfferItem) => {
@@ -106,7 +108,9 @@ export default function PortfolioPage() {
       });
       setToastMessage(`Offer #${cancellingOffer.offerId} successfully cancelled. Funds credited to Claimable Vault.`);
       refetchPortfolio();
-    } catch {}
+    } catch (err) {
+      console.error('[Portfolio CancelOffer Error]:', err);
+    }
   };
 
   const handleRepayLoan = (loan: LoanItem) => {

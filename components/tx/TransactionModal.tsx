@@ -154,6 +154,17 @@ export function TransactionModal({
           </p>
         </div>
 
+        {isError && state.error && (
+          <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-left space-y-1">
+            <span className="font-semibold text-red-600 dark:text-red-400 block text-[10px] uppercase tracking-wider font-mono">
+              Failure Reason
+            </span>
+            <p className="text-xs text-[var(--text)] leading-relaxed font-medium">
+              {state.error}
+            </p>
+          </div>
+        )}
+
         {state.details && state.details.length > 0 && (
           <div className="rounded-xl bg-[var(--panel)] border border-[var(--line)] p-3 text-left space-y-2">
             <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--muted)] block">

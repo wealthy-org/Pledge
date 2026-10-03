@@ -35,6 +35,16 @@ export function decodeTxError(err: unknown): DecodedTxError {
     };
   }
 
+  if (rawMessage.includes('CollectionNotAllowed')) {
+    return {
+      message: 'This collection is currently not allowed for new loan offers.',
+      code: 'CollectionNotAllowed',
+      isUserRejection: false,
+      isSilent: false,
+      actionHint: 'Please choose an active curated collection.',
+    };
+  }
+
   if (rawMessage.includes('OfferNotOpen')) {
     return {
       message: 'This offer is no longer open (it has been accepted or cancelled).',
@@ -85,10 +95,20 @@ export function decodeTxError(err: unknown): DecodedTxError {
     };
   }
 
-  if (rawMessage.includes('NoClaimableBalance') || rawMessage.includes('NoClaimableProceeds')) {
+  if (rawMessage.includes('NoClaimableBalance')) {
     return {
       message: 'No claimable balance available for withdrawal.',
       code: 'NoClaimableBalance',
+      isUserRejection: false,
+      isSilent: false,
+      actionHint: 'Proceeds will appear once loans are repaid or offers are cancelled.',
+    };
+  }
+
+  if (rawMessage.includes('NoClaimableProceeds')) {
+    return {
+      message: 'No claimable proceeds available for withdrawal.',
+      code: 'NoClaimableProceeds',
       isUserRejection: false,
       isSilent: false,
       actionHint: 'Proceeds will appear once loans are repaid or offers are cancelled.',
@@ -141,37 +161,41 @@ export function decodeTxError(err: unknown): DecodedTxError {
     };
   }
 
-  if (rawMessage.includes('ZeroPrincipal')) {
+  if (rawMessage.includes('ZeroPrincipal') || rawMessage.includes('InvalidPrincipal')) {
     return {
       message: 'Loan principal amount must be greater than zero.',
-      code: 'ZeroPrincipal',
+      code: 'InvalidPrincipal',
       isUserRejection: false,
       isSilent: false,
     };
   }
 
-  if (rawMessage.includes('DurationTooShort') || rawMessage.includes('DurationTooLong')) {
+  if (
+    rawMessage.includes('DurationTooShort') ||
+    rawMessage.includes('DurationTooLong') ||
+    rawMessage.includes('InvalidDuration')
+  ) {
     return {
-      message: 'Loan duration is outside the permitted protocol range.',
+      message: 'Loan duration is outside the permitted protocol range (7, 14, or 30 days).',
       code: 'InvalidDuration',
       isUserRejection: false,
       isSilent: false,
     };
   }
 
-  if (rawMessage.includes('InterestBpsTooHigh')) {
+  if (rawMessage.includes('InterestBpsTooHigh') || rawMessage.includes('InvalidInterestRate')) {
     return {
       message: 'Interest rate exceeds the protocol maximum limit.',
-      code: 'InterestBpsTooHigh',
+      code: 'InvalidInterestRate',
       isUserRejection: false,
       isSilent: false,
     };
   }
 
-  if (rawMessage.includes('ExpiryInPast')) {
+  if (rawMessage.includes('ExpiryInPast') || rawMessage.includes('InvalidExpiration')) {
     return {
       message: 'Offer expiration time must be in the future.',
-      code: 'ExpiryInPast',
+      code: 'InvalidExpiration',
       isUserRejection: false,
       isSilent: false,
     };
@@ -186,13 +210,38 @@ export function decodeTxError(err: unknown): DecodedTxError {
     };
   }
 
-  if (lower.includes('insufficient funds') || lower.includes('exceeds the balance')) {
+  if (
+    lower.includes('insufficient funds') ||
+    lower.includes('exceeds the balance') ||
+    lower.includes('insufficient eth balance') ||
+    lower.includes('insufficient balance')
+  ) {
     return {
-      message: 'Insufficient ETH balance for transaction value and gas fee.',
+      message: 'Insufficient ETH balance for offer principal and gas fee.',
       code: 'INSUFFICIENT_FUNDS',
       isUserRejection: false,
       isSilent: false,
-      actionHint: 'Add more ETH to your wallet to cover the transaction value and network fees.',
+      actionHint: 'Add more ETH to your wallet on Robinhood Chain to cover the transaction value and network fees.',
+    };
+  }
+
+  if (lower.includes('wallet not connected')) {
+    return {
+      message: 'Wallet not connected. Please connect your wallet to continue.',
+      code: 'WALLET_NOT_CONNECTED',
+      isUserRejection: false,
+      isSilent: false,
+      actionHint: 'Click Connect Wallet in the top right corner.',
+    };
+  }
+
+  if (lower.includes('wallet client unavailable') || lower.includes('wallet client')) {
+    return {
+      message: 'Wallet client is unavailable. Please unlock your wallet extension.',
+      code: 'WALLET_UNAVAILABLE',
+      isUserRejection: false,
+      isSilent: false,
+      actionHint: 'Open your browser wallet extension and ensure it is unlocked.',
     };
   }
 

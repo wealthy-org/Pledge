@@ -126,7 +126,9 @@ export default function LendPage() {
         setToastMessage('Lending offer created successfully! Capital committed to escrow.');
         refetchOffers();
       }
-    } catch {}
+    } catch (err) {
+      console.error('[LendPage CreateOffer Error]:', err);
+    }
   };
 
   const handleOpenCancelModal = (offerId: number) => {
@@ -153,7 +155,9 @@ export default function LendPage() {
         setToastMessage(`Offer #${cancellingOffer.offerId} cancelled. Capital returned to claimable proceeds.`);
         refetchOffers();
       }
-    } catch {}
+    } catch (err) {
+      console.error('[LendPage CancelOffer Error]:', err);
+    }
   };
 
   return (

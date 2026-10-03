@@ -95,6 +95,7 @@ export function useTransactionFlow() {
   }, []);
 
   const reportFailure = useCallback((err: unknown, title?: string, description?: string) => {
+    console.error('[TransactionFlow Failure]:', err);
     const decoded = decodeTxError(err);
     const now = Date.now();
     setState({
@@ -198,6 +199,7 @@ export function useTransactionFlow() {
               'Block confirmation timed out on Robinhood Chain.'
             );
           } catch (receiptErr: unknown) {
+            console.error('[TransactionFlow Receipt Error]:', receiptErr);
             const isTimeout =
               receiptErr instanceof Error &&
               (receiptErr.name === 'TimeoutError' || receiptErr.message.includes('timed out'));
@@ -237,6 +239,7 @@ export function useTransactionFlow() {
 
         return hash;
       } catch (err: unknown) {
+        console.error('[TransactionFlow Error]:', err);
         const decoded = decodeTxError(err);
         const errorObj = err instanceof Error ? err : new Error(decoded.message);
 

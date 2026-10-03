@@ -70,9 +70,9 @@ export function TransactionStepper({ stage }: TransactionStepperProps) {
   if (stage === 'IDLE') return null;
 
   return (
-    <div className="w-full py-2">
-      <div className="flex items-center justify-between relative">
-        <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 h-[2px] bg-[var(--line)] z-0" />
+    <div className="w-full py-2 px-1">
+      <div className="relative flex items-start justify-between">
+        <div className="absolute top-3.5 left-5 right-5 -translate-y-1/2 h-[2px] bg-[var(--line)] z-0" />
 
         {STEPS.map((step, idx) => {
           const status = getStepStatus(idx, stage);
@@ -80,14 +80,14 @@ export function TransactionStepper({ stage }: TransactionStepperProps) {
           const isActive = status === 'active';
 
           return (
-            <div key={step.id} className="relative z-10 flex flex-col items-center group">
+            <div key={step.id} className="relative z-10 flex flex-col items-center flex-1 max-w-[90px]">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-mono font-semibold transition-all duration-300 ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-mono font-semibold transition-all duration-300 bg-white dark:bg-[#111a17] ${
                   isCompleted
-                    ? 'bg-[var(--primary)] text-white shadow-xs'
+                    ? '!bg-[var(--primary)] text-white shadow-xs border-transparent'
                     : isActive
-                    ? 'bg-white dark:bg-[#111a17] text-[var(--primary)] border-2 border-[var(--primary)] ring-4 ring-[var(--primary-soft)]'
-                    : 'bg-white dark:bg-[#111a17] text-[var(--muted)] border border-[var(--line)]'
+                    ? 'text-[var(--primary)] border-2 border-[var(--primary)] ring-4 ring-[var(--primary-soft)]'
+                    : 'text-[var(--muted)] border border-[var(--line)]'
                 }`}
               >
                 {isCompleted ? (
@@ -105,7 +105,7 @@ export function TransactionStepper({ stage }: TransactionStepperProps) {
               </div>
 
               <span
-                className={`mt-1.5 text-[10px] font-medium tracking-tight text-center ${
+                className={`mt-2 text-[10px] font-medium tracking-tight text-center leading-tight ${
                   isActive
                     ? 'text-[var(--primary)] font-semibold'
                     : isCompleted
