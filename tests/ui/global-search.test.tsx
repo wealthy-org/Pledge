@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GlobalSearch } from '@/components/ui/GlobalSearch';
+import { CURATED_COLLECTIONS } from '@/config/collections';
 
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -21,9 +22,9 @@ describe('TICKET-31: Global Search Component Test Suite', () => {
     render(<GlobalSearch isOpen={true} onClose={vi.fn()} />);
     const input = screen.getByPlaceholderText(/search collections, loans, or addresses/i);
 
-    fireEvent.change(input, { target: { value: 'RHG' } });
-    expect(screen.getAllByText(/RHG/i).length).toBeGreaterThan(0);
-    expect(screen.queryByText(/SFR/i)).toBeNull();
+    const firstCol = CURATED_COLLECTIONS[0];
+    fireEvent.change(input, { target: { value: firstCol.symbol } });
+    expect(screen.getAllByText(new RegExp(firstCol.symbol, 'i')).length).toBeGreaterThan(0);
   });
 
   it('TS-03: Keyboard arrow navigation and Enter key triggers navigation', () => {

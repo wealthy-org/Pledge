@@ -1,32 +1,14 @@
 [
   {
-    "id": "rhg",
-    "name": "Robinhood Genesis Pass",
-    "symbol": "RHG",
-    "defaultDurations": [7, 14, 30],
-    "addresses": {
-      "46630": "0xE80385Cf259C82359CF5eA4eA98cD6514d9257a9",
-      "4663": "0x1111111111111111111111111111111111111111"
-    }
+    "46630": "0xE80385Cf259C82359CF5eA4eA98cD6514d9257a9",
+    "4663": "0x1111111111111111111111111111111111111111"
   },
   {
-    "id": "sfr",
-    "name": "Sherwood Forest Rangers",
-    "symbol": "SFR",
-    "defaultDurations": [7, 14, 30],
-    "addresses": {
-      "46630": "0x146BefC6C8656Df737255d08fa1281319Fc1A4c3",
-      "4663": "0x2222222222222222222222222222222222222222"
-    }
+    "46630": "0x146BefC6C8656Df737255d08fa1281319Fc1A4c3",
+    "4663": "0x2222222222222222222222222222222222222222"
   },
   {
-    "id": "ngp",
-    "name": "Nottingham Guild Pledges",
-    "symbol": "NGP",
-    "defaultDurations": [7, 14, 30],
-    "addresses": {
-      "46630": "0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D",
-      "4663": "0x3333333333333333333333333333333333333333"
-    }
+    "46630": "0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D",
+    "4663": "0x3333333333333333333333333333333333333333"
   }
 ]

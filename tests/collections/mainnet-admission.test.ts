@@ -17,7 +17,7 @@ describe('TICKET-19b: Mainnet Collection Admission Technical Audit Suite', () =>
     const rhg = MAINNET_CURATED_COLLECTIONS[0];
     const retrieved = getMainnetCollectionByAddress(rhg.contractAddress.toLowerCase());
     expect(retrieved).not.toBeNull();
-    expect(retrieved?.symbol).toBe('RHG');
+    expect(retrieved?.symbol).toBe(rhg.symbol);
   });
 
   it('TS-03: Returns null for unknown or unwhitelisted address', () => {

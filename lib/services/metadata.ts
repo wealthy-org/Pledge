@@ -108,20 +108,21 @@ export async function fetchNftMetadata(
     }
   }
 
-  const knownCollection = getCollectionByAddress(contractAddress);
-  const name = knownCollection ? knownCollection.name : `NFT #${tokenId}`;
+  const collectionInfo = await fetchOnChainCollectionInfo(contractAddress);
+  const name = collectionInfo.name;
   const imageUrl = resolveCollectionImageUrl(name);
 
   const metadata: NftMetadata = {
     contractAddress: contractAddress as `0x${string}`,
     tokenId,
-    name: knownCollection ? `${knownCollection.name} #${tokenId}` : `NFT #${tokenId}`,
+    name: `${name} #${tokenId}`,
     description: `${name} on Robinhood Chain`,
     imageUrl,
     rawImageUrl: null,
-    attributes: knownCollection
-      ? [{ traitType: 'Collection', value: knownCollection.name }]
-      : [],
+    attributes: [
+      { traitType: 'Collection', value: name },
+      { traitType: 'Symbol', value: collectionInfo.symbol },
+    ],
     isFallback: false,
     tokenUri: `ipfs://bafybeihrhgpass/${tokenId}`,
   };

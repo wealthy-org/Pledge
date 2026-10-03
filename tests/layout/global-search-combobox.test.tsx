@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GlobalSearch } from '@/components/ui/GlobalSearch';
+import { CURATED_COLLECTIONS } from '@/config/collections';
 
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -31,9 +32,10 @@ describe('TICKET-63: GlobalSearch Combobox & Keyboard Navigation Test Suite', ()
     render(<GlobalSearch isOpen={true} onClose={mockClose} />);
 
     const input = screen.getByRole('combobox');
-    fireEvent.change(input, { target: { value: 'RHG' } });
+    const firstCol = CURATED_COLLECTIONS[0];
+    fireEvent.change(input, { target: { value: firstCol.symbol } });
 
-    expect(screen.getAllByText(/RHG/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(new RegExp(firstCol.symbol, 'i')).length).toBeGreaterThan(0);
   });
 
   it('supports keyboard ArrowDown and Enter navigation to select collection', () => {
@@ -51,7 +53,8 @@ describe('TICKET-63: GlobalSearch Combobox & Keyboard Navigation Test Suite', ()
     render(<GlobalSearch isOpen={true} onClose={mockClose} />);
 
     const input = screen.getByRole('combobox');
-    fireEvent.change(input, { target: { value: 'SFR' } });
+    const secondCol = CURATED_COLLECTIONS[1];
+    fireEvent.change(input, { target: { value: secondCol.symbol } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
     const recent = JSON.parse(localStorage.getItem('pledge:recent-searches') || '[]');

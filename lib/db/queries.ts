@@ -1,4 +1,4 @@
-import { getCollectionByAddress } from '@/config/collections';
+import { getCollectionByAddress, getCuratedCollections } from '@/config/collections';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { fetchOnChainCollectionInfo, resolveCollectionImageUrl } from '@/lib/services/metadata';
@@ -123,44 +123,27 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
     }
   }
 
-  const envRhg = process.env.NEXT_PUBLIC_RHG_COLLECTION;
-  const envSfr = process.env.NEXT_PUBLIC_SFR_COLLECTION;
-  const envNgp = process.env.NEXT_PUBLIC_NGP_COLLECTION;
-  if (envRhg && envRhg.startsWith('0x')) addressSet.add(envRhg.toLowerCase());
-  if (envSfr && envSfr.startsWith('0x')) addressSet.add(envSfr.toLowerCase());
-  if (envNgp && envNgp.startsWith('0x')) addressSet.add(envNgp.toLowerCase());
+  const curated = getCuratedCollections(targetChain);
+  for (const c of curated) {
+    addressSet.add(c.contractAddress.toLowerCase());
+  }
 
   const results: CollectionItemResponse[] = [];
   for (const addr of addressSet) {
-    const known = getCollectionByAddress(addr, targetChain);
+    const onChain = await fetchOnChainCollectionInfo(addr, targetChain);
     const stats = await getCollectionStatsFromStore(addr, targetChain);
 
-    if (known) {
-      results.push({
-        address: known.contractAddress,
-        name: known.name,
-        symbol: known.symbol,
-        imageUrl: resolveCollectionImageUrl(known.name),
-        description: `${known.name} on Robinhood Chain`,
-        bestOfferWei: stats.bestOfferWei,
-        poolSizeWei: stats.poolSizeWei,
-        offerCount: stats.offerCount,
-        activeLoansCount: stats.activeLoansCount,
-      });
-    } else {
-      const onChain = await fetchOnChainCollectionInfo(addr, targetChain);
-      results.push({
-        address: onChain.address,
-        name: onChain.name,
-        symbol: onChain.symbol,
-        imageUrl: resolveCollectionImageUrl(onChain.name),
-        description: `${onChain.name} on Robinhood Chain`,
-        bestOfferWei: stats.bestOfferWei,
-        poolSizeWei: stats.poolSizeWei,
-        offerCount: stats.offerCount,
-        activeLoansCount: stats.activeLoansCount,
-      });
-    }
+    results.push({
+      address: onChain.address,
+      name: onChain.name,
+      symbol: onChain.symbol,
+      imageUrl: resolveCollectionImageUrl(onChain.name),
+      description: `${onChain.name} on Robinhood Chain`,
+      bestOfferWei: stats.bestOfferWei,
+      poolSizeWei: stats.poolSizeWei,
+      offerCount: stats.offerCount,
+      activeLoansCount: stats.activeLoansCount,
+    });
   }
 
   return results;
@@ -188,25 +171,8 @@ export async function fetchCollectionDetail(
   }
 
   const stats = await getCollectionStatsFromStore(address, targetChain);
-
-  if (known) {
-    return {
-      collection: {
-        address: known.contractAddress,
-        name: known.name,
-        symbol: known.symbol,
-        imageUrl: resolveCollectionImageUrl(known.name),
-        description: `${known.name} on Robinhood Chain`,
-        bestOfferWei: stats.bestOfferWei,
-        poolSizeWei: stats.poolSizeWei,
-        offerCount: stats.offerCount,
-        activeLoansCount: stats.activeLoansCount,
-      },
-      stats,
-    };
-  }
-
   const onChain = await fetchOnChainCollectionInfo(address, targetChain);
+
   return {
     collection: {
       address: onChain.address,
@@ -308,9 +274,8 @@ export async function fetchLoanDetail(loanId: number, chainId?: number): Promise
     txHash: fromStore.tx_hash,
   };
 
-  const known = getCollectionByAddress(loan.collection, targetChain);
-  const onChain = known ? null : await fetchOnChainCollectionInfo(loan.collection, targetChain);
-  const collectionName = known ? known.name : (onChain?.name || 'NFT Collection');
+  const onChain = await fetchOnChainCollectionInfo(loan.collection, targetChain);
+  const collectionName = onChain.name;
   const imageUrl = resolveCollectionImageUrl(collectionName);
   const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
 

@@ -1,9 +1,15 @@
 import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID, getActiveChain } from './chains';
 import { createPublicClient, http } from 'viem';
 import { ERC721_ABI } from './contracts';
-import defaultCollections from './collections.json';
+import addressesData from './collections.json';
 
-export interface CuratedCollectionDefinition {
+export interface CuratedCollectionEntry {
+  [TESTNET_CHAIN_ID]: `0x${string}`;
+  [MAINNET_CHAIN_ID]: `0x${string}`;
+  [key: number]: `0x${string}`;
+}
+
+export interface ActiveCuratedCollection {
   id: string;
   name: string;
   symbol: string;
@@ -13,26 +19,14 @@ export interface CuratedCollectionDefinition {
     [MAINNET_CHAIN_ID]: `0x${string}`;
     [key: number]: `0x${string}`;
   };
-}
-
-export interface ActiveCuratedCollection extends CuratedCollectionDefinition {
   contractAddress: `0x${string}`;
 }
 
-export function parseCuratedCollections(): CuratedCollectionDefinition[] {
-  const envJson = process.env.NEXT_PUBLIC_COLLECTIONS_JSON;
-  if (envJson) {
-    try {
-      const parsed = JSON.parse(envJson);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed as CuratedCollectionDefinition[];
-      }
-    } catch {}
-  }
-  return defaultCollections as unknown as CuratedCollectionDefinition[];
-}
+export type CuratedCollectionDefinition = ActiveCuratedCollection;
 
-export const CURATED_COLLECTIONS_CONFIG: CuratedCollectionDefinition[] = parseCuratedCollections();
+export const CURATED_COLLECTION_ENTRIES = addressesData as unknown as CuratedCollectionEntry[];
+
+const collectionMetadataCache = new Map<string, { name: string; symbol: string }>();
 
 export async function fetchOnChainCollection(
   address: `0x${string}`,
@@ -41,30 +35,50 @@ export async function fetchOnChainCollection(
   const chain = getActiveChain(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(chain.rpcUrls.default.http[0]),
+    transport: http(chain.rpcUrls.default.http[0], { timeout: 3000 }),
   });
 
   const [nameResult, symbolResult] = await Promise.all([
-    client.readContract({ address, abi: ERC721_ABI, functionName: 'name' as any }),
-    client.readContract({ address, abi: ERC721_ABI, functionName: 'symbol' as any }),
+    client.readContract({ address, abi: ERC721_ABI, functionName: 'name' as any }).catch(() => null),
+    client.readContract({ address, abi: ERC721_ABI, functionName: 'symbol' as any }).catch(() => null),
   ]);
 
-  const name = String(nameResult);
-  const symbol = String(symbolResult);
+  const name = nameResult ? String(nameResult) : 'Robinhood NFT';
+  const symbol = symbolResult ? String(symbolResult) : 'RNFT';
   const targetChain = chainId || TESTNET_CHAIN_ID;
+
+  collectionMetadataCache.set(address.toLowerCase(), { name, symbol });
+
+  const knownEntry = CURATED_COLLECTION_ENTRIES.find((entry) =>
+    Object.values(entry).some((a) => a.toLowerCase() === address.toLowerCase())
+  );
 
   return {
     id: symbol.toLowerCase(),
     name,
     symbol,
     defaultDurations: [7, 14, 30],
-    addresses: {
+    addresses: knownEntry || {
       [TESTNET_CHAIN_ID]: address,
       [MAINNET_CHAIN_ID]: address,
       [targetChain]: address,
     },
     contractAddress: address,
   };
+}
+
+export async function fetchCuratedCollections(
+  chainId?: number
+): Promise<ActiveCuratedCollection[]> {
+  const targetChain = chainId || TESTNET_CHAIN_ID;
+  const isMainnet = targetChain === MAINNET_CHAIN_ID;
+
+  return Promise.all(
+    CURATED_COLLECTION_ENTRIES.map((entry) => {
+      const address = isMainnet ? entry[MAINNET_CHAIN_ID] : entry[TESTNET_CHAIN_ID];
+      return fetchOnChainCollection(address, targetChain);
+    })
+  );
 }
 
 export function getCuratedCollections(chainId?: number): ActiveCuratedCollection[] {
@@ -76,12 +90,18 @@ export function getCuratedCollections(chainId?: number): ActiveCuratedCollection
   }
 
   const isMainnet = targetChain === MAINNET_CHAIN_ID;
-  const configList = parseCuratedCollections();
 
-  return configList.map((col) => {
-    const contractAddress = isMainnet ? col.addresses[MAINNET_CHAIN_ID] : col.addresses[TESTNET_CHAIN_ID];
+  return CURATED_COLLECTION_ENTRIES.map((entry) => {
+    const contractAddress = isMainnet ? entry[MAINNET_CHAIN_ID] : entry[TESTNET_CHAIN_ID];
+    const cached = collectionMetadataCache.get(contractAddress.toLowerCase());
+    const name = cached?.name || 'Robinhood NFT';
+    const symbol = cached?.symbol || 'RNFT';
     return {
-      ...col,
+      id: symbol.toLowerCase(),
+      name,
+      symbol,
+      defaultDurations: [7, 14, 30],
+      addresses: entry,
       contractAddress,
     };
   });
@@ -105,5 +125,9 @@ export function getCollectionByAddress(
 }
 
 export function isCollectionAllowed(address: string, chainId?: number): boolean {
-  return getCollectionByAddress(address, chainId) !== null;
+  if (!address) return false;
+  const lowerTarget = address.toLowerCase();
+  return CURATED_COLLECTION_ENTRIES.some((entry) =>
+    Object.values(entry).some((a) => a.toLowerCase() === lowerTarget)
+  );
 }
