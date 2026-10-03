@@ -1,6 +1,7 @@
 import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID, getActiveChain } from './chains';
 import { createPublicClient, http } from 'viem';
 import { ERC721_ABI } from './contracts';
+import defaultCollections from './collections.json';
 
 export interface CuratedCollectionDefinition {
   id: string;
@@ -18,38 +19,20 @@ export interface ActiveCuratedCollection extends CuratedCollectionDefinition {
   contractAddress: `0x${string}`;
 }
 
-export const CURATED_COLLECTIONS_CONFIG: CuratedCollectionDefinition[] = [
-  {
-    id: 'rhg',
-    name: 'Robinhood Genesis Pass',
-    symbol: 'RHG',
-    defaultDurations: [7, 14, 30],
-    addresses: {
-      [TESTNET_CHAIN_ID]: '0xE80385Cf259C82359CF5eA4eA98cD6514d9257a9',
-      [MAINNET_CHAIN_ID]: '0x1111111111111111111111111111111111111111',
-    },
-  },
-  {
-    id: 'sfr',
-    name: 'Sherwood Forest Rangers',
-    symbol: 'SFR',
-    defaultDurations: [7, 14, 30],
-    addresses: {
-      [TESTNET_CHAIN_ID]: '0x146BefC6C8656Df737255d08fa1281319Fc1A4c3',
-      [MAINNET_CHAIN_ID]: '0x2222222222222222222222222222222222222222',
-    },
-  },
-  {
-    id: 'ngp',
-    name: 'Nottingham Guild Pledges',
-    symbol: 'NGP',
-    defaultDurations: [7, 14, 30],
-    addresses: {
-      [TESTNET_CHAIN_ID]: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D',
-      [MAINNET_CHAIN_ID]: '0x3333333333333333333333333333333333333333',
-    },
-  },
-];
+export function parseCuratedCollections(): CuratedCollectionDefinition[] {
+  const envJson = process.env.NEXT_PUBLIC_COLLECTIONS_JSON;
+  if (envJson) {
+    try {
+      const parsed = JSON.parse(envJson);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed as CuratedCollectionDefinition[];
+      }
+    } catch {}
+  }
+  return defaultCollections as unknown as CuratedCollectionDefinition[];
+}
+
+export const CURATED_COLLECTIONS_CONFIG: CuratedCollectionDefinition[] = parseCuratedCollections();
 
 export async function fetchOnChainCollection(
   address: `0x${string}`,
@@ -93,8 +76,9 @@ export function getCuratedCollections(chainId?: number): ActiveCuratedCollection
   }
 
   const isMainnet = targetChain === MAINNET_CHAIN_ID;
+  const configList = parseCuratedCollections();
 
-  return CURATED_COLLECTIONS_CONFIG.map((col) => {
+  return configList.map((col) => {
     const contractAddress = isMainnet ? col.addresses[MAINNET_CHAIN_ID] : col.addresses[TESTNET_CHAIN_ID];
     return {
       ...col,
