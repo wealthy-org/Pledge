@@ -117,7 +117,7 @@ export default function HomePage() {
 
               <div className="flex items-center justify-between my-2.5">
                 <h3 className="text-xs font-semibold text-[var(--text)] truncate">
-                  {c.name} #{String(i * 324 + 842).padStart(4, '0')}
+                  {c.name}
                 </h3>
                 <span className="text-xs text-[var(--accent-primary)] shrink-0 font-bold">✦</span>
               </div>
@@ -276,9 +276,9 @@ export default function HomePage() {
                   </div>
                   <div>
                     <div className="text-xs font-semibold text-[var(--text)]">
-                      {c.symbol} #{String(i * 216 + 842).padStart(4, '0')}
+                      {c.name}
                     </div>
-                    <div className="text-[10px] text-[var(--muted)]">{c.name}</div>
+                    <div className="text-[10px] text-[var(--muted)] font-mono">{c.symbol}</div>
                   </div>
                 </div>
 

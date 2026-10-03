@@ -47,50 +47,29 @@ function BorrowContent() {
   const activeCollectionOffers = offersData?.offers || [];
 
   const borrowableNfts: BorrowableNft[] = useMemo(() => {
-    if (rawWalletNfts.length > 0) {
-      return rawWalletNfts.map((nft) => {
-        const remoteStats = collectionsData?.collections?.find(
-          (c) => c.address.toLowerCase() === nft.contractAddress.toLowerCase()
-        );
-        const activeLoan = userLoansData?.loans?.find(
-          (l) =>
-            l.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
-            l.tokenId === nft.tokenId &&
-            l.status === 'active'
-        );
-
-        return {
-          contractAddress: nft.contractAddress,
-          tokenId: nft.tokenId,
-          collectionName: nft.collectionName,
-          name: nft.name,
-          imageUrl: nft.imageUrl,
-          bestOfferWei: remoteStats?.bestOfferWei || undefined,
-          offerCount: remoteStats?.offerCount || 0,
-          isInLoan: Boolean(activeLoan),
-        };
-      });
-    }
-
-    return getCuratedCollections(chainId).map((col, idx) => {
-      const colAddress = col.contractAddress;
+    return rawWalletNfts.map((nft) => {
       const remoteStats = collectionsData?.collections?.find(
-        (c) => c.address.toLowerCase() === colAddress.toLowerCase()
+        (c) => c.address.toLowerCase() === nft.contractAddress.toLowerCase()
       );
-      const name = remoteStats?.name || col.name;
+      const activeLoan = userLoansData?.loans?.find(
+        (l) =>
+          l.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
+          l.tokenId === nft.tokenId &&
+          l.status === 'active'
+      );
 
       return {
-        contractAddress: colAddress,
-        tokenId: String(idx + 1),
-        collectionName: name,
-        name: `${name} #${idx + 1}`,
-        imageUrl: remoteStats?.imageUrl || resolveCollectionImageUrl(name),
+        contractAddress: nft.contractAddress,
+        tokenId: nft.tokenId,
+        collectionName: nft.collectionName,
+        name: nft.name,
+        imageUrl: nft.imageUrl,
         bestOfferWei: remoteStats?.bestOfferWei || undefined,
         offerCount: remoteStats?.offerCount || 0,
-        isInLoan: false,
+        isInLoan: Boolean(activeLoan),
       };
     });
-  }, [rawWalletNfts, collectionsData, userLoansData, chainId]);
+  }, [rawWalletNfts, collectionsData, userLoansData]);
 
   const filteredNfts = useMemo(() => {
     if (!collectionParam) return borrowableNfts;
