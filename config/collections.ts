@@ -147,11 +147,3 @@ export function getCollectionByAddress(
   );
   return found || null;
 }
-
-export function isCollectionAllowed(address: string, chainId?: number): boolean {
-  if (!address) return false;
-  const lowerTarget = address.toLowerCase();
-  return CURATED_COLLECTION_ENTRIES.some((entry) =>
-    Object.values(entry).some((a) => a.toLowerCase() === lowerTarget)
-  );
-}

@@ -1,16 +1,25 @@
 import { NextRequest } from 'next/server';
 import { indexerStore } from '@/lib/indexer/store';
+import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse } from '@/lib/api/response';
 import { OffersListResponse, OfferItem } from '@/types/api';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
   const statusParam = searchParams.get('status');
   const collectionParam = searchParams.get('collection');
   const lenderParam = searchParams.get('lender');
   const sortParam = searchParams.get('sort') || 'principal';
   const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 50);
   const cursor = searchParams.get('cursor');
+
+  if (chainId !== undefined) {
+    try {
+      await syncOnChainLogs(chainId);
+    } catch {}
+  }
 
   const allOffers: OfferItem[] = [];
   for (const row of indexerStore.offers.values()) {

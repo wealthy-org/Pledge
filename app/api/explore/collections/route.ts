@@ -119,11 +119,13 @@ export async function GET(request: NextRequest) {
         }
       }
 
+      const meta = await fetchOnChainCollectionInfo(colAddr, chainId);
+
       aggregated.push({
         address: colAddr,
-        name: `Collection ${colAddr.slice(0, 6)}...${colAddr.slice(-4)}`,
-        symbol: 'NFT',
-        imageUrl: resolveCollectionImageUrl(colAddr, 'NFT'),
+        name: meta.name || `Collection ${colAddr.slice(0, 6)}...${colAddr.slice(-4)}`,
+        symbol: meta.symbol || 'NFT',
+        imageUrl: resolveCollectionImageUrl(colAddr, meta.symbol || meta.name),
         bestOfferWei: bestOffer !== null ? bestOffer.toString() : null,
         poolSizeWei: poolSize.toString(),
         offerCount: colOffers.length,

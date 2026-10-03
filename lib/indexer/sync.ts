@@ -7,6 +7,9 @@ import { indexerStore } from './store';
 
 let lastSyncTime = 0;
 const SYNC_COOLDOWN_MS = 5000;
+const RPC_TIMEOUT_MS = 4000;
+const TESTNET_DEPLOYMENT_START_BLOCK = 127800000n;
+const HIGH_BLOCK_HEIGHT_THRESHOLD = 500000n;
 
 export async function syncOnChainLogs(chainId?: number): Promise<number> {
   const now = Date.now();
@@ -25,12 +28,13 @@ export async function syncOnChainLogs(chainId?: number): Promise<number> {
 
     const client = createPublicClient({
       chain,
-      transport: http(rpcUrl, { timeout: 4000 }),
+      transport: http(rpcUrl, { timeout: RPC_TIMEOUT_MS }),
     });
 
     const currentBlock = await client.getBlockNumber();
     const checkpoint = indexerStore.getCheckpoint(chain.id, contractAddress);
-    const fromBlock = checkpoint ? BigInt(checkpoint.last_block_number + 1) : 0n;
+    const defaultStartBlock = chain.id === TESTNET_CHAIN_ID ? (currentBlock > HIGH_BLOCK_HEIGHT_THRESHOLD ? TESTNET_DEPLOYMENT_START_BLOCK : 0n) : 0n;
+    const fromBlock = checkpoint ? BigInt(checkpoint.last_block_number + 1) : defaultStartBlock;
 
     if (fromBlock > currentBlock) {
       return 0;

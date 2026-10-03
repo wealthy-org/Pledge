@@ -44,7 +44,8 @@ export default function HomePage() {
   }, [collections, activeOfferCollections, selectedFilter]);
 
   const uniqueListings: UniqueListingItem[] = useMemo(() => {
-    if (activeOfferCollections.length === 0) return [];
+    const source = activeOfferCollections.length > 0 ? activeOfferCollections : collections;
+    if (source.length === 0) return [];
     const statuses: ('floor' | 'lower_price' | 'in_loan' | 'off_market')[] = [
       'in_loan',
       'floor',
@@ -54,7 +55,7 @@ export default function HomePage() {
       'off_market',
     ];
 
-    return activeOfferCollections.slice(0, 6).map((c, idx) => ({
+    return source.slice(0, 6).map((c, idx) => ({
       id: `${c.address}-${idx + 1}`,
       collectionAddress: c.address,
       collectionName: c.name,
@@ -66,7 +67,7 @@ export default function HomePage() {
       isVerified: true,
       durationDays: 14,
     }));
-  }, [activeOfferCollections]);
+  }, [activeOfferCollections, collections]);
 
   const marketStats = useMemo(() => {
     const totalPoolWei = collections.reduce((acc, c) => acc + BigInt(c.poolSizeWei || '0'), 0n);

@@ -15,7 +15,7 @@ import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { useOffers } from '@/hooks/api/useOffers';
-import { useExploreCollections } from '@/hooks/api/useExploreCollections';
+import { useUnifiedCollectionSearch } from '@/hooks/useUnifiedCollectionSearch';
 import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
@@ -26,13 +26,16 @@ export default function LendPage() {
   const { address, isConnected } = useConnection();
   const { openConnectModal } = useConnectModal();
   const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
+
+  const [searchQuery, setSearchQuery] = useState('');
   const {
-    data: exploreData,
+    collections: unifiedCollections,
     isLoading: isLoadingCollections,
     isError: isErrorCollections,
     error: errorCollections,
     refetch: refetchCollections,
-  } = useExploreCollections({ chainId, limit: 50 });
+  } = useUnifiedCollectionSearch({ chainId, query: searchQuery });
+
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
@@ -59,30 +62,27 @@ export default function LendPage() {
   }, [apiOffers]);
 
   const collectionsList: CreateOfferCollectionOption[] = useMemo(() => {
-    if (!exploreData?.collections) return [];
-    return exploreData.collections.map((item) => ({
+    return unifiedCollections.map((item) => ({
       id: item.address.toLowerCase(),
       name: item.name,
       symbol: item.symbol,
       contractAddress: item.address,
     }));
-  }, [exploreData]);
+  }, [unifiedCollections]);
 
   const collectionStats = useMemo(() => {
     const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
-    if (exploreData?.collections) {
-      for (const item of exploreData.collections) {
-        const id = item.address.toLowerCase();
-        map[id] = {
-          poolSizeEth: item.poolSizeWei && item.poolSizeWei !== '0'
-            ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
-            : '0.00',
-          activeLoansCount: item.offerCount || 0,
-        };
-      }
+    for (const item of unifiedCollections) {
+      const id = item.address.toLowerCase();
+      map[id] = {
+        poolSizeEth: item.poolSizeWei && item.poolSizeWei !== '0'
+          ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
+          : '0.00',
+        activeLoansCount: item.offerCount || 0,
+      };
     }
     return map;
-  }, [exploreData]);
+  }, [unifiedCollections]);
 
   const selectedCol = useMemo(() => {
     if (!pendingFormData) return null;
@@ -210,11 +210,32 @@ export default function LendPage() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a collection market</h2>
-          <span className="text-xs text-[var(--muted)]">
-            {collectionsList.length} indexed collections
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a collection market</h2>
+            <span className="text-xs text-[var(--muted)]">
+              {collectionsList.length} indexed collections
+            </span>
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search collections or address..."
+              className="w-full pl-9 pr-4 py-2 text-xs bg-[var(--surface)] border border-[var(--line)] rounded-lg text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--lime)] transition-colors"
+            />
+            <svg
+              className="w-4 h-4 absolute left-3 top-2.5 text-[var(--muted)]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <circle cx="11" cy="11" r="8" strokeWidth="2" />
+              <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </div>
         </div>
 
         {isErrorCollections ? (
@@ -237,13 +258,13 @@ export default function LendPage() {
             </div>
           </div>
         ) : isLoadingCollections ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
             {[1, 2, 3, 4].map((idx) => (
               <div
                 key={idx}
-                className="bg-[var(--surface)] border border-[var(--line)] rounded-xl overflow-hidden p-4 space-y-3"
+                className="bg-[var(--surface)] border border-[var(--line)] rounded-xl overflow-hidden p-3 sm:p-4 space-y-3"
               >
-                <Skeleton width="100%" height="160px" borderRadius="8px" />
+                <Skeleton width="100%" height="140px" borderRadius="8px" />
                 <Skeleton width="120px" height="16px" />
                 <Skeleton width="80px" height="12px" />
                 <Skeleton width="100%" height="32px" borderRadius="6px" />
@@ -251,7 +272,7 @@ export default function LendPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
             {collectionsList.map((col) => (
               <LendCollectionCard
                 key={col.contractAddress || col.id}

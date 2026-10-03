@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useConnection, useChainId, useBalance } from 'wagmi';
 import { formatUnits } from 'viem';
 import { ConnectWallet } from '@/components/web3/ConnectWallet';
-import { ThemeToggle } from '@/components/layout/ThemeToggle';
 import { getActiveChain, TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 import { useMounted } from '@/lib/hooks/useMounted';
 
@@ -82,7 +81,6 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
           </div>
         )}
 
-        <ThemeToggle variant="header" />
         <ConnectWallet />
       </div>
     </header>

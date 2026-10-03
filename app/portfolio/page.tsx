@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { useConnection } from 'wagmi';
+import Link from 'next/link';
+import { useConnection, useBalance } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { formatUnits } from 'viem';
 import { ClaimableProceedsBanner } from '@/components/portfolio/ClaimableProceedsBanner';
@@ -13,12 +14,14 @@ import { PortfolioDisconnectedState } from '@/components/portfolio/PortfolioDisc
 import { CancelOfferModal } from '@/components/lend/CancelOfferModal';
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
+import { NftImage } from '@/components/nft/NftImage';
 import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useWithdrawProceeds } from '@/hooks/transactions/useWithdrawProceeds';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { usePortfolio } from '@/hooks/api/usePortfolio';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useOffers } from '@/hooks/api/useOffers';
+import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
 import type { OfferItem, LoanItem } from '@/types/api';
 
 export default function PortfolioPage() {
@@ -27,6 +30,14 @@ export default function PortfolioPage() {
   const { openConnectModal } = useConnectModal();
   const effectiveAddress = userAddress || '';
 
+  const { data: balanceData } = useBalance({
+    address: userAddress,
+    query: {
+      enabled: Boolean(userAddress && isConnected),
+    },
+  });
+  const { nfts: userNfts, isLoading: isLoadingNfts } = useEligibleNfts(userAddress, chainId);
+
   const { data: apiPortfolio, refetch: refetchPortfolio } = usePortfolio(effectiveAddress);
   const { data: allUserLoans } = useLoans({ borrower: effectiveAddress });
   const { data: allUserOffers } = useOffers({ lender: effectiveAddress });
@@ -34,7 +45,7 @@ export default function PortfolioPage() {
   const { state: withdrawTxState, withdrawProceeds, reset: resetWithdrawTx } = useWithdrawProceeds();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
-  const [activeTab, setActiveTab] = useState<'loans' | 'offers' | 'lending' | 'history'>('loans');
+  const [activeTab, setActiveTab] = useState<'nfts' | 'loans' | 'offers' | 'lending' | 'history'>('nfts');
   const [claimableWei, setClaimableWei] = useState<string>('0');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -167,33 +178,43 @@ export default function PortfolioPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 bg-[var(--surface)] border border-[var(--line)] rounded-xl p-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-5 bg-[var(--surface)] border border-[var(--line)] rounded-xl p-5 sm:p-6">
         <div className="space-y-1">
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>Wallet Balance</span>
+          </div>
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+            {balanceData ? Number(formatUnits(balanceData.value, balanceData.decimals)).toFixed(3) : '0.000'} <small className="text-xs text-[var(--muted)]">{balanceData?.symbol || 'ETH'}</small>
+          </div>
+        </div>
+
+        <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
+          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+            <span>Eligible Collectibles</span>
+          </div>
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+            {userNfts.length} <small className="text-xs text-[var(--muted)]">NFTs</small>
+          </div>
+        </div>
+
+        <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
           <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
             <span>Borrowed ETH</span>
           </div>
-          <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
             {totalBorrowedEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
 
         <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
           <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            <span>Total repayment due</span>
-          </div>
-          <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
-            {totalRepaymentDueEth} <small className="text-xs text-[var(--muted)]">ETH</small>
-          </div>
-        </div>
-
-        <div className="space-y-1 sm:border-l sm:border-[var(--line)] sm:pl-6">
-          <div className="flex items-center gap-1.5 text-[10px] text-[var(--muted)] uppercase font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-violet-500" />
-            <span>Open offer principal</span>
+            <span>Active Offers / Lent</span>
           </div>
-          <div className="text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
+          <div className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] font-mono">
             {totalOpenOfferEth} <small className="text-xs text-[var(--muted)]">ETH</small>
           </div>
         </div>
@@ -210,7 +231,19 @@ export default function PortfolioPage() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-[var(--line)]">
-          <div role="tablist" className="bg-[var(--panel)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
+          <div role="tablist" className="bg-[var(--panel)] p-1 rounded-lg flex flex-wrap gap-1 border border-[var(--line)]">
+            <button
+              role="tab"
+              aria-selected={activeTab === 'nfts'}
+              onClick={() => setActiveTab('nfts')}
+              className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
+                activeTab === 'nfts'
+                  ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                  : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
+              }`}
+            >
+              My Collectibles ({userNfts.length})
+            </button>
             <button
               role="tab"
               aria-selected={activeTab === 'loans'}
@@ -221,7 +254,7 @@ export default function PortfolioPage() {
                   : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              Borrowing
+              Borrowing ({userBorrowingLoans.length})
             </button>
             <button
               role="tab"
@@ -233,7 +266,7 @@ export default function PortfolioPage() {
                   : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              Offers
+              Offers ({userOffers.length})
             </button>
             <button
               role="tab"
@@ -245,7 +278,7 @@ export default function PortfolioPage() {
                   : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
               }`}
             >
-              Lending
+              Lending ({userLentLoans.length})
             </button>
             <button
               role="tab"
@@ -261,6 +294,68 @@ export default function PortfolioPage() {
             </button>
           </div>
         </div>
+
+        {activeTab === 'nfts' && (
+          <div className="space-y-4">
+            {isLoadingNfts ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-[var(--surface)] border border-[var(--line)] rounded-xl p-4 space-y-3">
+                    <div className="aspect-square bg-[var(--panel)] rounded-lg shimmer" />
+                    <div className="h-4 bg-[var(--panel)] rounded shimmer w-3/4" />
+                    <div className="h-3 bg-[var(--panel)] rounded shimmer w-1/2" />
+                  </div>
+                ))}
+              </div>
+            ) : userNfts.length === 0 ? (
+              <div className="py-16 px-6 border border-dashed border-[var(--line)] rounded-xl text-center bg-[var(--surface)]">
+                <div className="text-3xl text-[var(--muted)] mb-2 font-mono">◈</div>
+                <h3 className="text-sm font-semibold text-[var(--text)] mb-1">No Collectibles in Wallet</h3>
+                <p className="text-xs text-[var(--muted)] max-w-sm mx-auto mb-4">
+                  Your connected wallet does not hold any verified collectibles from our supported collections.
+                </p>
+                <Link
+                  href="/borrow"
+                  className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                >
+                  Mint Testnet NFT ↗
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {userNfts.map((nft) => (
+                  <div
+                    key={`${nft.contractAddress}-${nft.tokenId}`}
+                    className="flex flex-col bg-[var(--surface)] border border-[var(--line)] rounded-xl overflow-hidden hover:border-[var(--line-strong)] transition-colors"
+                  >
+                    <div className="relative aspect-square w-full bg-[var(--panel)]">
+                      <NftImage
+                        src={nft.imageUrl}
+                        alt={nft.name}
+                        contractAddress={nft.contractAddress}
+                        tokenId={nft.tokenId}
+                        symbol={nft.collectionName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-3.5 flex flex-col flex-1 justify-between space-y-3">
+                      <div>
+                        <div className="text-[10px] text-[var(--muted)] font-mono truncate">{nft.collectionName}</div>
+                        <h4 className="text-xs font-semibold text-[var(--text)] truncate mt-0.5">{nft.name}</h4>
+                      </div>
+                      <Link
+                        href={`/borrow?collection=${nft.contractAddress}`}
+                        className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white border border-emerald-500/25 transition-colors text-center block"
+                      >
+                        Borrow Against NFT ↗
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {activeTab === 'loans' && (
           <BorrowingTab

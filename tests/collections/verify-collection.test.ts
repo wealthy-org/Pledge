@@ -4,7 +4,7 @@ import {
   CURATED_COLLECTIONS,
   getCuratedCollections,
   getCollectionByAddress,
-  isCollectionAllowed,
+  fetchOnChainCollection,
 } from '@/config/collections';
 import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 
@@ -35,12 +35,16 @@ describe('TICKET-07b: Curated Collections & Verification Test Suite', () => {
     expect(mainnetCols[0].contractAddress).toBe(CURATED_COLLECTIONS[0].addresses[MAINNET_CHAIN_ID]);
   });
 
-  it('TS-03: isCollectionAllowed correctly checks address membership', () => {
+  it('TS-03: fetchOnChainCollection correctly verifies collections on-chain or returns null', async () => {
     const validTestnetAddr = CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID];
     const invalidAddr = '0x000000000000000000000000000000000000dEaD';
 
-    expect(isCollectionAllowed(validTestnetAddr, TESTNET_CHAIN_ID)).toBe(true);
-    expect(isCollectionAllowed(invalidAddr, TESTNET_CHAIN_ID)).toBe(false);
+    const validCol = await fetchOnChainCollection(validTestnetAddr, TESTNET_CHAIN_ID);
+    expect(validCol).not.toBeNull();
+    expect(validCol?.contractAddress.toLowerCase()).toBe(validTestnetAddr.toLowerCase());
+
+    const invalidCol = await fetchOnChainCollection(invalidAddr as any, TESTNET_CHAIN_ID);
+    expect(invalidCol).toBeNull();
   });
 
   it('TS-04: getCollectionByAddress retrieves collection or returns null safely', () => {

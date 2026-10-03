@@ -34,7 +34,7 @@ export function NFTGrid({
 }: NFTGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5" data-testid="nft-grid-skeleton">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5" data-testid="nft-grid-skeleton">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
@@ -42,7 +42,7 @@ export function NFTGrid({
             className="flex flex-col bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl overflow-hidden"
           >
             <div className="aspect-square w-full bg-[var(--panel)] shimmer" />
-            <div className="p-4 flex flex-col flex-1 justify-between space-y-3">
+            <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between space-y-3">
               <div>
                 <div className="w-24 h-2.5 bg-[var(--panel)] rounded shimmer mb-1.5" />
                 <div className="w-36 h-4 bg-[var(--panel)] rounded shimmer mb-3" />
@@ -94,7 +94,7 @@ export function NFTGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
       {nfts.map((nft) => {
         const isSelected =
           selectedNft?.contractAddress.toLowerCase() === nft.contractAddress.toLowerCase() &&
@@ -124,7 +124,7 @@ export function NFTGrid({
                   src={nft.imageUrl}
                   alt={nft.name}
                   fill
-                  sizes="(max-width: 768px) 100vw, 25vw"
+                  sizes="(max-width: 768px) 50vw, 25vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-300"
                   unoptimized
                 />
@@ -135,7 +135,7 @@ export function NFTGrid({
               )}
             </div>
 
-            <div className="p-4 flex flex-col flex-1 justify-between">
+            <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between">
               <div>
                 <div className="text-[10px] text-[#627478] dark:text-[#8ca197] truncate">
                   {nft.collectionName}

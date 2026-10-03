@@ -82,6 +82,15 @@ vi.mock('wagmi', () => ({
     isConnected: Boolean(connectedAccount),
     chainId: 46630,
   }),
+  useBalance: () => ({
+    data: {
+      value: 2500000000000000000n,
+      formatted: '2.50',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    isLoading: false,
+  }),
   usePublicClient: () => ({
     simulateContract: vi.fn().mockResolvedValue({ request: {} }),
     waitForTransactionReceipt: vi.fn().mockResolvedValue({ status: 'success' }),

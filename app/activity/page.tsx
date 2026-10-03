@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import { ActivityFilterBar } from '@/components/activity/ActivityFilterBar';
 import { ActivityStream } from '@/components/activity/ActivityStream';
 import { useActivity } from '@/hooks/api/useActivity';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 
 export default function ActivityPage() {
+  const chainId = useSafeChainId();
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedCollection, setSelectedCollection] = useState<string>('all');
   const [limit, setLimit] = useState<number>(20);
@@ -13,6 +15,7 @@ export default function ActivityPage() {
   const { data: activityData, isLoading } = useActivity({
     eventType: selectedType === 'all' ? undefined : selectedType,
     collection: selectedCollection === 'all' ? undefined : selectedCollection,
+    chainId,
   });
 
   const activities = activityData?.activity || [];

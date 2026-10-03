@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { NftImage } from '@/components/nft/NftImage';
 import type { CuratedCollectionDefinition, ActiveCuratedCollection } from '@/config/collections';
 
@@ -49,16 +50,16 @@ export function LendCollectionCard({
         />
       </div>
 
-      <div className="p-4 flex flex-col flex-1 justify-between">
+      <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between">
         <div>
           <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-600 dark:text-violet-400">
             Open Market
           </div>
-          <h3 className="text-sm font-semibold text-[var(--text)] mt-0.5 mb-3 truncate">
+          <h3 className="text-xs sm:text-sm font-semibold text-[var(--text)] mt-0.5 mb-2 sm:mb-3 truncate">
             {collection.name}
           </h3>
 
-          <div className="space-y-2 text-xs pb-3 border-b border-[var(--line)]">
+          <div className="space-y-1.5 sm:space-y-2 text-[11px] sm:text-xs pb-2 sm:pb-3 border-b border-[var(--line)]">
             <div className="flex items-center justify-between">
               <span className="text-[var(--muted)]">Pool size</span>
               <strong className="font-mono text-emerald-600 dark:text-emerald-400">
@@ -72,14 +73,25 @@ export function LendCollectionCard({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onMakeOffer(collection)}
-          className="w-full mt-3 py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white border border-emerald-500/25 transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
-        >
-          <span>Make offer</span>
-          <span className="text-sm font-normal">+</span>
-        </button>
+        <div className="flex flex-col sm:flex-row items-stretch gap-1.5 sm:gap-2 mt-2.5 sm:mt-3">
+          {contractAddr ? (
+            <Link
+              href={`/collection/${contractAddr}`}
+              className="w-full sm:flex-1 py-1.5 sm:py-2 px-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-[var(--panel)] text-[var(--text)] hover:bg-[var(--raised)] border border-[var(--line)] transition-colors text-center truncate"
+            >
+              Details ↗
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            aria-label="Make Offer"
+            onClick={() => onMakeOffer(collection)}
+            className="w-full sm:flex-1 py-1.5 sm:py-2 px-2 rounded-lg text-[11px] sm:text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white border border-emerald-500/25 transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-xs"
+          >
+            <span>Offer</span>
+            <span className="text-sm font-normal">+</span>
+          </button>
+        </div>
       </div>
     </article>
   );

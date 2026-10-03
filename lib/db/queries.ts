@@ -200,6 +200,7 @@ export async function fetchCollectionOffers(
   chainId?: number
 ): Promise<OffersListResponse> {
   const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   const target = address.toLowerCase();
   const allOffers: OfferItem[] = [];
 
@@ -255,6 +256,7 @@ export async function fetchCollectionOffers(
 
 export async function fetchLoanDetail(loanId: number, chainId?: number): Promise<LoanDetailResponse | null> {
   const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   const fromStore = indexerStore.getLoan(targetChain, loanId);
   if (!fromStore) return null;
 
@@ -303,6 +305,7 @@ export async function fetchWalletLoans(
   chainId?: number
 ): Promise<WalletLoansResponse> {
   const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   const target = address.toLowerCase();
   const allLoans: LoanItem[] = [];
 
@@ -359,6 +362,7 @@ export async function fetchOffersForWallet(
   chainId?: number
 ): Promise<OffersListResponse> {
   const targetChain = resolveChainId(chainId);
+  await syncOnChainLogs(targetChain);
   const target = address.toLowerCase();
   const allOffers: OfferItem[] = [];
 
@@ -429,7 +433,13 @@ export async function fetchActivityFeed(
 
   if (collection) {
     const target = collection.toLowerCase();
-    filtered = filtered.filter((a) => a.contractAddress.toLowerCase() === target);
+    filtered = filtered.filter((a) => {
+      const dataCollection =
+        (a.data?.collection as string) ||
+        (a.data?.collectionAddress as string) ||
+        a.contractAddress;
+      return dataCollection.toLowerCase() === target;
+    });
   }
 
   if (type) {

@@ -8,6 +8,7 @@ export interface UseActivityParams {
   eventType?: string;
   collection?: string;
   cursor?: string;
+  chainId?: number;
 }
 
 export function useActivity(params?: UseActivityParams) {
@@ -26,6 +27,9 @@ export function useActivity(params?: UseActivityParams) {
         }
         if (params?.cursor) {
           searchParams.set('cursor', params.cursor);
+        }
+        if (params?.chainId) {
+          searchParams.set('chainId', params.chainId.toString());
         }
 
         const qs = searchParams.toString();

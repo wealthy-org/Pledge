@@ -3,7 +3,7 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { useExploreCollections } from '@/hooks/api/useExploreCollections';
+import { useUnifiedCollectionSearch } from '@/hooks/useUnifiedCollectionSearch';
 import { ExploreFilters, type ExploreSortBy, type ExploreViewMode } from '@/components/explore/ExploreFilters';
 import { ExploreGrid } from '@/components/explore/ExploreGrid';
 import { Button } from '@/components/ui/Button';
@@ -15,14 +15,14 @@ function ExploreContent() {
   const [sortBy, setSortBy] = useState<ExploreSortBy>('volume');
   const [viewMode, setViewMode] = useState<ExploreViewMode>('grid');
 
-  const { data, isLoading, isError, error, refetch } = useExploreCollections({
+  const { collections: rawCollections, isLoading, isError, error, refetch } = useUnifiedCollectionSearch({
     chainId,
-    search,
-    hasOffers: hasOffersOnly,
+    query: search,
+    hasOffersOnly,
   });
 
   const collections = useMemo(() => {
-    const list = [...(data?.collections || [])];
+    const list = [...rawCollections];
     return list.sort((a, b) => {
       if (sortBy === 'offers') {
         return (b.offerCount || 0) - (a.offerCount || 0);
@@ -44,7 +44,7 @@ function ExploreContent() {
       }
       return (b.offerCount || 0) - (a.offerCount || 0);
     });
-  }, [data, sortBy]);
+  }, [rawCollections, sortBy]);
 
   return (
     <div className="space-y-6">
@@ -99,7 +99,7 @@ function ExploreContent() {
         onSortChange={setSortBy}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
-        totalCount={data?.total || collections.length}
+        totalCount={collections.length}
       />
 
       {isError ? (
