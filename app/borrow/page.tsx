@@ -165,6 +165,24 @@ function BorrowContent() {
           </span>
         </div>
 
+        {collectionParam && (
+          <div className="flex items-center justify-between p-3 rounded-lg bg-[var(--panel)] border border-[var(--line)] text-xs text-[var(--text)]">
+            <div className="flex items-center gap-2">
+              <span className="text-[var(--muted)]">Filtered by:</span>
+              <strong className="font-semibold text-sky-600 dark:text-sky-400">
+                {collectionsData?.collections?.find((c) => c.address.toLowerCase() === collectionParam.toLowerCase())?.name || collectionParam}
+              </strong>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push('/borrow')}
+              className="text-xs font-semibold text-[var(--muted)] hover:text-[var(--text)] underline cursor-pointer"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
+
         <NFTGrid
           nfts={filteredNfts}
           selectedNft={selectedNft}

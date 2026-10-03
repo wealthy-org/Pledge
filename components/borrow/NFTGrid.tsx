@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { formatUnits } from 'viem';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -57,11 +58,17 @@ export function NFTGrid({
 
   if (nfts.length === 0) {
     return (
-      <div className="p-8 border border-dashed border-[#e1e8e9] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17]">
+      <div className="p-8 border border-dashed border-[#e1e8e9] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17] flex flex-col items-center justify-center">
         <EmptyState
           title="No Eligible Collectibles Found"
           description="Your connected wallet does not hold any verified NFTs from our curated collections, or all eligible collectibles are currently collateralized."
         />
+        <Link
+          href="/collections"
+          className="mt-3 inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-colors shadow-xs"
+        >
+          Explore Whitelisted Collections ↗
+        </Link>
       </div>
     );
   }
