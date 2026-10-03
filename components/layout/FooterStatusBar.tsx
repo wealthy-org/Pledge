@@ -42,7 +42,8 @@ export function FooterStatusBar() {
     return () => clearInterval(interval);
   }, []);
 
-  const activeChain = getActiveChain(chainId ?? TESTNET_CHAIN_ID);
+  const isSupportedChain = chainId === TESTNET_CHAIN_ID || chainId === 4663;
+  const activeChain = getActiveChain(isSupportedChain ? chainId : undefined);
   const explorerUrl = activeChain.blockExplorers?.default.url || 'https://explorer.testnet.chain.robinhood.com';
 
   return (

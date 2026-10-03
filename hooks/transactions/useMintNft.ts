@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCuratedCollections } from '@/config/collections';
 import { getEffectiveWalletClient } from '@/lib/web3/getEffectiveWalletClient';
 
@@ -27,7 +28,8 @@ export interface MintNftParams {
 }
 
 export function useMintNft() {
-  const { address, isConnected, chainId } = useConnection();
+  const { address, isConnected } = useConnection();
+  const chainId = useSafeChainId();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();

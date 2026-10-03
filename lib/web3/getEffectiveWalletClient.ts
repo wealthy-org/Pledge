@@ -11,7 +11,12 @@ export async function getEffectiveWalletClient(
     return cachedWalletClient;
   }
 
-  const activeChain = getActiveChain(targetChainId || TESTNET_CHAIN_ID);
+  const safeChainId =
+    targetChainId === TESTNET_CHAIN_ID || targetChainId === 4663
+      ? targetChainId
+      : undefined;
+
+  const activeChain = getActiveChain(safeChainId);
 
   try {
     const { config } = await import('@/lib/wagmi');

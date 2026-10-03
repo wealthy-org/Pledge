@@ -38,7 +38,7 @@ export function ConnectWallet({ className = '' }: ConnectWalletProps) {
   }
 
   const isSupportedChain = chainId === TESTNET_CHAIN_ID || chainId === MAINNET_CHAIN_ID;
-  const activeChain = getActiveChain(chainId);
+  const activeChain = getActiveChain(isSupportedChain ? chainId : undefined);
 
   const handleDisconnect = () => {
     disconnect();

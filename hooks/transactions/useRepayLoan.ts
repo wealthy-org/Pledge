@@ -5,6 +5,7 @@ import { formatUnits } from 'viem';
 import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI } from '@/config/contracts';
 import { getEffectiveWalletClient } from '@/lib/web3/getEffectiveWalletClient';
 
@@ -18,7 +19,8 @@ export interface RepayLoanParams {
 }
 
 export function useRepayLoan() {
-  const { address, isConnected, chainId } = useConnection();
+  const { address, isConnected } = useConnection();
+  const chainId = useSafeChainId();
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();

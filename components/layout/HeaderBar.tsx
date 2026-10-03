@@ -25,7 +25,7 @@ export function HeaderBar({ onSearchClick }: HeaderBarProps) {
   });
 
   const isSupportedChain = chainId === TESTNET_CHAIN_ID || chainId === MAINNET_CHAIN_ID;
-  const activeChain = getActiveChain(chainId);
+  const activeChain = getActiveChain(isSupportedChain ? chainId : undefined);
 
   return (
     <header className="fixed top-0 left-0 md:left-[var(--rail-width)] right-0 h-[var(--header-height)] bg-[var(--surface)] z-30 px-6 border-b border-[var(--line)] flex items-center justify-between gap-6 transition-colors duration-150">
