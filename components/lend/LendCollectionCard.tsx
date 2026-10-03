@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { NftImage } from '@/components/nft/NftImage';
 import type { CuratedCollectionDefinition, ActiveCuratedCollection } from '@/config/collections';
 
 export interface GenericCollectionItem {
@@ -29,27 +28,24 @@ export function LendCollectionCard({
   imageUrl,
   onMakeOffer,
 }: LendCollectionCardProps) {
-  const displayImage = imageUrl || resolveCollectionImageUrl(collection.name || collection.symbol);
-  const displayPool = poolSizeEth
-    ? `${poolSizeEth} ETH`
-    : '—';
+  const contractAddr =
+    collection.contractAddress ||
+    (collection as any).address ||
+    (collection as any).id ||
+    '';
+  const displayPool = poolSizeEth ? `${poolSizeEth} ETH` : '—';
   const activeCount = activeLoansCount !== undefined ? activeLoansCount : 0;
 
   return (
     <article className="flex flex-col bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] hover:-translate-y-1 hover:shadow-md rounded-xl overflow-hidden transition-all duration-200">
-      <div className="relative aspect-square w-full bg-[var(--panel)] overflow-hidden group flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
-        {displayImage ? (
-          <Image
-            src={displayImage}
-            alt={collection.name}
-            fill
-            sizes="(max-width: 768px) 100vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            unoptimized
-          />
-        ) : (
-          collection.symbol
-        )}
+      <div className="relative aspect-square w-full bg-[var(--panel)] overflow-hidden group flex items-center justify-center">
+        <NftImage
+          src={imageUrl}
+          alt={collection.name}
+          contractAddress={contractAddr}
+          tokenId="0"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
       </div>
 
       <div className="p-4 flex flex-col flex-1 justify-between">

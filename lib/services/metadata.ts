@@ -2,7 +2,7 @@ import { isAddress, createPublicClient, http } from 'viem';
 import { NftMetadata, CachedNftRecord, MetadataFetchOptions } from '@/types/nft';
 import { TESTNET_CHAIN_ID, getActiveChain } from '@/config/chains';
 import { ERC721_ABI } from '@/config/contracts';
-import { resolveNftImage } from '@/lib/nft-image';
+import { resolveNftImage, generateSvgArtwork } from '@/lib/nft-image';
 
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -10,8 +10,7 @@ const inMemoryMetadataCache = new Map<string, CachedNftRecord>();
 const inMemoryCollectionCache = new Map<string, { name: string; symbol: string; expiresAt: number }>();
 
 export function resolveCollectionImageUrl(name: string): string {
-  const query = encodeURIComponent((name || '').trim());
-  return `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80&keyword=${query}`;
+  return generateSvgArtwork(name, '0');
 }
 
 function getCacheKey(contractAddress: string, tokenId: string): string {

@@ -40,15 +40,14 @@ describe('TICKET-22: NFT Metadata Service & Caching Layer Test Suite', () => {
   });
 
   describe('TS-02: Dynamic URL Resolution with Pure String Interpolation', () => {
-    it('interpolates collection name directly into image query URL without if-else', () => {
+    it('generates deterministic SVG data URI for collection fallback', () => {
       const url = resolveCollectionImageUrl('Nottingham Guild Pledges');
-      expect(url).toContain('keyword=Nottingham%20Guild%20Pledges');
-      expect(url).toContain('https://images.unsplash.com');
+      expect(url.startsWith('data:image/svg+xml;utf8,')).toBe(true);
     });
 
-    it('handles arbitrary collection names via URL encoding', () => {
+    it('handles arbitrary collection names via deterministic artwork generation', () => {
       const url = resolveCollectionImageUrl('Sherwood Forest & Rangers #1');
-      expect(url).toContain('keyword=Sherwood%20Forest%20%26%20Rangers%20%231');
+      expect(url.startsWith('data:image/svg+xml;utf8,')).toBe(true);
     });
   });
 

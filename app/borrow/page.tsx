@@ -41,6 +41,15 @@ function BorrowContent() {
   const [isApproved, setIsApproved] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (!isConnected) {
+      setSelectedNft(null);
+      setSelectedOffer(null);
+      setIsDrawerOpen(false);
+      setIsConfirmModalOpen(false);
+    }
+  }, [isConnected]);
+
   const { data: offersData } = useOffers({
     collection: selectedNft?.contractAddress,
     status: 'open',
@@ -87,23 +96,26 @@ function BorrowContent() {
 
   const handleReviewProceed = async () => {
     if (!selectedNft) return;
+    if (!isConnected) {
+      openConnectModal();
+      return;
+    }
     setIsDrawerOpen(false);
 
-    if (isConnected) {
-      const approved = await checkIsApproved({
-        collectionAddress: selectedNft.contractAddress as `0x${string}`,
-        tokenId: selectedNft.tokenId,
-      });
-      setIsApproved(approved);
-    } else {
-      setIsApproved(true);
-    }
-
+    const approved = await checkIsApproved({
+      collectionAddress: selectedNft.contractAddress as `0x${string}`,
+      tokenId: selectedNft.tokenId,
+    });
+    setIsApproved(approved);
     setIsConfirmModalOpen(true);
   };
 
   const handleApproveNFT = async () => {
     if (!selectedNft) return;
+    if (!isConnected) {
+      openConnectModal();
+      return;
+    }
     setIsTxModalOpen(true);
     const hash = await approveNFT({
       collectionAddress: selectedNft.contractAddress as `0x${string}`,
@@ -119,22 +131,20 @@ function BorrowContent() {
 
   const handleExecuteAcceptOffer = async () => {
     if (!selectedNft || !selectedOffer) return;
+    if (!isConnected) {
+      openConnectModal();
+      return;
+    }
     setIsConfirmModalOpen(false);
     setIsTxModalOpen(true);
 
-    if (isConnected) {
-      const hash = await acceptOffer({
-        offerId: selectedOffer.offerId,
-        tokenId: selectedNft.tokenId,
-        collectionAddress: selectedNft.contractAddress as `0x${string}`,
-      });
-      if (hash) {
-        setToastMessage(`Loan initiated successfully! Redirecting...`);
-      }
-    } else {
-      setIsTxModalOpen(false);
-      setToastMessage(`Loan initiated successfully for ${selectedNft.name}! Funds sent to wallet.`);
-      router.push(`/loan/1`);
+    const hash = await acceptOffer({
+      offerId: selectedOffer.offerId,
+      tokenId: selectedNft.tokenId,
+      collectionAddress: selectedNft.contractAddress as `0x${string}`,
+    });
+    if (hash) {
+      setToastMessage(`Loan initiated successfully! Redirecting...`);
     }
   };
 
@@ -244,7 +254,7 @@ function BorrowContent() {
         )}
       </div>
 
-      {selectedNft && (
+      {isConnected && selectedNft && (
         <div className="space-y-4 pt-4 border-t border-[var(--line)]">
           <div className="flex items-center justify-between">
             <div>
