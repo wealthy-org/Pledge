@@ -113,7 +113,7 @@ export async function fetchNftMetadata(
   const imageUrl = resolveCollectionImageUrl(name);
 
   const metadata: NftMetadata = {
-    contractAddress: knownCollection ? knownCollection.contractAddress : contractAddress,
+    contractAddress: contractAddress as `0x${string}`,
     tokenId,
     name: knownCollection ? `${knownCollection.name} #${tokenId}` : `NFT #${tokenId}`,
     description: `${name} on Robinhood Chain`,

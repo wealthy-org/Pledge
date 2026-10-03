@@ -18,6 +18,39 @@ export interface ActiveCuratedCollection extends CuratedCollectionDefinition {
   contractAddress: `0x${string}`;
 }
 
+export const CURATED_COLLECTIONS_CONFIG: CuratedCollectionDefinition[] = [
+  {
+    id: 'rhg',
+    name: 'Robinhood Genesis Pass',
+    symbol: 'RHG',
+    defaultDurations: [7, 14, 30],
+    addresses: {
+      [TESTNET_CHAIN_ID]: '0xE80385Cf259C82359CF5eA4eA98cD6514d9257a9',
+      [MAINNET_CHAIN_ID]: '0x1111111111111111111111111111111111111111',
+    },
+  },
+  {
+    id: 'sfr',
+    name: 'Sherwood Forest Rangers',
+    symbol: 'SFR',
+    defaultDurations: [7, 14, 30],
+    addresses: {
+      [TESTNET_CHAIN_ID]: '0x146BefC6C8656Df737255d08fa1281319Fc1A4c3',
+      [MAINNET_CHAIN_ID]: '0x2222222222222222222222222222222222222222',
+    },
+  },
+  {
+    id: 'ngp',
+    name: 'Nottingham Guild Pledges',
+    symbol: 'NGP',
+    defaultDurations: [7, 14, 30],
+    addresses: {
+      [TESTNET_CHAIN_ID]: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D',
+      [MAINNET_CHAIN_ID]: '0x3333333333333333333333333333333333333333',
+    },
+  },
+];
+
 export async function fetchOnChainCollection(
   address: `0x${string}`,
   chainId?: number
@@ -60,46 +93,14 @@ export function getCuratedCollections(chainId?: number): ActiveCuratedCollection
   }
 
   const isMainnet = targetChain === MAINNET_CHAIN_ID;
-  const env = process.env;
-  const collections: ActiveCuratedCollection[] = [];
-  const processedSymbols = new Set<string>();
 
-  for (const key of Object.keys(env)) {
-    if (key.startsWith('NEXT_PUBLIC_') && key.endsWith('_COLLECTION') && !key.endsWith('_MAINNET')) {
-      const symbol = key.replace('NEXT_PUBLIC_', '').replace('_COLLECTION', '');
-      if (!symbol || processedSymbols.has(symbol)) continue;
-      processedSymbols.add(symbol);
-
-      const testnetAddr = env[`NEXT_PUBLIC_${symbol}_COLLECTION`] as `0x${string}`;
-      const mainnetAddr = (env[`NEXT_PUBLIC_${symbol}_COLLECTION_MAINNET`] || testnetAddr) as `0x${string}`;
-
-      if (!testnetAddr) {
-        throw new Error(`Collection address for ${symbol} is missing`);
-      }
-
-      const contractAddress = isMainnet ? mainnetAddr : testnetAddr;
-      const id = symbol.toLowerCase();
-      const name = symbol;
-
-      collections.push({
-        id,
-        name,
-        symbol,
-        defaultDurations: [7, 14, 30],
-        addresses: {
-          [TESTNET_CHAIN_ID]: testnetAddr,
-          [MAINNET_CHAIN_ID]: mainnetAddr,
-        },
-        contractAddress,
-      });
-    }
-  }
-
-  if (collections.length === 0) {
-    throw new Error('No curated collections configured in environment');
-  }
-
-  return collections;
+  return CURATED_COLLECTIONS_CONFIG.map((col) => {
+    const contractAddress = isMainnet ? col.addresses[MAINNET_CHAIN_ID] : col.addresses[TESTNET_CHAIN_ID];
+    return {
+      ...col,
+      contractAddress,
+    };
+  });
 }
 
 export const CURATED_COLLECTIONS: ActiveCuratedCollection[] = getCuratedCollections();
