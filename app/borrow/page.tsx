@@ -18,18 +18,71 @@ import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { useMounted } from '@/lib/hooks/useMounted';
 import type { OfferItem } from '@/types/api';
+
+export function BorrowPageSkeleton() {
+  return (
+    <div className="space-y-8" data-testid="borrow-page-skeleton">
+      <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
+        <div className="w-64 h-3 bg-[var(--panel)] rounded shimmer" />
+        <div className="w-80 sm:w-96 h-9 bg-[var(--panel)] rounded shimmer" />
+        <div className="w-72 h-4 bg-[var(--panel)] rounded shimmer" />
+      </div>
+
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-36 h-6 bg-[var(--panel)] rounded shimmer" />
+            <div className="w-24 h-4 bg-[var(--panel)] rounded shimmer" />
+          </div>
+          <div className="w-36 h-8 bg-[var(--panel)] rounded-lg shimmer" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              data-testid="nft-card-skeleton"
+              className="flex flex-col bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl overflow-hidden"
+            >
+              <div className="aspect-square w-full bg-[var(--panel)] shimmer" />
+              <div className="p-4 flex flex-col flex-1 justify-between space-y-3">
+                <div>
+                  <div className="w-24 h-2.5 bg-[var(--panel)] rounded shimmer mb-1.5" />
+                  <div className="w-36 h-4 bg-[var(--panel)] rounded shimmer mb-3" />
+                  <div className="space-y-2 pt-2 border-t border-[#e8eded] dark:border-[#1e332c]">
+                    <div className="flex items-center justify-between">
+                      <div className="w-16 h-3 bg-[var(--panel)] rounded shimmer" />
+                      <div className="w-14 h-3 bg-[var(--panel)] rounded shimmer" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="w-20 h-3 bg-[var(--panel)] rounded shimmer" />
+                      <div className="w-8 h-3 bg-[var(--panel)] rounded shimmer" />
+                    </div>
+                  </div>
+                </div>
+                <div className="w-full h-9 bg-[var(--panel)] rounded-lg shimmer mt-3" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function BorrowContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const collectionParam = searchParams.get('collection');
   const chainId = useSafeChainId();
+  const mounted = useMounted();
   const { address, isConnected } = useConnection();
   const { state: txState, checkIsApproved, approveNFT, acceptOffer, reset: resetTx } = useAcceptOffer();
   const { state: mintTxState, mintNft, reset: resetMintTx } = useMintNft();
 
-  const { nfts: rawWalletNfts } = useEligibleNfts(address, chainId);
+  const { nfts: rawWalletNfts, isLoading: isLoadingNfts } = useEligibleNfts(address, chainId);
   const { data: collectionsData } = useCollections(chainId);
   const { data: userLoansData } = useLoans({ borrower: address, status: 'active' });
 
@@ -42,13 +95,13 @@ function BorrowContent() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   React.useEffect(() => {
-    if (!isConnected) {
+    if (mounted && !isConnected) {
       setSelectedNft(null);
       setSelectedOffer(null);
       setIsDrawerOpen(false);
       setIsConfirmModalOpen(false);
     }
-  }, [isConnected]);
+  }, [isConnected, mounted]);
 
   const { data: offersData } = useOffers({
     collection: selectedNft?.contractAddress,
@@ -176,6 +229,10 @@ function BorrowContent() {
       )
     : null;
 
+  if (!mounted) {
+    return <BorrowPageSkeleton />;
+  }
+
   return (
     <div className="space-y-8">
       <div className="space-y-2 border-b border-[#e6ece9] dark:border-[#1e332c] pb-4">
@@ -199,7 +256,9 @@ function BorrowContent() {
             <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Your eligible NFTs</h2>
             <span className="text-xs text-[var(--muted)]">
               {isConnected
-                ? `${filteredNfts.length} eligible NFT${filteredNfts.length === 1 ? '' : 's'}`
+                ? isLoadingNfts
+                  ? 'Scanning wallet...'
+                  : `${filteredNfts.length} eligible NFT${filteredNfts.length === 1 ? '' : 's'}`
                 : '(Connect wallet to scan)'}
             </span>
           </div>
@@ -237,6 +296,7 @@ function BorrowContent() {
           <NFTGrid
             nfts={filteredNfts}
             selectedNft={selectedNft}
+            isLoading={isLoadingNfts}
             onMintTestnet={handleMintTestnetNft}
             onSelectNft={(nft) => {
               setSelectedNft(nft);
@@ -337,7 +397,7 @@ function BorrowContent() {
 
 export default function BorrowPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-[var(--muted)]">Loading Borrow Page...</div>}>
+    <Suspense fallback={<BorrowPageSkeleton />}>
       <BorrowContent />
     </Suspense>
   );

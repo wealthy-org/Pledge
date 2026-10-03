@@ -61,8 +61,8 @@ export async function fetchOnChainCollectionInfo(
       }).catch(() => null),
     ]);
 
-    const name = nameResult ? String(nameResult) : 'Robinhood NFT';
-    const symbol = symbolResult ? String(symbolResult) : 'RNFT';
+    const name = nameResult ? String(nameResult) : 'ERC721 Collection';
+    const symbol = symbolResult ? String(symbolResult) : 'NFT';
 
     inMemoryCollectionCache.set(normalized, {
       name,
@@ -78,8 +78,8 @@ export async function fetchOnChainCollectionInfo(
   } catch {
     return {
       address: collectionAddress as `0x${string}`,
-      name: 'Robinhood NFT',
-      symbol: 'RNFT',
+      name: 'ERC721 Collection',
+      symbol: 'NFT',
     };
   }
 }

@@ -1,9 +1,10 @@
 import { NextRequest } from 'next/server';
 import { getBlockscoutClient } from '@/lib/blockscout';
+import { getCuratedCollections } from '@/config/collections';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse } from '@/lib/api/response';
-import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { resolveCollectionImageUrl, fetchOnChainCollectionInfo } from '@/lib/services/metadata';
 import { detectDuplicateNames } from '@/lib/services/collectionSafety';
 import type { ExploreCollectionItem, ExploreCollectionsResponse } from '@/types/api';
 
@@ -73,7 +74,7 @@ export async function GET(request: NextRequest) {
 
   for (const item of blockscoutItems) {
     const addr = item.contractAddress.toLowerCase();
-    if (!addr) continue;
+    if (!addr || seenAddresses.has(addr)) continue;
     seenAddresses.add(addr);
 
     const colOffers = offersByCol.get(addr) || [];

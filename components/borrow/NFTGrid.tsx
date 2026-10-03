@@ -4,7 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatUnits } from 'viem';
-import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 
 export interface BorrowableNft {
@@ -35,22 +34,30 @@ export function NFTGrid({
 }: NFTGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" data-testid="nft-grid-skeleton">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
             data-testid="nft-card-skeleton"
-            className="bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl overflow-hidden p-0"
+            className="flex flex-col bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl overflow-hidden"
           >
-            <Skeleton width="100%" height="200px" borderRadius="0px" />
-            <div className="p-4 space-y-3">
-              <Skeleton width="100px" height="12px" />
-              <Skeleton width="140px" height="16px" />
-              <div className="pt-2 border-t border-[#e1e8e9] dark:border-[#1e332c] space-y-2">
-                <Skeleton width="100%" height="14px" />
-                <Skeleton width="100%" height="14px" />
+            <div className="aspect-square w-full bg-[var(--panel)] shimmer" />
+            <div className="p-4 flex flex-col flex-1 justify-between space-y-3">
+              <div>
+                <div className="w-24 h-2.5 bg-[var(--panel)] rounded shimmer mb-1.5" />
+                <div className="w-36 h-4 bg-[var(--panel)] rounded shimmer mb-3" />
+                <div className="space-y-2 pt-2 border-t border-[#e8eded] dark:border-[#1e332c]">
+                  <div className="flex items-center justify-between">
+                    <div className="w-16 h-3 bg-[var(--panel)] rounded shimmer" />
+                    <div className="w-14 h-3 bg-[var(--panel)] rounded shimmer" />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="w-20 h-3 bg-[var(--panel)] rounded shimmer" />
+                    <div className="w-8 h-3 bg-[var(--panel)] rounded shimmer" />
+                  </div>
+                </div>
               </div>
-              <Skeleton width="100%" height="36px" borderRadius="8px" />
+              <div className="w-full h-9 bg-[var(--panel)] rounded-lg shimmer mt-3" />
             </div>
           </div>
         ))}

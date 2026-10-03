@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useCollections } from '@/hooks/api/useCollections';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCuratedCollections } from '@/config/collections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
@@ -23,6 +24,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const chainId = useSafeChainId();
+  const { data: curatedData } = useCollections(chainId);
 
   const fallbackCollections: CollectionItemResponse[] = useMemo(() => {
     const raw = getCuratedCollections(chainId);
@@ -40,16 +42,31 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   }, [chainId]);
 
   const displayCollections = useMemo(() => {
-    const source = apiResults !== null ? apiResults : fallbackCollections;
+    const baseList = curatedData?.collections && curatedData.collections.length > 0
+      ? curatedData.collections
+      : fallbackCollections;
+
+    const mergedMap = new Map<string, CollectionItemResponse>();
+    for (const item of baseList) {
+      mergedMap.set(item.address.toLowerCase(), item);
+    }
+    if (apiResults) {
+      for (const item of apiResults) {
+        const existing = mergedMap.get(item.address.toLowerCase());
+        mergedMap.set(item.address.toLowerCase(), existing ? { ...existing, ...item } : item);
+      }
+    }
+
+    const merged = Array.from(mergedMap.values());
     const q = query.toLowerCase().trim();
-    if (!q) return source;
-    return source.filter(
+    if (!q) return merged;
+    return merged.filter(
       (c) =>
         c.name.toLowerCase().includes(q) ||
         c.symbol.toLowerCase().includes(q) ||
         c.address.toLowerCase().includes(q)
     );
-  }, [apiResults, fallbackCollections, query]);
+  }, [curatedData, fallbackCollections, apiResults, query]);
 
   useEffect(() => {
     try {
