@@ -77,6 +77,7 @@ export function useAcceptOffer() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: 'Approve NFT Collateral',
         description: `Authorizing Pledge protocol to escrow NFT from ${collectionName || collectionAddress}`,
         details: [
@@ -123,6 +124,7 @@ export function useAcceptOffer() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: 'Accept Loan Offer',
         description: `Borrowing against NFT #${tokenId} for Offer #${offerId}`,
         details: [

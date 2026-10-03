@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react';
 import { decodeTxError, type DecodedTxError } from '@/lib/tx/errorDecoder';
+import { getActiveChain, TESTNET_CHAIN_ID } from '@/config/chains';
+import { getPhantomProvider } from '@/lib/web3/wallet';
 
 export type TransactionStage =
   | 'IDLE'
@@ -38,6 +40,7 @@ export interface ExecuteTransactionParams {
   title: string;
   description?: string;
   details?: TransactionDetailItem[];
+  targetChainId?: number;
   prepare?: () => Promise<void>;
   simulate?: () => Promise<void>;
   write: () => Promise<`0x${string}`>;
@@ -119,6 +122,7 @@ export function useTransactionFlow() {
       title,
       description,
       details,
+      targetChainId,
       prepare,
       simulate,
       write,
@@ -130,6 +134,49 @@ export function useTransactionFlow() {
     }: ExecuteTransactionParams): Promise<`0x${string}` | null> => {
       const now = Date.now();
       let capturedHash: `0x${string}` | null = null;
+
+      const targetChain = getActiveChain(
+        targetChainId === TESTNET_CHAIN_ID || targetChainId === 4663
+          ? targetChainId
+          : TESTNET_CHAIN_ID
+      );
+
+      let isMismatch = false;
+      if (typeof window !== 'undefined') {
+        const provider = getPhantomProvider() || (window as any).ethereum;
+        if (provider?.chainId) {
+          const providerChainId =
+            typeof provider.chainId === 'string'
+              ? parseInt(provider.chainId, 16)
+              : Number(provider.chainId);
+          if (providerChainId && providerChainId !== targetChain.id) {
+            isMismatch = true;
+          }
+        }
+      }
+
+      if (isMismatch) {
+        const mismatchMsg = `Wallet is connected to the wrong network. Please switch to ${targetChain.name}.`;
+        setState({
+          stage: 'ERROR',
+          stageStartedAt: now,
+          startedAt: now,
+          txHash: null,
+          error: mismatchMsg,
+          errorCode: 'CHAIN_MISMATCH',
+          actionHint: `Switch your network in your wallet to ${targetChain.name}.`,
+          isUserRejection: false,
+          isSilent: false,
+          title: title || 'Transaction Failed',
+          description: description || null,
+          details,
+          timeoutSeconds: undefined,
+        });
+        if (onError) {
+          onError(new Error(mismatchMsg));
+        }
+        return null;
+      }
 
       try {
         setState({

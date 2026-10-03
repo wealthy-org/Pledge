@@ -35,6 +35,7 @@ export function useForecloseLoan() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: `Foreclose Collateral #${params.loanId}`,
         description: `Transferring collateral for Loan #${params.loanId} to destination`,
         details: [

@@ -148,4 +148,62 @@ describe('TransactionModal Redesign & UX Enhancements Suite', () => {
     expect(screen.getByText(/The transaction was submitted to the network/i)).toBeDefined();
     expect(screen.getByRole('link', { name: /view on explorer/i })).toBeDefined();
   });
+
+  it('TS-06: TransactionModal renders Switch to Robinhood Testnet button on CHAIN_MISMATCH and invokes switch handler', async () => {
+    const mockRetry = vi.fn();
+    const state: TransactionState = {
+      stage: 'ERROR',
+      stageStartedAt: Date.now(),
+      startedAt: Date.now(),
+      txHash: null,
+      error: 'Wallet is connected to the wrong network. Please switch to Robinhood Chain.',
+      errorCode: 'CHAIN_MISMATCH',
+      actionHint: 'Switch your network in your wallet to Robinhood Chain.',
+      isUserRejection: false,
+      title: 'Mint Testnet NFT',
+      description: null,
+    };
+
+    render(
+      <TransactionModal
+        isOpen={true}
+        state={state}
+        chainId={46630}
+        onClose={vi.fn()}
+        onRetry={mockRetry}
+      />
+    );
+
+    const switchBtn = screen.getByRole('button', { name: /switch to robinhood testnet/i });
+    expect(switchBtn).toBeDefined();
+    expect(screen.queryByRole('button', { name: /^try again$/i })).toBeNull();
+  });
+
+  it('TS-07: TransactionModal displays Error Code: CHAIN_MISMATCH and Suggested Action', () => {
+    const state: TransactionState = {
+      stage: 'ERROR',
+      stageStartedAt: Date.now(),
+      startedAt: Date.now(),
+      txHash: null,
+      error: 'Wallet is connected to the wrong network. Please switch to Robinhood Chain.',
+      errorCode: 'CHAIN_MISMATCH',
+      actionHint: 'Switch your network in your wallet to Robinhood Chain.',
+      isUserRejection: false,
+      title: 'Mint Testnet NFT',
+      description: null,
+    };
+
+    render(
+      <TransactionModal
+        isOpen={true}
+        state={state}
+        chainId={46630}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/Error Code: CHAIN_MISMATCH/i)).toBeDefined();
+    expect(screen.getByText(/Suggested Action/i)).toBeDefined();
+    expect(screen.getByText(/Switch your network in your wallet to Robinhood Chain./i)).toBeDefined();
+  });
 });

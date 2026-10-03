@@ -31,6 +31,7 @@ export function useWithdrawProceeds() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: 'Withdraw Protocol Proceeds',
         description: 'Claiming accumulated loan yield and refunded offer capital to your wallet',
         details: [

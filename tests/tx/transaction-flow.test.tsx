@@ -166,4 +166,32 @@ describe('TICKET-45: Shared Transaction UX Framework Test Suite', () => {
     expect(screen.getByText('Foreclose Loan #12')).toBeDefined();
     expect(screen.getByText(/Broadcasting to network/i)).toBeDefined();
   });
+
+  it('TS-07: upfront chain mismatch sets ERROR directly without flashing PREPARING stage', async () => {
+    const originalWindowEthereum = (window as any).ethereum;
+    (window as any).ethereum = {
+      chainId: '0xaa36a7',
+    };
+
+    const { result } = renderHook(() => useTransactionFlow());
+    const mockPrepare = vi.fn();
+    const mockWrite = vi.fn();
+
+    await act(async () => {
+      await result.current.executeTransaction({
+        title: 'Mint Testnet NFT',
+        targetChainId: 46630,
+        prepare: mockPrepare,
+        write: mockWrite,
+      });
+    });
+
+    expect(mockPrepare).not.toHaveBeenCalled();
+    expect(mockWrite).not.toHaveBeenCalled();
+    expect(result.current.state.stage).toBe('ERROR');
+    expect(result.current.state.errorCode).toBe('CHAIN_MISMATCH');
+    expect(result.current.state.error).toContain('Robinhood Testnet');
+
+    (window as any).ethereum = originalWindowEthereum;
+  });
 });

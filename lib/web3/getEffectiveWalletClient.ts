@@ -7,16 +7,18 @@ export async function getEffectiveWalletClient(
   targetChainId?: number,
   userAddress?: `0x${string}`
 ): Promise<any> {
-  if (cachedWalletClient) {
-    return cachedWalletClient;
-  }
-
   const safeChainId =
     targetChainId === TESTNET_CHAIN_ID || targetChainId === 4663
       ? targetChainId
       : undefined;
 
   const activeChain = getActiveChain(safeChainId);
+
+  if (cachedWalletClient) {
+    if (!cachedWalletClient.chain || cachedWalletClient.chain.id === activeChain.id) {
+      return cachedWalletClient;
+    }
+  }
 
   try {
     const { config } = await import('@/lib/wagmi');

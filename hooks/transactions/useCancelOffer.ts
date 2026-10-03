@@ -33,6 +33,7 @@ export function useCancelOffer() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: `Cancel Offer #${params.offerId}`,
         description: `Refunding offer capital ${params.collectionName ? `for ${params.collectionName}` : ''} to claimable proceeds`,
         details: [

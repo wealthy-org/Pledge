@@ -37,6 +37,7 @@ export function useCreateOffer() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: 'Create Lending Offer',
         description: `Publishing lending offer for ${params.collectionName || params.collectionAddress}`,
         details: [

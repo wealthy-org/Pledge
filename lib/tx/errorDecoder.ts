@@ -245,7 +245,16 @@ export function decodeTxError(err: unknown): DecodedTxError {
     };
   }
 
-  if (lower.includes('chainmismatch') || lower.includes('chain mismatch') || lower.includes('does not match the target chain')) {
+  if (
+    lower.includes('chainmismatch') ||
+    lower.includes('chain mismatch') ||
+    lower.includes('does not match the target chain') ||
+    lower.includes('does not match the connection') ||
+    lower.includes('connectorchainmismatch') ||
+    lower.includes('unsupported chain') ||
+    lower.includes('wrong network') ||
+    lower.includes('switch to robinhood')
+  ) {
     return {
       message: 'Wallet is connected to the wrong network. Please switch to Robinhood Chain.',
       code: 'CHAIN_MISMATCH',

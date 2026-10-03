@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { type TransactionState } from '@/hooks/useTransactionFlow';
 import { Button } from '@/components/ui/Button';
-import { getExplorerTxUrl } from '@/config/chains';
+import { getActiveChain, getExplorerTxUrl, TESTNET_CHAIN_ID } from '@/config/chains';
+import { requestNetworkSwitch } from '@/lib/web3/networkSwitch';
 import { TransactionStepper } from './TransactionStepper';
 import { TransactionTimer } from './TransactionTimer';
 import { STAGE_ESTIMATES } from '@/lib/tx/stageEstimates';
@@ -25,6 +26,14 @@ export function TransactionModal({
   chainId,
 }: TransactionModalProps) {
   const [copied, setCopied] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState<string | null>(null);
+
+  const safeChainId =
+    chainId === TESTNET_CHAIN_ID || chainId === 4663
+      ? chainId
+      : TESTNET_CHAIN_ID;
+  const targetChain = getActiveChain(safeChainId);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -72,6 +81,36 @@ export function TransactionModal({
   const stageEstimate = STAGE_ESTIMATES[state.stage];
   const currentDesc = state.description || stageEstimate?.description || '';
   const explorerUrl = state.txHash ? getExplorerTxUrl(state.txHash, chainId) : null;
+
+  const isChainMismatch =
+    state.errorCode === 'CHAIN_MISMATCH' ||
+    Boolean(
+      state.error &&
+        (state.error.toLowerCase().includes('wrong network') ||
+          state.error.toLowerCase().includes('chain mismatch') ||
+          state.error.toLowerCase().includes('connectorchainmismatch') ||
+          state.error.toLowerCase().includes('unsupported chain') ||
+          state.error.toLowerCase().includes('switch to'))
+    );
+
+  const handleSwitchNetwork = async () => {
+    setIsSwitching(true);
+    setSwitchError(null);
+    try {
+      const success = await requestNetworkSwitch(targetChain);
+      if (success) {
+        if (onRetry) {
+          onRetry();
+        } else {
+          onClose();
+        }
+      }
+    } catch (err: any) {
+      setSwitchError(err?.message || 'Failed to switch network in wallet.');
+    } finally {
+      setIsSwitching(false);
+    }
+  };
 
   const handleCopyHash = async () => {
     if (!state.txHash) return;
@@ -246,6 +285,15 @@ export function TransactionModal({
                 <p className="text-[var(--muted)] leading-relaxed">{state.actionHint}</p>
               </div>
             )}
+
+            {switchError && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-[var(--error)] space-y-1">
+                <span className="font-semibold block text-[10px] uppercase tracking-wider font-mono">
+                  Switch Network Error
+                </span>
+                <p className="leading-relaxed">{switchError}</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -258,10 +306,23 @@ export function TransactionModal({
 
           {isError && (
             <>
-              {onRetry && !state.isUserRejection && state.errorCode !== 'RECEIPT_TIMEOUT' && (
-                <Button variant="primary" onClick={onRetry} className="flex-1">
-                  Try Again
+              {isChainMismatch ? (
+                <Button
+                  variant="primary"
+                  loading={isSwitching}
+                  onClick={handleSwitchNetwork}
+                  className="flex-1"
+                >
+                  Switch to {targetChain.name}
                 </Button>
+              ) : (
+                onRetry &&
+                !state.isUserRejection &&
+                state.errorCode !== 'RECEIPT_TIMEOUT' && (
+                  <Button variant="primary" onClick={onRetry} className="flex-1">
+                    Try Again
+                  </Button>
+                )
               )}
               <Button variant="secondary" onClick={onClose} className="flex-1">
                 Close

@@ -47,6 +47,7 @@ export function useMintNft() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: 'Mint Testnet NFT',
         description: `Minting testnet collectible #${tokenId.toString()} from ${targetName}`,
         details: [

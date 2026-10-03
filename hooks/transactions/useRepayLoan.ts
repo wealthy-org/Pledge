@@ -34,6 +34,7 @@ export function useRepayLoan() {
       let activeWalletClient: any = walletClient;
 
       return executeTransaction({
+        targetChainId: chainId,
         title: `Repay Loan #${params.loanId}`,
         description: `Settling ${params.collectionName ? `${params.collectionName} #${params.tokenId || ''}` : `Loan #${params.loanId}`}`,
         details: [
