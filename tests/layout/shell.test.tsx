@@ -80,4 +80,22 @@ describe('TICKET-29: Three-Panel Layout Shell Test Suite', () => {
     expect(screen.getByText(/eth/i)).toBeDefined();
     expect(screen.getByText(/gwei/i)).toBeDefined();
   });
+
+  it('TS-06: AppShell expands main content container when ActivityPanel is collapsed', () => {
+    render(
+      <AppShell>
+        <div data-testid="borrow-content">Borrow Content</div>
+      </AppShell>
+    );
+
+    const mainElement = screen.getByRole('main');
+    expect(mainElement.classList.contains('app-main-activity-open')).toBe(true);
+    expect(mainElement.classList.contains('app-main-activity-collapsed')).toBe(false);
+
+    const toggleBtn = screen.getByLabelText(/toggle activity panel/i);
+    fireEvent.click(toggleBtn);
+
+    expect(mainElement.classList.contains('app-main-activity-collapsed')).toBe(true);
+    expect(mainElement.classList.contains('app-main-activity-open')).toBe(false);
+  });
 });

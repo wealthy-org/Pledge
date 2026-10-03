@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
 import { useConnectModal } from '@/contexts/ConnectModalContext';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { useCollections } from '@/hooks/api/useCollections';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
@@ -23,9 +25,25 @@ export interface CollectionDetailClientProps {
   collection: ActiveCuratedCollection;
 }
 
-export function CollectionDetailClient({ collection }: CollectionDetailClientProps) {
+export function CollectionDetailClient({ collection: initialCollection }: CollectionDetailClientProps) {
   const { address, isConnected } = useConnection();
   const { openConnectModal } = useConnectModal();
+  const chainId = useSafeChainId();
+  const { data: collectionsData } = useCollections(chainId);
+
+  const matchedRemote = collectionsData?.collections?.find(
+    (c) => c.address.toLowerCase() === initialCollection.contractAddress.toLowerCase()
+  );
+
+  const collection: ActiveCuratedCollection = useMemo(() => {
+    if (!matchedRemote) return initialCollection;
+    return {
+      ...initialCollection,
+      name: matchedRemote.name || initialCollection.name,
+      symbol: matchedRemote.symbol || initialCollection.symbol,
+    };
+  }, [initialCollection, matchedRemote]);
+
   const [activeTab, setActiveTab] = useState<string>('offers');
   const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);

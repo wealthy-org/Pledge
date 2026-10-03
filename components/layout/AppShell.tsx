@@ -21,6 +21,7 @@ export interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [searchOpen, setSearchOpen] = useState(false);
+  const [isActivityOpen, setIsActivityOpen] = useState(true);
 
   useSearchShortcut(() => setSearchOpen(true));
 
@@ -37,11 +38,25 @@ export function AppShell({ children }: AppShellProps) {
       <Sidebar />
       <HeaderBar onSearchClick={() => setSearchOpen(true)} />
 
-      <main id="main-content" className="app-main-content w-full">
-        <div className="max-w-[1440px] mx-auto w-full">{children}</div>
+      <main
+        id="main-content"
+        className={`app-main-content w-full ${
+          isActivityOpen ? 'app-main-activity-open' : 'app-main-activity-collapsed'
+        }`}
+      >
+        <div
+          className={`mx-auto w-full transition-all duration-200 ${
+            isActivityOpen ? 'max-w-[1440px]' : 'max-w-[1720px]'
+          }`}
+        >
+          {children}
+        </div>
       </main>
 
-      <ActivityPanel />
+      <ActivityPanel
+        isOpen={isActivityOpen}
+        onToggle={() => setIsActivityOpen((prev) => !prev)}
+      />
       <FooterStatusBar />
       <MobileBottomNav onSearchClick={() => setSearchOpen(true)} />
 

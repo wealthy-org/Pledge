@@ -34,7 +34,7 @@ export function NFTGrid({
 }: NFTGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" data-testid="nft-grid-skeleton">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5" data-testid="nft-grid-skeleton">
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
@@ -94,7 +94,7 @@ export function NFTGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
       {nfts.map((nft) => {
         const isSelected =
           selectedNft?.contractAddress.toLowerCase() === nft.contractAddress.toLowerCase() &&

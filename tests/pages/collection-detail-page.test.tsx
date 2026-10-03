@@ -189,7 +189,7 @@ describe('TICKET-38: Collection Detail Page & Components', () => {
       const pagePromise = Promise.resolve({ address: mockCollection.contractAddress });
       render(await CollectionDetailPage({ params: pagePromise }));
 
-      expect(screen.getAllByText(mockCollection.name).length).toBeGreaterThan(0);
+      expect(screen.getByRole('heading', { level: 1, name: /Robinhood Genesis Pass/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /offers/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /active loans/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /history/i })).toBeDefined();

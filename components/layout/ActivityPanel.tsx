@@ -20,10 +20,25 @@ interface ActivityItem {
   timestamp: string;
 }
 
-export function ActivityPanel() {
+export interface ActivityPanelProps {
+  isOpen?: boolean;
+  onToggle?: () => void;
+}
+
+export function ActivityPanel({ isOpen: controlledOpen, onToggle }: ActivityPanelProps = {}) {
   const chainId = useSafeChainId();
   const { data: collectionsData } = useCollections(chainId);
-  const [isOpen, setIsOpen] = useState(true);
+  const [internalOpen, setInternalOpen] = useState(true);
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+
+  const handleToggle = () => {
+    if (onToggle) {
+      onToggle();
+    } else {
+      setInternalOpen((prev) => !prev);
+    }
+  };
+
   const [feedScope, setFeedScope] = useState<'all' | 'watch'>('all');
   const [feedType, setFeedType] = useState<'all' | 'loan' | 'repaid'>('all');
   const [activities, setActivities] = useState<ActivityItem[]>([]);
@@ -136,7 +151,7 @@ export function ActivityPanel() {
               </Link>
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={handleToggle}
                 aria-label="Toggle activity panel"
                 title="Collapse activity feed"
                 className="p-1 rounded text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)] transition-colors cursor-pointer"
@@ -296,7 +311,7 @@ export function ActivityPanel() {
         <div className="flex flex-col items-center gap-4 py-2 w-full">
           <button
             type="button"
-            onClick={() => setIsOpen(true)}
+            onClick={handleToggle}
             aria-label="Toggle activity panel"
             title="Expand activity feed"
             className="p-1.5 rounded text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--panel)] transition-colors cursor-pointer"
