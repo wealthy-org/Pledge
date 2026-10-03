@@ -259,6 +259,7 @@ function BorrowContent() {
 
           <OfferComparisonList
             offers={activeCollectionOffers}
+            collectionAddress={selectedNft.contractAddress}
             onSelectOffer={handleSelectOffer}
           />
         </div>

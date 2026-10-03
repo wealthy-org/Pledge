@@ -109,7 +109,7 @@ describe('TICKET-38: Collection Detail Page & Components', () => {
 
       expect(screen.getAllByText(mockCollection.name).length).toBeGreaterThan(0);
       expect(screen.getAllByText(mockCollection.symbol).length).toBeGreaterThan(0);
-      expect(screen.getByText('Verified')).toBeDefined();
+      expect(screen.getByText(/Verified/i)).toBeDefined();
       expect(screen.getByText('2.00 ETH')).toBeDefined();
       expect(screen.getByText('3.50 ETH')).toBeDefined();
       expect(screen.getByText('21.10% - 26.07%')).toBeDefined();

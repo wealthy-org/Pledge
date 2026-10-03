@@ -4,7 +4,6 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCuratedCollections } from '@/config/collections';
 import { useCollections } from '@/hooks/api/useCollections';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
@@ -12,7 +11,7 @@ import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function HomePage() {
   const chainId = useSafeChainId();
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'has_offers'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'has_offers' | 'all'>('has_offers');
   const [loanMarketTab, setLoanMarketTab] = useState<'offers' | 'active'>('offers');
   const { data: apiData, isLoading: isLoadingCollections } = useCollections(chainId);
 
@@ -30,12 +29,16 @@ export default function HomePage() {
     }));
   }, [apiData]);
 
+  const activeOfferCollections = useMemo(() => {
+    return collections.filter((c) => c.offerCount > 0);
+  }, [collections]);
+
   const filteredCollections = useMemo(() => {
     if (selectedFilter === 'has_offers') {
-      return collections.filter((c) => c.offerCount > 0);
+      return activeOfferCollections;
     }
     return collections;
-  }, [collections, selectedFilter]);
+  }, [collections, activeOfferCollections, selectedFilter]);
 
   const marketStats = useMemo(() => {
     const totalPoolWei = collections.reduce((acc, c) => acc + BigInt(c.poolSizeWei || '0'), 0n);
@@ -53,17 +56,27 @@ export default function HomePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[var(--line)]">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
-            Explore Pledge
+            Lending Markets
           </h1>
           <p className="text-xs text-[var(--muted)] mt-1">
-            Liquidity for the NFTs you want to keep.
+            Active NFT lending pools with live liquidity on Robinhood Chain.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono text-[var(--muted)] tracking-tight">
-          <span className="font-semibold text-[var(--text)]">Robinhood Chain</span>
-          <span className="opacity-40">/</span>
-          <span>Fixed-Rate Lending</span>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/explore"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] text-xs font-medium transition-colors"
+          >
+            <span>Explore All Collections</span>
+            <span>↗</span>
+          </Link>
+
+          <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[var(--muted)] tracking-tight">
+            <span className="font-semibold text-[var(--text)]">Robinhood Chain</span>
+            <span className="opacity-40">/</span>
+            <span>Fixed-Rate Escrow</span>
+          </div>
         </div>
       </div>
 
@@ -72,98 +85,111 @@ export default function HomePage() {
       <div className="space-y-3.5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold tracking-tight text-[var(--text)]">
-            Featured collectibles
+            Active Liquidity Pools
           </h2>
-          <span className="text-xs text-[var(--muted)]">
-            Curated markets <span className="text-[var(--accent-primary)] ml-1">↗</span>
-          </span>
+          <Link href="/explore" className="text-xs text-[var(--muted)] hover:text-[var(--accent-primary)] transition-colors">
+            Browse all collections <span className="text-[var(--accent-primary)] ml-1">↗</span>
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {collections.slice(0, 4).map((c, i) => {
-            const displayImage = c.imageUrl || resolveCollectionImageUrl(c.name);
-
-            return (
-              <article
-                key={c.address}
-                className="group flex flex-col bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] rounded-xl p-3 transition-colors duration-150"
+        {activeOfferCollections.length === 0 && !isLoadingCollections ? (
+          <div className="p-8 rounded-xl border border-dashed border-[var(--line)] bg-[var(--surface)] text-center space-y-3">
+            <div className="text-xs text-[var(--muted)]">
+              No active lending offers available in the market right now.
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <Link
+                href="/lend"
+                className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white text-xs font-semibold transition-colors shadow-xs"
               >
-                <Link
-                  href={`/borrow?collection=${c.address}`}
-                  className="w-full aspect-square bg-[var(--panel)] border border-[var(--line)] rounded-lg overflow-hidden relative block"
-                >
-                  {displayImage ? (
-                    <Image
-                      src={displayImage}
-                      alt={c.name}
-                      fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
-                      {c.symbol}
-                    </div>
-                  )}
-                </Link>
+                Create First Offer +
+              </Link>
+              <Link
+                href="/explore"
+                className="inline-flex items-center gap-1 px-3.5 py-2 rounded-lg border border-[var(--line)] bg-[var(--panel)] text-[var(--text)] text-xs font-medium transition-colors"
+              >
+                Explore Collections ↗
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {activeOfferCollections.slice(0, 4).map((c) => {
+              const displayImage = c.imageUrl || resolveCollectionImageUrl(c.name);
 
-              <div className="flex items-center justify-between my-2.5">
-                <h3 className="text-xs font-semibold text-[var(--text)] truncate">
-                  {c.name}
-                </h3>
-                <span className="text-xs text-[var(--accent-primary)] shrink-0 font-bold">✦</span>
-              </div>
-
-              <div className="space-y-1.5 mt-auto">
-                <Link
-                  href={`/borrow?collection=${c.address}`}
-                  className="flex items-center justify-between w-full border border-[var(--line)] hover:border-[var(--line-strong)] rounded-lg bg-[var(--panel)] text-[var(--text)] px-2.5 py-2 text-xs transition-colors"
+              return (
+                <article
+                  key={c.address}
+                  className="group flex flex-col bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] rounded-xl p-3 transition-colors duration-150"
                 >
-                  <span className="text-[var(--muted)]">Borrow up to</span>
-                  <strong className="font-mono font-medium text-[var(--accent-primary)]">
-                    {c.bestOfferWei ? (Number(c.bestOfferWei) / 1e18).toFixed(3) : '0.000'} <small className="text-[10px] text-[var(--muted)]">ETH</small>
-                  </strong>
-                </Link>
+                  <Link
+                    href={`/borrow?collection=${c.address}`}
+                    className="w-full aspect-square bg-[var(--panel)] border border-[var(--line)] rounded-lg overflow-hidden relative block"
+                  >
+                    {displayImage ? (
+                      <Image
+                        src={displayImage}
+                        alt={c.name}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
+                        {c.symbol}
+                      </div>
+                    )}
+                  </Link>
 
-                <Link
-                  href={`/lend?collection=${c.address}`}
-                  className="flex items-center justify-between w-full border border-[var(--line)] hover:border-[var(--line-strong)] rounded-lg bg-[var(--panel)] text-[var(--text)] px-2.5 py-2 text-xs transition-colors"
-                >
-                  <span>Make a loan offer</span>
-                  <span className="text-xs">↗</span>
-                </Link>
-              </div>
-            </article>
-          );
-        })}
-        </div>
+                  <div className="flex items-center justify-between my-2.5">
+                    <h3 className="text-xs font-semibold text-[var(--text)] truncate">
+                      {c.name}
+                    </h3>
+                    <span className="text-xs text-[var(--accent-primary)] shrink-0 font-bold">✦</span>
+                  </div>
+
+                  <div className="space-y-1.5 mt-auto">
+                    <Link
+                      href={`/borrow?collection=${c.address}`}
+                      className="flex items-center justify-between w-full border border-[var(--line)] hover:border-[var(--line-strong)] rounded-lg bg-[var(--panel)] text-[var(--text)] px-2.5 py-2 text-xs transition-colors"
+                    >
+                      <span className="text-[var(--muted)]">Borrow up to</span>
+                      <strong className="font-mono font-medium text-[var(--accent-primary)]">
+                        {c.bestOfferWei ? (Number(c.bestOfferWei) / 1e18).toFixed(3) : '0.000'} <small className="text-[10px] text-[var(--muted)]">ETH</small>
+                      </strong>
+                    </Link>
+
+                    <Link
+                      href={`/lend?collection=${c.address}`}
+                      className="flex items-center justify-between w-full border border-[var(--line)] hover:border-[var(--line-strong)] rounded-lg bg-[var(--panel)] text-[var(--text)] px-2.5 py-2 text-xs transition-colors"
+                    >
+                      <span>Make a loan offer</span>
+                      <span className="text-xs">↗</span>
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="space-y-4 pt-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold tracking-tight text-[var(--text)] flex items-center gap-2">
-              <span>Market Overview</span>
-              <span className="text-xs text-[var(--muted)] font-mono font-normal">04</span>
+              <span>Markets Overview</span>
+              <span className="text-xs text-[var(--muted)] font-mono font-normal">
+                {String(filteredCollections.length).padStart(2, '0')}
+              </span>
             </h2>
             <p className="text-xs text-[var(--muted)] mt-0.5">
-              Find liquidity for your next move.
+              Instant liquidity with zero price oracle liquidation risk.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="bg-[var(--panel)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
-              <button
-                type="button"
-                onClick={() => setSelectedFilter('all')}
-                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
-                  selectedFilter === 'all'
-                    ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
-                    : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
-                }`}
-              >
-                All
-              </button>
               <button
                 type="button"
                 onClick={() => setSelectedFilter('has_offers')}
@@ -173,15 +199,26 @@ export default function HomePage() {
                     : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
                 }`}
               >
-                Has offers
+                Has offers ({activeOfferCollections.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedFilter('all')}
+                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
+                  selectedFilter === 'all'
+                    ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
+                }`}
+              >
+                All Markets ({collections.length})
               </button>
             </div>
 
             <Link
-              href="/lend"
+              href="/explore"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--panel)] hover:bg-[var(--surface)] text-[var(--text)] text-xs font-medium transition-colors ml-2"
             >
-              <span>Explore lending</span>
+              <span>Explore All</span>
               <span>↗</span>
             </Link>
           </div>
@@ -238,7 +275,7 @@ export default function HomePage() {
         </div>
 
         <div className="space-y-2">
-          {collections.map((c, i) => {
+          {filteredCollections.map((c) => {
             const principalEth = c.bestOfferWei ? (Number(c.bestOfferWei) / 1e18).toFixed(3) : '0.000';
             const interestPct = 5.0;
             const repayEth = (Number(principalEth) * (1 + interestPct / 100)).toFixed(3);

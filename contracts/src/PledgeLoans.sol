@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
@@ -6,9 +5,12 @@ import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 import {IPledgeLoans} from "./interfaces/IPledgeLoans.sol";
 
 contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Receiver {
+    bytes4 private constant ERC721_INTERFACE_ID = 0x80ac58cd;
+
     uint16 public constant MAX_TERM_INTEREST_BPS = 10_000;
     uint16 public constant MAX_PROTOCOL_FEE_BPS = 1_000;
 
@@ -26,6 +28,7 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
     mapping(uint256 => Offer) public offers;
     mapping(uint256 => Loan) public loans;
     mapping(address => bool) public enabledCollections;
+    mapping(address => bool) public disabledCollections;
     mapping(address => uint256) public claimableProceeds;
     mapping(address => mapping(uint256 => bool)) public isTokenInCollateral;
 
@@ -47,7 +50,30 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
         nextLoanId = 1;
     }
 
+    function _validateERC721Collection(address collection) internal view {
+        if (collection.code.length == 0) {
+            revert InvalidERC721Contract(collection);
+        }
+        if (disabledCollections[collection]) {
+            revert CollectionBlocked(collection);
+        }
+        try IERC165(collection).supportsInterface(ERC721_INTERFACE_ID) returns (bool supported) {
+            if (!supported) {
+                revert InvalidERC721Contract(collection);
+            }
+        } catch {
+            revert InvalidERC721Contract(collection);
+        }
+    }
+
+    function setCollectionBlocked(address collection, bool blocked) external onlyOwner {
+        disabledCollections[collection] = blocked;
+        enabledCollections[collection] = !blocked;
+        emit CollectionBlockStatusChanged(collection, blocked);
+    }
+
     function setCollectionEnabled(address collection, bool enabled) external onlyOwner {
+        disabledCollections[collection] = !enabled;
         enabledCollections[collection] = enabled;
         emit CollectionStatusChanged(collection, enabled);
     }
@@ -92,9 +118,7 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
         if (msg.value == 0) {
             revert InvalidPrincipal();
         }
-        if (!enabledCollections[collection]) {
-            revert CollectionNotAllowed(collection);
-        }
+        _validateERC721Collection(collection);
         if (termInterestBps > MAX_TERM_INTEREST_BPS) {
             revert InvalidInterestRate(termInterestBps);
         }
@@ -164,9 +188,7 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
         if (block.timestamp >= offer.expiresAt) {
             revert OfferExpired(offerId);
         }
-        if (!enabledCollections[offer.collection]) {
-            revert CollectionNotAllowed(offer.collection);
-        }
+        _validateERC721Collection(offer.collection);
         if (isTokenInCollateral[offer.collection][tokenId]) {
             revert TokenAlreadyInCollateral(offer.collection, tokenId);
         }

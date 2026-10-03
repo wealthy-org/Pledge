@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { type CuratedCollectionDefinition, type ActiveCuratedCollection, getCollectionByAddress } from '@/config/collections';
-import { LendCollectionCard } from '@/components/lend/LendCollectionCard';
+import Link from 'next/link';
+import { LendCollectionCard, type GenericCollectionItem } from '@/components/lend/LendCollectionCard';
 import { MyOpenOffersList } from '@/components/lend/MyOpenOffersList';
-import { CreateOfferDrawer, type CreateOfferFormData } from '@/components/lend/CreateOfferDrawer';
+import { CreateOfferDrawer, type CreateOfferFormData, type CreateOfferCollectionOption } from '@/components/lend/CreateOfferDrawer';
 import { CreateOfferConfirmationModal } from '@/components/lend/CreateOfferConfirmationModal';
 import { CancelOfferModal } from '@/components/lend/CancelOfferModal';
 import { TransactionModal } from '@/components/tx/TransactionModal';
@@ -15,12 +15,11 @@ import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { useOffers } from '@/hooks/api/useOffers';
-import { useCollections } from '@/hooks/api/useCollections';
+import { useExploreCollections } from '@/hooks/api/useExploreCollections';
 import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { formatShortAddress } from '@/lib/services/collectionSafety';
 import type { OfferItem } from '@/types/api';
-
-import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 
 export default function LendPage() {
   const chainId = useSafeChainId();
@@ -28,17 +27,18 @@ export default function LendPage() {
   const { openConnectModal } = useConnectModal();
   const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
   const {
-    data: collectionsData,
+    data: exploreData,
     isLoading: isLoadingCollections,
     isError: isErrorCollections,
     error: errorCollections,
     refetch: refetchCollections,
-  } = useCollections(chainId);
+  } = useExploreCollections({ chainId, limit: 50 });
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
+  const [selectedCustomAddress, setSelectedCustomAddress] = useState<string>('');
   const [pendingFormData, setPendingFormData] = useState<CreateOfferFormData | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isTxModalOpen, setIsTxModalOpen] = useState(false);
@@ -58,47 +58,54 @@ export default function LendPage() {
     });
   }, [apiOffers]);
 
-  const curated: ActiveCuratedCollection[] = useMemo(() => {
-    if (!collectionsData?.collections) return [];
-    return collectionsData.collections.map((item) => ({
-      id: item.symbol.toLowerCase(),
+  const collectionsList: CreateOfferCollectionOption[] = useMemo(() => {
+    if (!exploreData?.collections) return [];
+    return exploreData.collections.map((item) => ({
+      id: item.address.toLowerCase(),
       name: item.name,
       symbol: item.symbol,
-      defaultDurations: [7, 14, 30] as [7, 14, 30],
-      addresses: {
-        [TESTNET_CHAIN_ID]: item.address as `0x${string}`,
-        [MAINNET_CHAIN_ID]: item.address as `0x${string}`,
-        [chainId]: item.address as `0x${string}`,
-      },
-      contractAddress: item.address as `0x${string}`,
+      contractAddress: item.address,
     }));
-  }, [chainId, collectionsData]);
+  }, [exploreData]);
 
   const collectionStats = useMemo(() => {
     const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
-    if (collectionsData?.collections) {
-      for (const item of collectionsData.collections) {
-        const id = item.symbol.toLowerCase();
+    if (exploreData?.collections) {
+      for (const item of exploreData.collections) {
+        const id = item.address.toLowerCase();
         map[id] = {
           poolSizeEth: item.poolSizeWei && item.poolSizeWei !== '0'
             ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
             : '0.00',
-          activeLoansCount: item.activeLoansCount || 0,
+          activeLoansCount: item.offerCount || 0,
         };
       }
     }
     return map;
-  }, [collectionsData]);
+  }, [exploreData]);
 
   const selectedCol = useMemo(() => {
-    return curated.find((c) => c.id === selectedCollectionId) || curated[0] || null;
-  }, [curated, selectedCollectionId]);
+    if (!pendingFormData) return null;
+    const match = collectionsList.find(
+      (c) => c.contractAddress?.toLowerCase() === pendingFormData.collectionAddress.toLowerCase()
+    );
+    if (match) return match;
+    return {
+      id: pendingFormData.collectionAddress.toLowerCase(),
+      name: `Contract ${formatShortAddress(pendingFormData.collectionAddress)}`,
+      symbol: 'ERC721',
+      contractAddress: pendingFormData.collectionAddress,
+    };
+  }, [collectionsList, pendingFormData]);
 
-  const handleOpenDrawer = (collection?: CuratedCollectionDefinition | ActiveCuratedCollection) => {
+  const handleOpenDrawer = (collection?: GenericCollectionItem) => {
     if (collection) {
-      setSelectedCollectionId(collection.id);
-    } else if (curated[0]) {
-      setSelectedCollectionId(curated[0].id);
+      const addr = collection.contractAddress || collection.address || '';
+      setSelectedCollectionId(addr.toLowerCase());
+      setSelectedCustomAddress(addr);
+    } else if (collectionsList[0]) {
+      setSelectedCollectionId(collectionsList[0].id);
+      setSelectedCustomAddress(collectionsList[0].contractAddress || '');
     }
     setIsDrawerOpen(true);
   };
@@ -127,6 +134,7 @@ export default function LendPage() {
       if (hash) {
         setToastMessage('Lending offer created successfully! Capital committed to escrow.');
         refetchOffers();
+        refetchCollections();
       }
     } catch (err) {
       console.error('[LendPage CreateOffer Error]:', err);
@@ -146,16 +154,17 @@ export default function LendPage() {
     setIsCancelModalOpen(false);
 
     try {
-      const colDef = getCollectionByAddress(cancellingOffer.collection, chainId);
+      const match = collectionsList.find((c) => c.contractAddress?.toLowerCase() === cancellingOffer.collection.toLowerCase());
       const hash = await cancelOffer({
         offerId: cancellingOffer.offerId,
         principalWei: cancellingOffer.principalWei,
-        collectionName: colDef?.name,
+        collectionName: match?.name || formatShortAddress(cancellingOffer.collection),
       });
 
       if (hash) {
         setToastMessage(`Offer #${cancellingOffer.offerId} cancelled. Capital returned to claimable proceeds.`);
         refetchOffers();
+        refetchCollections();
       }
     } catch (err) {
       console.error('[LendPage CancelOffer Error]:', err);
@@ -177,25 +186,34 @@ export default function LendPage() {
             </h1>
 
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
-              Make offers on curated collections. Liquidity opportunities with fixed interest when borrowers repay.
+              Make offers on any verified ERC-721 collection across Robinhood Chain. Liquidity opportunities with fixed interest when borrowers repay.
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => handleOpenDrawer()}
-            className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs shrink-0 cursor-pointer"
-          >
-            Create Offer +
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/explore"
+              className="px-3.5 py-2 text-xs font-medium rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors shrink-0"
+            >
+              Browse Explore Catalog ↗
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => handleOpenDrawer()}
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs shrink-0 cursor-pointer"
+            >
+              Create Offer +
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a market</h2>
+          <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a collection market</h2>
           <span className="text-xs text-[var(--muted)]">
-            {curated.length} curated collections
+            {collectionsList.length} indexed collections
           </span>
         </div>
 
@@ -208,9 +226,9 @@ export default function LendPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-[var(--text)]">Failed to load curated collections</h3>
+                <h3 className="text-sm font-semibold text-[var(--text)]">Failed to load collections</h3>
                 <p className="text-xs text-[var(--muted)] mt-1">
-                  {errorCollections instanceof Error ? errorCollections.message : 'Unable to query curated collections from the RPC network.'}
+                  {errorCollections instanceof Error ? errorCollections.message : 'Unable to query collections.'}
                 </p>
               </div>
               <Button onClick={() => refetchCollections()} size="sm" variant="secondary">
@@ -220,7 +238,7 @@ export default function LendPage() {
           </div>
         ) : isLoadingCollections ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {[1, 2, 3].map((idx) => (
+            {[1, 2, 3, 4].map((idx) => (
               <div
                 key={idx}
                 className="bg-[var(--surface)] border border-[var(--line)] rounded-xl overflow-hidden p-4 space-y-3"
@@ -234,9 +252,9 @@ export default function LendPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {curated.map((col) => (
+            {collectionsList.map((col) => (
               <LendCollectionCard
-                key={col.contractAddress}
+                key={col.contractAddress || col.id}
                 collection={col}
                 poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
                 activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
@@ -268,8 +286,9 @@ export default function LendPage() {
       {isDrawerOpen && (
         <CreateOfferDrawer
           isOpen={isDrawerOpen}
-          collections={curated}
+          collections={collectionsList}
           initialCollectionId={selectedCollectionId}
+          initialCollectionAddress={selectedCustomAddress}
           onClose={() => setIsDrawerOpen(false)}
           onSubmit={handleDrawerSubmit}
           isConnected={isConnected}

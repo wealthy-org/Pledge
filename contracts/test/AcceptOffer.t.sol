@@ -238,11 +238,11 @@ contract AcceptOfferTest is Test, IPledgeLoans {
         );
 
         vm.prank(admin);
-        pledgeLoans.setCollectionEnabled(address(nft), false);
+        pledgeLoans.setCollectionBlocked(address(nft), true);
 
         vm.startPrank(borrower);
         nft.approve(address(pledgeLoans), 1);
-        vm.expectRevert(abi.encodeWithSelector(CollectionNotAllowed.selector, address(nft)));
+        vm.expectRevert(abi.encodeWithSelector(CollectionBlocked.selector, address(nft)));
         pledgeLoans.acceptOffer(offerId, 1);
         vm.stopPrank();
     }

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { formatUnits } from 'viem';
@@ -6,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { getExplorerAddressUrl } from '@/config/chains';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { formatShortAddress } from '@/lib/services/collectionSafety';
 import type { ActiveCuratedCollection } from '@/config/collections';
 
 export interface CollectionHeaderStats {
@@ -21,6 +24,7 @@ export interface CollectionHeaderProps {
   stats: CollectionHeaderStats;
   imageUrl?: string;
   chainId?: number;
+  isDuplicateName?: boolean;
 }
 
 export function CollectionHeader({
@@ -28,13 +32,14 @@ export function CollectionHeader({
   stats,
   imageUrl,
   chainId,
+  isDuplicateName = false,
 }: CollectionHeaderProps) {
   const safeChainId = useSafeChainId();
   const activeChainId = chainId ?? safeChainId;
   const [copied, setCopied] = useState(false);
   const displayImage = imageUrl || resolveCollectionImageUrl(collection.name || collection.symbol);
 
-  const truncatedAddress = `${collection.contractAddress.slice(0, 6)}...${collection.contractAddress.slice(-4)}`;
+  const truncatedAddress = formatShortAddress(collection.contractAddress);
   const explorerUrl = getExplorerAddressUrl(collection.contractAddress, activeChainId);
 
   const bestOfferEth = stats.bestOfferWei
@@ -52,7 +57,26 @@ export function CollectionHeader({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {isDuplicateName && (
+        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">⚠️</span>
+            <span>
+              <strong>Duplicate Name Warning:</strong> Multiple contracts share the name &ldquo;{collection.name}&rdquo;. Verify the contract address ({truncatedAddress}) on explorer before committing capital.
+            </span>
+          </div>
+          <a
+            href={explorerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] font-mono underline decoration-dotted text-amber-900 dark:text-amber-100 hover:text-[var(--accent-primary)] shrink-0"
+          >
+            Verify on Blockscout ↗
+          </a>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 rounded-2xl border border-[var(--line)] bg-[var(--panel)] shadow-[var(--shadow-subtle)]">
         <div className="flex items-start sm:items-center gap-4">
           <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-[var(--line)] bg-[var(--raised)] shrink-0 flex items-center justify-center font-mono font-bold text-lg text-[var(--accent-primary)]">
@@ -78,7 +102,7 @@ export function CollectionHeader({
               <span className="px-2 py-0.5 rounded-md bg-[var(--raised)] border border-[var(--line)] text-[11px] font-mono font-semibold text-[var(--muted)]">
                 {collection.symbol}
               </span>
-              <Badge status="active">Verified</Badge>
+              <Badge status="active">Verified ERC-721</Badge>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--muted)] font-mono">
@@ -90,19 +114,17 @@ export function CollectionHeader({
                   aria-label="View on Blockscout"
                   className="hover:text-[var(--primary)] underline decoration-dotted transition-colors"
                 >
-                  {truncatedAddress}
+                  {collection.contractAddress}
                 </a>
                 <button
                   type="button"
                   onClick={handleCopy}
                   className="p-1 hover:text-[var(--text)] transition-colors cursor-pointer"
-                  title="Copy address"
-                  aria-label="Copy address"
+                  title="Copy contract address"
+                  aria-label="Copy contract address"
                 >
                   {copied ? (
-                    <svg className="w-3.5 h-3.5 text-[var(--accent-primary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Copied!</span>
                   ) : (
                     <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -123,7 +145,7 @@ export function CollectionHeader({
             className="w-full sm:w-auto"
           >
             <Button variant="secondary" size="sm" className="w-full sm:w-auto">
-              Explorer ↗
+              Blockscout Explorer ↗
             </Button>
           </a>
         </div>
@@ -180,7 +202,7 @@ export function CollectionHeader({
             Contract
           </span>
           <span className="text-base font-bold font-mono text-[var(--text)]">
-            {collection.contractAddress.slice(0, 6)}...{collection.contractAddress.slice(-4)}
+            {truncatedAddress}
           </span>
         </div>
       </div>

@@ -36,7 +36,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
   const [rankingTab, setRankingTab] = useState<RankingTabType>('top');
   const [timeframe, setTimeframe] = useState<TimeframeType>('24h');
   const [sortField, setSortField] = useState<SortField>('poolSize');
-  const { watchlist, toggleWatchlist, isWatchlisted } = useWatchlist();
+  const { watchlist, toggleWatchlist } = useWatchlist();
   const [activeTab, setActiveTab] = useState<'all' | 'watchlist'>('all');
 
   const filteredAndSorted = useMemo(() => {
@@ -183,8 +183,18 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
         <div className="p-8 border border-dashed border-[#e1ebe6] dark:border-[#1e332c] rounded-xl text-center text-[#627478] dark:text-[#8ca197] bg-white dark:bg-[#111a17]">
           <EmptyState
             title={activeTab === 'watchlist' ? 'Your watchlist is empty' : 'No collections match your filter'}
-            description={activeTab === 'watchlist' ? 'Star a collection to save it to your personal watchlist.' : 'Try changing your filter settings.'}
+            description={activeTab === 'watchlist' ? 'Star a collection to save it to your personal watchlist.' : 'Try changing your filter or explore all collections.'}
           />
+          {activeTab === 'all' && (
+            <div className="mt-4 flex items-center justify-center gap-3">
+              <Link
+                href="/explore"
+                className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--panel)] text-[var(--text)] text-xs font-medium transition-colors"
+              >
+                Browse All Collections ↗
+              </Link>
+            </div>
+          )}
         </div>
       ) : (
         <div className="w-full overflow-x-auto">
@@ -209,7 +219,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                 <th scope="col" className="py-2.5 px-3">
                   <div className="flex items-center gap-1">
                     <span>LTV</span>
-                    <Tooltip content="Max loan-to-value ratio based on curated collection parameters" />
+                    <Tooltip content="Max loan-to-value ratio based on collection parameters" />
                   </div>
                 </th>
                 <th scope="col" className="py-2.5 px-3 text-right">Action</th>
@@ -268,7 +278,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                             className="text-xs font-semibold text-[var(--text)] hover:text-violet-600 dark:hover:text-violet-400 transition-colors flex items-center gap-1"
                           >
                             <span>{c.name}</span>
-                            <span className="text-[11px] text-violet-600 dark:text-violet-400 font-bold" title="Curated pool">
+                            <span className="text-[11px] text-violet-600 dark:text-violet-400 font-bold" title="Verified pool">
                               ✦
                             </span>
                           </Link>
@@ -323,7 +333,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
           </table>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[10px] text-[#667d7a] dark:text-[#8ca197] pt-3 pb-6 gap-2">
-            <span>Showing {filteredAndSorted.length} verified markets · Fixed rate lending escrow</span>
+            <span>Showing {filteredAndSorted.length} markets · Fixed rate lending escrow</span>
             <span className="font-mono">ETH denominated</span>
           </div>
         </div>

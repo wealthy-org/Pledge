@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 interface IPledgeLoans {
@@ -43,6 +42,8 @@ interface IPledgeLoans {
 
     error Unauthorized();
     error CollectionNotAllowed(address collection);
+    error CollectionBlocked(address collection);
+    error InvalidERC721Contract(address collection);
     error InvalidDuration(uint32 durationSeconds);
     error InvalidInterestRate(uint16 termInterestBps);
     error InvalidPrincipal();
@@ -63,6 +64,7 @@ interface IPledgeLoans {
     error InvalidDestination();
 
     event CollectionStatusChanged(address indexed collection, bool enabled);
+    event CollectionBlockStatusChanged(address indexed collection, bool blocked);
     event OfferCreated(
         uint256 indexed offerId,
         address indexed lender,

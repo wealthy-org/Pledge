@@ -168,7 +168,7 @@ describe('TICKET-36: Borrow Page & Review Drawer Test Suite', () => {
 
   it('TS-04: OfferComparisonList renders EmptyState when no offers available', () => {
     render(<OfferComparisonList offers={[]} onSelectOffer={vi.fn()} />);
-    expect(screen.getByText(/no open offers/i)).toBeDefined();
+    expect(screen.getByText(/Belum ada penawaran untuk koleksi ini/i)).toBeDefined();
   });
 
   it('TS-05: BorrowReviewDrawer calculates exact total due, deadline, protocol fee, and escrow warning', () => {

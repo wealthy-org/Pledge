@@ -3,12 +3,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { getCuratedCollections, type ActiveCuratedCollection } from '@/config/collections';
-import { useCollections } from '@/hooks/api/useCollections';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
+import { getCuratedCollections } from '@/config/collections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
-
-import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
+import { formatShortAddress } from '@/lib/services/collectionSafety';
+import type { CollectionItemResponse } from '@/types/api';
 
 export interface GlobalSearchProps {
   isOpen: boolean;
@@ -19,27 +18,38 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [apiResults, setApiResults] = useState<CollectionItemResponse[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const chainId = useSafeChainId();
-  const { data: collectionsData } = useCollections(chainId);
 
-  const collections: ActiveCuratedCollection[] = useMemo(() => {
+  const fallbackCollections: CollectionItemResponse[] = useMemo(() => {
     const raw = getCuratedCollections(chainId);
-    if (!collectionsData?.collections) return raw;
-    return collectionsData.collections.map((item) => ({
-      id: item.symbol.toLowerCase(),
-      name: item.name,
-      symbol: item.symbol,
-      defaultDurations: [7, 14, 30] as [7, 14, 30],
-      addresses: {
-        [TESTNET_CHAIN_ID]: item.address as `0x${string}`,
-        [MAINNET_CHAIN_ID]: item.address as `0x${string}`,
-        [chainId]: item.address as `0x${string}`,
-      },
-      contractAddress: item.address as `0x${string}`,
+    return raw.map((c) => ({
+      address: c.contractAddress,
+      name: c.name,
+      symbol: c.symbol,
+      imageUrl: resolveCollectionImageUrl(c.name),
+      description: `${c.name} on Robinhood Chain`,
+      bestOfferWei: null,
+      activeLoansCount: 0,
+      offerCount: 0,
+      poolSizeWei: '0',
     }));
-  }, [chainId, collectionsData]);
+  }, [chainId]);
+
+  const displayCollections = useMemo(() => {
+    const source = apiResults !== null ? apiResults : fallbackCollections;
+    const q = query.toLowerCase().trim();
+    if (!q) return source;
+    return source.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.symbol.toLowerCase().includes(q) ||
+        c.address.toLowerCase().includes(q)
+    );
+  }, [apiResults, fallbackCollections, query]);
 
   useEffect(() => {
     try {
@@ -47,9 +57,41 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       if (saved) {
         setRecentSearches(JSON.parse(saved));
       }
-    } catch {
-    }
+    } catch {}
   }, [isOpen]);
+
+  useEffect(() => {
+    let active = true;
+    const fetchResults = async () => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (chainId) params.set('chainId', chainId.toString());
+        if (query.trim()) params.set('search', query.trim());
+        params.set('limit', '20');
+
+        const res = await fetch(`/api/explore/collections?${params.toString()}`);
+        if (res.ok && active) {
+          const data = await res.json();
+          if (data.collections) {
+            setApiResults(data.collections);
+          }
+        }
+      } catch {
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchResults();
+    }, 150);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [query, chainId]);
 
   const saveRecentSearch = (name: string) => {
     try {
@@ -57,24 +99,13 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
       const updated = [name, ...filtered].slice(0, 5);
       setRecentSearches(updated);
       localStorage.setItem('pledge:recent-searches', JSON.stringify(updated));
-    } catch {
-    }
+    } catch {}
   };
 
   const clearRecentSearches = () => {
     setRecentSearches([]);
     localStorage.removeItem('pledge:recent-searches');
   };
-
-  const filteredCollections = collections.filter((col) => {
-    const q = query.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      col.name.toLowerCase().includes(q) ||
-      col.symbol.toLowerCase().includes(q) ||
-      col.contractAddress.toLowerCase().includes(q)
-    );
-  });
 
   const handleClose = () => {
     setQuery('');
@@ -102,9 +133,9 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
   if (!isOpen) return null;
 
-  const handleSelect = (col: ActiveCuratedCollection) => {
+  const handleSelect = (col: CollectionItemResponse) => {
     saveRecentSearch(col.name);
-    router.push(`/collection/${col.contractAddress}`);
+    router.push(`/collection/${col.address}`);
     handleClose();
   };
 
@@ -112,22 +143,22 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setSelectedIndex((prev) =>
-        prev < filteredCollections.length - 1 ? prev + 1 : 0
+        prev < displayCollections.length - 1 ? prev + 1 : 0
       );
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setSelectedIndex((prev) =>
-        prev > 0 ? prev - 1 : filteredCollections.length - 1
+        prev > 0 ? prev - 1 : displayCollections.length - 1
       );
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (filteredCollections[selectedIndex]) {
-        handleSelect(filteredCollections[selectedIndex]);
+      if (displayCollections[selectedIndex]) {
+        handleSelect(displayCollections[selectedIndex]);
       }
     }
   };
 
-  const activeOptionId = filteredCollections[selectedIndex] ? `search-option-${filteredCollections[selectedIndex].id}` : undefined;
+  const activeOptionId = displayCollections[selectedIndex] ? `search-option-${displayCollections[selectedIndex].address}` : undefined;
 
   return (
     <div
@@ -163,9 +194,13 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             placeholder="Search collections, loans, or addresses..."
             className="flex-1 bg-transparent border-none text-xs text-[var(--text)] placeholder-[var(--muted)] focus:outline-hidden"
           />
-          <kbd className="px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--line)] text-[10px] font-mono text-[var(--muted)]">
-            ESC
-          </kbd>
+          {isLoading ? (
+            <span className="w-3.5 h-3.5 border-2 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin shrink-0" />
+          ) : (
+            <kbd className="px-1.5 py-0.5 rounded bg-[var(--surface)] border border-[var(--line)] text-[10px] font-mono text-[var(--muted)]">
+              ESC
+            </kbd>
+          )}
         </div>
 
         {recentSearches.length > 0 && !query && (
@@ -194,17 +229,20 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         )}
 
         <div id="search-results-list" role="listbox" className="max-h-80 overflow-y-auto p-2 divide-y divide-[var(--line)]">
-          {filteredCollections.length === 0 ? (
+          {displayCollections.length === 0 && !isLoading ? (
             <div className="p-6 text-center text-xs text-[var(--muted)]">
-              No matching collections found for &ldquo;{query}&rdquo;
+              No collections found for &ldquo;{query}&rdquo;
             </div>
           ) : (
-            filteredCollections.map((col, idx) => {
+            displayCollections.map((col, idx) => {
               const isSelected = idx === selectedIndex;
+              const hasOffers = (col.offerCount || 0) > 0;
+              const displayImage = col.imageUrl || resolveCollectionImageUrl(col.name);
+
               return (
                 <div
-                  key={col.id}
-                  id={`search-option-${col.id}`}
+                  key={col.address}
+                  id={`search-option-${col.address}`}
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(col)}
@@ -216,26 +254,40 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-md bg-[var(--surface)] border border-[var(--line)] overflow-hidden flex items-center justify-center text-xs font-bold font-mono text-[var(--accent-primary)] shrink-0">
-                      <Image
-                        src={resolveCollectionImageUrl(col.name)}
-                        alt={col.name}
-                        width={32}
-                        height={32}
-                        className="w-full h-full object-cover"
-                        unoptimized
-                      />
+                      {displayImage ? (
+                        <Image
+                          src={displayImage}
+                          alt={col.name}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        col.symbol.slice(0, 2)
+                      )}
                     </div>
                     <div>
-                      <div className="text-xs font-semibold leading-tight">{col.name}</div>
-                      <div className="text-[10px] text-[var(--muted)] mt-0.5 font-mono">{col.symbol}</div>
+                      <div className="text-xs font-semibold leading-tight flex items-center gap-1.5">
+                        <span>{col.name}</span>
+                        <span className="text-[10px] text-[var(--muted)] font-mono">({col.symbol})</span>
+                      </div>
+                      <div className="text-[10px] text-[var(--muted)] mt-0.5 font-mono">
+                        {formatShortAddress(col.address)}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="text-right text-xs">
-                    <div className="font-mono font-semibold">{col.symbol}</div>
-                    <div className="text-[10px] text-[var(--muted)] font-mono">
-                      {col.contractAddress.slice(0, 6)}...{col.contractAddress.slice(-4)}
-                    </div>
+                  <div className="flex items-center gap-2">
+                    {hasOffers ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+                        Offers Active ({col.offerCount})
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-[var(--surface)] text-[var(--muted)] border border-[var(--line)]">
+                        Explore
+                      </span>
+                    )}
                   </div>
                 </div>
               );
@@ -248,7 +300,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
             <span>↑↓ to navigate</span>
             <span>↵ to select</span>
           </div>
-          <span>Pledge Protocol Quick Jump</span>
+          <span>Pledge Open Discovery</span>
         </div>
       </div>
     </div>

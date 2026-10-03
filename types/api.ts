@@ -24,6 +24,27 @@ export interface CollectionsResponse {
   total: number;
 }
 
+export interface ExploreCollectionItem {
+  address: string;
+  name: string;
+  symbol: string;
+  imageUrl?: string;
+  totalSupply?: string;
+  holdersCount?: number;
+  bestOfferWei: string | null;
+  poolSizeWei: string;
+  offerCount: number;
+  activeLoansCount: number;
+  isVerifiedErc721: boolean;
+  isDuplicateName?: boolean;
+}
+
+export interface ExploreCollectionsResponse {
+  collections: ExploreCollectionItem[];
+  nextCursor: string | null;
+  total: number;
+}
+
 export interface CollectionDetailResponse {
   collection: CollectionItemResponse;
   stats: CollectionStatsResponse;

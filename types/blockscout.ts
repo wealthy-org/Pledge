@@ -5,6 +5,9 @@ export interface BlockscoutRawToken {
   symbol?: string | null;
   type?: string | null;
   total_supply?: string | null;
+  holders_count?: number | string | null;
+  icon_url?: string | null;
+  volume_24h?: string | null;
 }
 
 export interface BlockscoutRawAttribute {
@@ -39,6 +42,11 @@ export interface BlockscoutRawWalletNFTResponse {
   next_page_params?: Record<string, unknown> | null;
 }
 
+export interface BlockscoutRawTokensResponse {
+  items: BlockscoutRawToken[];
+  next_page_params?: Record<string, unknown> | null;
+}
+
 export interface SanitizedNFTItem {
   tokenId: string;
   collectionAddress: string;
@@ -51,6 +59,21 @@ export interface SanitizedNFTItem {
 
 export interface SanitizedWalletNFTResponse {
   items: SanitizedNFTItem[];
+  nextPageParams: Record<string, unknown> | null;
+}
+
+export interface SanitizedCollectionItem {
+  contractAddress: string;
+  name: string;
+  symbol: string;
+  type: string;
+  totalSupply?: string;
+  holdersCount?: number;
+  iconUrl?: string;
+}
+
+export interface SanitizedCollectionsResponse {
+  items: SanitizedCollectionItem[];
   nextPageParams: Record<string, unknown> | null;
 }
 

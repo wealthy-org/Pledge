@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 import { formatUnits } from 'viem';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -9,12 +10,14 @@ import type { OfferItem } from '@/types/api';
 
 export interface OfferComparisonListProps {
   offers: OfferItem[];
+  collectionAddress?: string;
   onSelectOffer: (offer: OfferItem) => void;
   isLoading?: boolean;
 }
 
 export function OfferComparisonList({
   offers,
+  collectionAddress,
   onSelectOffer,
   isLoading = false,
 }: OfferComparisonListProps) {
@@ -55,11 +58,25 @@ export function OfferComparisonList({
 
   if (sortedOffers.length === 0) {
     return (
-      <div className="p-8 rounded-2xl border border-[var(--line)] bg-[var(--surface)]">
+      <div className="p-8 rounded-2xl border border-[var(--line)] bg-[var(--surface)] text-center space-y-4">
         <EmptyState
-          title="No Open Offers"
-          description="There are currently no active liquidity offers available for this collection. Please check back later or select another NFT."
+          title="Belum ada penawaran untuk koleksi ini."
+          description="Saat ini belum ada pemberi pinjaman (lender) yang memasang penawaran aktif untuk koleksi ini."
         />
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <Link href="/explore">
+            <Button variant="secondary" size="sm">
+              Jelajahi Koleksi Lain
+            </Button>
+          </Link>
+          {collectionAddress && (
+            <Link href={`/lend?collection=${collectionAddress}`}>
+              <Button variant="primary" size="sm">
+                Buat Penawaran Likuiditas
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
     );
   }

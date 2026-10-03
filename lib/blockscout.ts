@@ -4,7 +4,11 @@ import type {
   BlockscoutRawAttribute,
   BlockscoutRawMetadata,
   BlockscoutRawNFTInstance,
+  BlockscoutRawToken,
+  BlockscoutRawTokensResponse,
   BlockscoutRawWalletNFTResponse,
+  SanitizedCollectionItem,
+  SanitizedCollectionsResponse,
   SanitizedNFTItem,
   SanitizedWalletNFTResponse,
 } from '@/types/blockscout';
@@ -89,6 +93,13 @@ export function sanitizeMetadata(raw?: BlockscoutRawMetadata | null): {
   };
 }
 
+const memoryCache = new Map<string, { data: unknown; expiresAt: number }>();
+const CACHE_TTL_MS = 30_000;
+
+export function clearBlockscoutCache(): void {
+  memoryCache.clear();
+}
+
 export class BlockscoutClient {
   private baseUrl: string;
   private apiKey?: string;
@@ -106,16 +117,24 @@ export class BlockscoutClient {
     this.timeoutMs = config?.timeoutMs ?? 10000;
   }
 
-  private async request<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
+  private async request<T>(endpoint: string, params?: Record<string, string>, useCache = false): Promise<T> {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     const url = new URL(`${this.baseUrl}${cleanEndpoint}`);
 
     if (params) {
       Object.entries(params).forEach(([key, val]) => {
-        if (val !== undefined && val !== null) {
+        if (val !== undefined && val !== null && val !== '') {
           url.searchParams.append(key, val);
         }
       });
+    }
+
+    const cacheKey = url.toString();
+    if (useCache) {
+      const cached = memoryCache.get(cacheKey);
+      if (cached && cached.expiresAt > Date.now()) {
+        return cached.data as T;
+      }
     }
 
     const headers: Record<string, string> = {
@@ -145,6 +164,9 @@ export class BlockscoutClient {
       }
 
       const data = (await response.json()) as T;
+      if (useCache) {
+        memoryCache.set(cacheKey, { data, expiresAt: Date.now() + CACHE_TTL_MS });
+      }
       return data;
     } catch (err: unknown) {
       if (err instanceof BlockscoutApiError) {
@@ -177,7 +199,8 @@ export class BlockscoutClient {
 
     const raw = await this.request<BlockscoutRawWalletNFTResponse>(
       `/addresses/${walletAddress}/nft`,
-      queryParams
+      queryParams,
+      true
     );
 
     const items: SanitizedNFTItem[] = (raw.items || []).map((item) => {
@@ -229,7 +252,9 @@ export class BlockscoutClient {
     }
 
     const item = await this.request<BlockscoutRawNFTInstance>(
-      `/tokens/${collectionAddress}/instances/${tokenId}`
+      `/tokens/${collectionAddress}/instances/${tokenId}`,
+      undefined,
+      true
     );
 
     const metadata = sanitizeMetadata(item.metadata);
@@ -255,6 +280,81 @@ export class BlockscoutClient {
       description: metadata.description || '',
       imageUrl,
       attributes: metadata.attributes || [],
+    };
+  }
+
+  public async fetchERC721Collections(
+    queryParams?: Record<string, string>
+  ): Promise<SanitizedCollectionsResponse> {
+    const params = {
+      type: 'ERC-721',
+      ...queryParams,
+    };
+
+    const raw = await this.request<BlockscoutRawTokensResponse>(
+      '/tokens',
+      params,
+      true
+    );
+
+    const items: SanitizedCollectionItem[] = (raw.items || []).map((item) => {
+      const contractAddress =
+        item.address_hash ||
+        item.address ||
+        '';
+      const name = item.name || 'Unnamed Collection';
+      const symbol = item.symbol || 'NFT';
+      const type = item.type || 'ERC-721';
+      const totalSupply = item.total_supply || undefined;
+      const holdersCount = item.holders_count ? Number(item.holders_count) : undefined;
+      const iconUrl = item.icon_url || undefined;
+
+      return {
+        contractAddress,
+        name,
+        symbol,
+        type,
+        totalSupply,
+        holdersCount,
+        iconUrl,
+      };
+    });
+
+    return {
+      items,
+      nextPageParams: raw.next_page_params || null,
+    };
+  }
+
+  public async fetchCollectionDetails(
+    collectionAddress: string
+  ): Promise<SanitizedCollectionItem> {
+    if (!collectionAddress || !collectionAddress.startsWith('0x')) {
+      throw new Error(`Invalid collection address format: ${collectionAddress}`);
+    }
+
+    const item = await this.request<BlockscoutRawToken>(
+      `/tokens/${collectionAddress}`,
+      undefined,
+      true
+    );
+
+    const contractAddress = item.address_hash || item.address || collectionAddress;
+    const name = item.name || 'Unnamed Collection';
+    const symbol = item.symbol || 'NFT';
+    const type = item.type || 'ERC-721';
+    const totalSupply = item.total_supply || undefined;
+    const holdersCount = item.holders_count ? Number(item.holders_count) : undefined;
+    const iconUrl = item.icon_url || undefined;
+
+    return {
+      contractAddress,
+      name,
+      symbol,
+      type,
+      totalSupply,
+      holdersCount,
+      iconUrl,
     };
   }
 }

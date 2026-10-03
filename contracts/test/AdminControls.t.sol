@@ -65,7 +65,7 @@ contract AdminControlsTest is Test, IPledgeLoans {
 
         vm.prank(lender);
         vm.expectRevert(
-            abi.encodeWithSelector(CollectionNotAllowed.selector, address(nft))
+            abi.encodeWithSelector(CollectionBlocked.selector, address(nft))
         );
         pledge.createOffer{value: PRINCIPAL}(
             address(nft),

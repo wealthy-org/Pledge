@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.24;
 
 import {Script} from "forge-std/Script.sol";
@@ -25,10 +24,6 @@ contract DeployTestnet is Script {
         MockERC721 ngp = new MockERC721("Nottingham Guild Pledges", "NGP", "ipfs://bafybeingppass/");
 
         PledgeLoans pledge = new PledgeLoans(deployer, feeRecipient, initialFeeBps);
-
-        pledge.setCollectionEnabled(address(rhg), true);
-        pledge.setCollectionEnabled(address(sfr), true);
-        pledge.setCollectionEnabled(address(ngp), true);
 
         vm.stopBroadcast();
 

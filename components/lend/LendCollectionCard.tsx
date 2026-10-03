@@ -3,14 +3,23 @@
 import React from 'react';
 import Image from 'next/image';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
-import type { CuratedCollectionDefinition } from '@/config/collections';
+import type { CuratedCollectionDefinition, ActiveCuratedCollection } from '@/config/collections';
+
+export interface GenericCollectionItem {
+  id?: string;
+  name: string;
+  symbol: string;
+  contractAddress?: string;
+  address?: string;
+  addresses?: Record<number, `0x${string}`>;
+}
 
 export interface LendCollectionCardProps {
-  collection: CuratedCollectionDefinition;
+  collection: CuratedCollectionDefinition | ActiveCuratedCollection | GenericCollectionItem;
   poolSizeEth?: string;
   activeLoansCount?: number;
   imageUrl?: string;
-  onMakeOffer: (collection: CuratedCollectionDefinition) => void;
+  onMakeOffer: (collection: CuratedCollectionDefinition | ActiveCuratedCollection | GenericCollectionItem) => void;
 }
 
 export function LendCollectionCard({
@@ -46,7 +55,7 @@ export function LendCollectionCard({
       <div className="p-4 flex flex-col flex-1 justify-between">
         <div>
           <div className="text-[10px] uppercase tracking-wider font-semibold text-violet-600 dark:text-violet-400">
-            Curated Market
+            Open Market
           </div>
           <h3 className="text-sm font-semibold text-[var(--text)] mt-0.5 mb-3 truncate">
             {collection.name}

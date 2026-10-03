@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
-import { parseUnits, formatUnits } from 'viem';
+import React, { useState, useMemo, useEffect } from 'react';
+import { parseUnits, formatUnits, isAddress } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { Drawer } from '@/components/ui/Drawer';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import type { CuratedCollectionDefinition, ActiveCuratedCollection } from '@/config/collections';
+import { verifyErc721OnChain, formatShortAddress } from '@/lib/services/collectionSafety';
 
 export interface CreateOfferFormData {
   collectionAddress: string;
@@ -16,10 +16,19 @@ export interface CreateOfferFormData {
   expirySeconds: number;
 }
 
+export interface CreateOfferCollectionOption {
+  id: string;
+  name: string;
+  symbol: string;
+  contractAddress?: string;
+  addresses?: Record<number, `0x${string}`>;
+}
+
 export interface CreateOfferDrawerProps {
   isOpen: boolean;
-  collections: readonly (CuratedCollectionDefinition | ActiveCuratedCollection)[];
+  collections: readonly CreateOfferCollectionOption[];
   initialCollectionId?: string;
+  initialCollectionAddress?: string;
   onClose: () => void;
   onSubmit: (data: CreateOfferFormData) => void;
   isLoading?: boolean;
@@ -43,17 +52,66 @@ export function CreateOfferDrawer({
   isOpen,
   collections,
   initialCollectionId,
+  initialCollectionAddress,
   onClose,
   onSubmit,
   isLoading = false,
   isConnected = true,
   onConnect,
 }: CreateOfferDrawerProps) {
+  const chainId = useSafeChainId();
+  const [mode, setMode] = useState<'catalog' | 'custom'>('catalog');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
+  const [customAddress, setCustomAddress] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [customVerificationStatus, setCustomVerificationStatus] = useState<'idle' | 'valid' | 'invalid'>('idle');
+
   const [principalInput, setPrincipalInput] = useState('1.0');
   const [interestRateInput, setInterestRateInput] = useState('5.0');
   const [durationSeconds, setDurationSeconds] = useState(7 * 86400);
   const [expirySeconds, setExpirySeconds] = useState(3 * 86400);
+
+  useEffect(() => {
+    if (initialCollectionAddress && isAddress(initialCollectionAddress)) {
+      const match = collections.find(
+        (c) =>
+          c.contractAddress?.toLowerCase() === initialCollectionAddress.toLowerCase() ||
+          (c.addresses && Object.values(c.addresses).some((a) => a.toLowerCase() === initialCollectionAddress.toLowerCase()))
+      );
+      if (match) {
+        setSelectedCollectionId(match.id);
+        setMode('catalog');
+      } else {
+        setCustomAddress(initialCollectionAddress);
+        setMode('custom');
+      }
+    }
+  }, [initialCollectionAddress, collections]);
+
+  useEffect(() => {
+    let active = true;
+    if (mode === 'custom' && customAddress.trim().length === 42 && isAddress(customAddress.trim())) {
+      setIsVerifying(true);
+      setCustomVerificationStatus('idle');
+      verifyErc721OnChain(customAddress.trim(), chainId)
+        .then((valid) => {
+          if (!active) return;
+          setIsVerifying(false);
+          setCustomVerificationStatus(valid ? 'valid' : 'invalid');
+        })
+        .catch(() => {
+          if (!active) return;
+          setIsVerifying(false);
+          setCustomVerificationStatus('invalid');
+        });
+    } else if (mode === 'custom') {
+      setIsVerifying(false);
+      setCustomVerificationStatus('idle');
+    }
+    return () => {
+      active = false;
+    };
+  }, [mode, customAddress, chainId]);
 
   const effectiveCollectionId = selectedCollectionId || initialCollectionId || collections[0]?.id || '';
 
@@ -64,6 +122,23 @@ export function CreateOfferDrawer({
       null
     );
   }, [collections, effectiveCollectionId]);
+
+  const targetAddress = useMemo(() => {
+    if (mode === 'custom') {
+      return customAddress.trim();
+    }
+    if (!selectedCol) return '';
+    if (selectedCol.contractAddress) return selectedCol.contractAddress;
+    if (selectedCol.addresses) {
+      return selectedCol.addresses[chainId] || Object.values(selectedCol.addresses)[0] || '';
+    }
+    return '';
+  }, [mode, customAddress, selectedCol, chainId]);
+
+  const isAddressValid = useMemo(() => {
+    if (mode === 'catalog') return Boolean(targetAddress && isAddress(targetAddress));
+    return Boolean(isAddress(targetAddress) && customVerificationStatus === 'valid');
+  }, [mode, targetAddress, customVerificationStatus]);
 
   const preview = useMemo(() => {
     try {
@@ -93,7 +168,7 @@ export function CreateOfferDrawer({
         interestEth: Number(formatUnits(interestWei, 18)).toFixed(3),
         feeEth: Number(formatUnits(feeWei, 18)).toFixed(4),
         netPayoutEth: Number(formatUnits(netPayoutWei, 18)).toFixed(3),
-        isValid: true,
+        isValid: isAddressValid,
         principalWei: pWei.toString(),
         termInterestBps: bps,
       };
@@ -108,21 +183,14 @@ export function CreateOfferDrawer({
         termInterestBps: 0,
       };
     }
-  }, [principalInput, interestRateInput]);
-
-  const chainId = useSafeChainId();
+  }, [principalInput, interestRateInput, isAddressValid]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!preview.isValid || !selectedCol) return;
-
-    const collectionAddress =
-      (selectedCol as ActiveCuratedCollection).contractAddress ||
-      selectedCol.addresses[chainId] ||
-      Object.values(selectedCol.addresses)[0];
+    if (!preview.isValid || !targetAddress) return;
 
     onSubmit({
-      collectionAddress,
+      collectionAddress: targetAddress,
       principalWei: preview.principalWei,
       termInterestBps: preview.termInterestBps,
       durationSeconds,
@@ -140,21 +208,90 @@ export function CreateOfferDrawer({
       width="470px"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-[var(--text)] block">
-            Target Collection
-          </label>
-          <select
-            value={effectiveCollectionId}
-            onChange={(e) => setSelectedCollectionId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] text-xs font-medium text-[var(--text)] focus:outline-hidden focus:border-[var(--primary)] transition-all cursor-pointer"
-          >
-            {collections.map((col) => (
-              <option key={col.id} value={col.id}>
-                {col.name} ({col.symbol})
-              </option>
-            ))}
-          </select>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold text-[var(--text)]">
+              Target Collection
+            </label>
+            <div className="flex items-center gap-1 bg-[var(--panel)] p-0.5 rounded-lg border border-[var(--line)]">
+              <button
+                type="button"
+                onClick={() => setMode('catalog')}
+                className={`text-[10px] font-medium py-1 px-2 rounded-md transition-colors cursor-pointer ${
+                  mode === 'catalog'
+                    ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)]'
+                }`}
+              >
+                Catalog
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode('custom')}
+                className={`text-[10px] font-medium py-1 px-2 rounded-md transition-colors cursor-pointer ${
+                  mode === 'custom'
+                    ? 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)]'
+                }`}
+              >
+                Custom ERC-721
+              </button>
+            </div>
+          </div>
+
+          {mode === 'catalog' ? (
+            <div className="space-y-1.5">
+              <select
+                id="collection-select"
+                value={effectiveCollectionId}
+                onChange={(e) => setSelectedCollectionId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] text-xs font-medium text-[var(--text)] focus:outline-hidden focus:border-[var(--primary)] transition-all cursor-pointer"
+              >
+                {collections.map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.name} ({col.symbol})
+                  </option>
+                ))}
+              </select>
+              {targetAddress && (
+                <div className="text-[10px] font-mono text-[var(--muted)] px-1">
+                  Contract: {formatShortAddress(targetAddress)}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Input
+                id="custom-collection-address"
+                label="ERC-721 Contract Address"
+                placeholder="0x..."
+                value={customAddress}
+                onChange={(e) => setCustomAddress(e.target.value)}
+                required
+              />
+
+              {isVerifying && (
+                <div className="text-[11px] text-sky-600 dark:text-sky-400 font-mono flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+                  Verifying ERC-721 interface (0x80ac58cd) on-chain...
+                </div>
+              )}
+
+              {!isVerifying && customVerificationStatus === 'valid' && (
+                <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
+                  <span className="font-bold text-emerald-600">✓</span>
+                  <span>Verified ERC-721 Compliant Contract</span>
+                </div>
+              )}
+
+              {!isVerifying && customVerificationStatus === 'invalid' && customAddress.length === 42 && (
+                <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
+                  <span className="font-bold text-rose-600">✕</span>
+                  <span>Contract does not implement ERC-721 or does not exist on this chain.</span>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -273,16 +410,16 @@ export function CreateOfferDrawer({
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs leading-relaxed">
-          <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-900 dark:text-amber-100">
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs leading-relaxed space-y-2">
+          <div className="font-bold flex items-center gap-1.5 text-amber-900 dark:text-amber-100">
             <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10" />
               <path d="M12 16v-4m0-4h.01" />
             </svg>
-            <span>Collateral Security Disclosure</span>
+            <span>Permissionless Market Disclosure</span>
           </div>
           <p>
-            Fund recovery depends on borrower repayment; if the borrower defaults, you are entitled to foreclose and claim the collateral NFT.
+            Fund recovery depends on borrower repayment; if the borrower defaults, you will claim the collateral NFT. Pledge is an open protocol, verify the contract address before depositing capital.
           </p>
         </div>
 
