@@ -99,10 +99,11 @@ export function TransactionModal({
     try {
       const success = await requestNetworkSwitch(targetChain);
       if (success) {
+        onClose();
         if (onRetry) {
-          onRetry();
-        } else {
-          onClose();
+          setTimeout(() => {
+            onRetry();
+          }, 350);
         }
       }
     } catch (err: any) {

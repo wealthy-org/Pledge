@@ -74,12 +74,19 @@ export async function getEffectiveWalletClient(
       }
 
       try {
-        const viemClient = createWalletClient({
-          account: userAddress,
-          chain: activeChain,
-          transport: custom(provider as any),
-        });
-        return viemClient;
+        const rawChain =
+          (provider as any).chainId || (await provider.request?.({ method: 'eth_chainId' }));
+        const providerChainId =
+          typeof rawChain === 'string' ? parseInt(rawChain, 16) : Number(rawChain);
+
+        if (providerChainId === activeChain.id) {
+          const viemClient = createWalletClient({
+            account: userAddress,
+            chain: activeChain,
+            transport: custom(provider as any),
+          });
+          return viemClient;
+        }
       } catch (viemError) {
         console.warn('[WalletClientHelper] fallback createWalletClient failed:', viemError);
       }
@@ -87,6 +94,6 @@ export async function getEffectiveWalletClient(
   }
 
   throw new Error(
-    `Wallet client unavailable. Please ensure your wallet (e.g. Phantom / MetaMask) is unlocked and switched to ${activeChain.name} (Chain ID: ${activeChain.id}).`
+    `Wallet is connected to the wrong network. Please switch to ${activeChain.name} (Chain ID: ${activeChain.id}).`
   );
 }

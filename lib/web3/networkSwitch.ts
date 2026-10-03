@@ -11,45 +11,96 @@ export async function requestNetworkSwitch(targetChain: Chain): Promise<boolean>
     throw new Error('No EVM wallet provider detected in browser.');
   }
 
+  let switched = false;
+
   try {
-    await provider.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: hexChainId }],
-    });
-    return true;
-  } catch (switchError: any) {
-    const errorCode = switchError?.code || switchError?.data?.originalError?.code;
-    const errorMessage = (switchError?.message || '').toLowerCase();
-
-    if (
-      errorCode === 4902 ||
-      errorCode === -32603 ||
-      errorMessage.includes('unrecognized') ||
-      errorMessage.includes('not added') ||
-      errorMessage.includes('add')
-    ) {
-      const rpcUrls = targetChain.rpcUrls?.default?.http || [];
-      const explorerUrls = targetChain.blockExplorers?.default?.url ? [targetChain.blockExplorers.default.url] : [];
-
-      await provider.request({
-        method: 'wallet_addEthereumChain',
-        params: [
-          {
-            chainId: hexChainId,
-            chainName: targetChain.name,
-            nativeCurrency: targetChain.nativeCurrency,
-            rpcUrls: rpcUrls.length > 0 ? rpcUrls : ['https://rpc.testnet.chain.robinhood.com'],
-            blockExplorerUrls: explorerUrls.length > 0 ? explorerUrls : undefined,
-          },
-        ],
-      });
-      return true;
+    const { config } = await import('@/lib/wagmi');
+    const { switchChain } = await import('wagmi/actions');
+    if (config) {
+      await switchChain(config, { chainId: targetChain.id as any });
+      switched = true;
     }
-
-    if (errorCode === 4001 || errorMessage.includes('user rejected') || errorMessage.includes('cancelled') || errorMessage.includes('denied')) {
-      throw new Error('Network switch request was rejected in your wallet. Please approve switching to Robinhood Testnet in Phantom/MetaMask.');
-    }
-
-    throw switchError;
+  } catch {
+    switched = false;
   }
+
+  if (!switched) {
+    try {
+      await provider.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: hexChainId }],
+      });
+      switched = true;
+    } catch (switchError: any) {
+      const errorCode = switchError?.code || switchError?.data?.originalError?.code;
+      const errorMessage = (switchError?.message || '').toLowerCase();
+
+      if (
+        errorCode === 4902 ||
+        errorCode === -32603 ||
+        errorMessage.includes('unrecognized') ||
+        errorMessage.includes('not added') ||
+        errorMessage.includes('add') ||
+        errorMessage.includes('could not find')
+      ) {
+        const rpcUrls = targetChain.rpcUrls?.default?.http || ['https://rpc.testnet.chain.robinhood.com'];
+        const explorerUrls = targetChain.blockExplorers?.default?.url
+          ? [targetChain.blockExplorers.default.url]
+          : [];
+
+        await provider.request({
+          method: 'wallet_addEthereumChain',
+          params: [
+            {
+              chainId: hexChainId,
+              chainName: targetChain.name,
+              nativeCurrency: targetChain.nativeCurrency,
+              rpcUrls: rpcUrls.filter((url) => !url.startsWith('/')),
+              blockExplorerUrls: explorerUrls.length > 0 ? explorerUrls : undefined,
+            },
+          ],
+        });
+        switched = true;
+      } else if (
+        errorCode === 4001 ||
+        errorMessage.includes('user rejected') ||
+        errorMessage.includes('cancelled') ||
+        errorMessage.includes('denied')
+      ) {
+        throw new Error(
+          'Network switch request was rejected in your wallet. Please approve switching to Robinhood Testnet in your wallet.'
+        );
+      } else {
+        throw switchError;
+      }
+    }
+  }
+
+  if (switched) {
+    try {
+      const { config } = await import('@/lib/wagmi');
+      const { switchChain } = await import('wagmi/actions');
+      if (config) {
+        await switchChain(config, { chainId: targetChain.id as any });
+      }
+    } catch {}
+
+    let retries = 15;
+    while (retries > 0) {
+      try {
+        const currentChain = await provider.request({ method: 'eth_chainId' });
+        const currentId =
+          typeof currentChain === 'string'
+            ? parseInt(currentChain, 16)
+            : Number(currentChain);
+        if (currentId === targetChain.id) {
+          break;
+        }
+      } catch {}
+      await new Promise((r) => setTimeout(r, 100));
+      retries--;
+    }
+  }
+
+  return true;
 }
