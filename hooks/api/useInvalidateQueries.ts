@@ -12,6 +12,7 @@ export function useInvalidateProtocolQueries() {
       queryClient.invalidateQueries({ queryKey: ['loans'] }),
       queryClient.invalidateQueries({ queryKey: ['portfolio'] }),
       queryClient.invalidateQueries({ queryKey: ['activity'] }),
+      queryClient.invalidateQueries({ queryKey: ['eligible-nfts'] }),
     ]);
   };
 

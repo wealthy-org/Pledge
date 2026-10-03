@@ -9,6 +9,7 @@ import { BorrowConfirmationModal } from '@/components/borrow/BorrowConfirmationM
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
 import { useAcceptOffer } from '@/hooks/transactions/useAcceptOffer';
+import { useMintNft } from '@/hooks/transactions/useMintNft';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
 import { useCollections } from '@/hooks/api/useCollections';
 import { useOffers } from '@/hooks/api/useOffers';
@@ -24,6 +25,7 @@ function BorrowContent() {
   const chainId = useSafeChainId();
   const { address, isConnected } = useConnection();
   const { state: txState, checkIsApproved, approveNFT, acceptOffer, reset: resetTx } = useAcceptOffer();
+  const { state: mintTxState, mintNft, reset: resetMintTx } = useMintNft();
 
   const { nfts: rawWalletNfts } = useEligibleNfts(address, chainId);
   const { data: collectionsData } = useCollections(chainId);
@@ -134,6 +136,22 @@ function BorrowContent() {
     }
   };
 
+  const handleMintTestnetNft = async () => {
+    const fallbackAddress = collectionsData?.collections?.[0]?.address as `0x${string}` | undefined;
+    const targetAddress = (collectionParam || fallbackAddress) as `0x${string}` | undefined;
+    if (!targetAddress) return;
+    const targetCollection = collectionsData?.collections?.find(
+      (c) => c.address.toLowerCase() === targetAddress.toLowerCase()
+    );
+    const hash = await mintNft({
+      collectionAddress: targetAddress,
+      collectionName: targetCollection?.name || 'Robinhood Genesis Pass',
+    });
+    if (hash) {
+      setToastMessage('Testnet NFT minted successfully! Your new NFT will appear shortly.');
+    }
+  };
+
   const selectedCollectionDef = selectedNft
     ? collectionsData?.collections?.find(
         (c) => c.address.toLowerCase() === selectedNft.contractAddress.toLowerCase()
@@ -158,11 +176,21 @@ function BorrowContent() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Your eligible NFTs</h2>
-          <span className="text-xs text-[var(--muted)]">
-            {filteredNfts.length} eligible NFT{filteredNfts.length === 1 ? '' : 's'}
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Your eligible NFTs</h2>
+            <span className="text-xs text-[var(--muted)]">
+              {filteredNfts.length} eligible NFT{filteredNfts.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleMintTestnetNft}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-white dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-colors cursor-pointer shadow-xs self-start sm:self-auto"
+          >
+            <span>Mint Testnet NFT ⚡</span>
+          </button>
         </div>
 
         {collectionParam && (
@@ -186,6 +214,7 @@ function BorrowContent() {
         <NFTGrid
           nfts={filteredNfts}
           selectedNft={selectedNft}
+          onMintTestnet={handleMintTestnetNft}
           onSelectNft={(nft) => {
             setSelectedNft(nft);
             const offers = activeCollectionOffers.filter(
@@ -258,6 +287,16 @@ function BorrowContent() {
           resetTx();
         }}
         onRetry={handleExecuteAcceptOffer}
+      />
+
+      <TransactionModal
+        isOpen={mintTxState.stage !== 'IDLE'}
+        state={mintTxState}
+        chainId={chainId}
+        onClose={() => {
+          resetMintTx();
+        }}
+        onRetry={handleMintTestnetNft}
       />
 
       {toastMessage && (

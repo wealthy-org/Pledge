@@ -23,6 +23,7 @@ export interface NFTGridProps {
   selectedNft: BorrowableNft | null;
   onSelectNft: (nft: BorrowableNft) => void;
   isLoading?: boolean;
+  onMintTestnet?: () => void;
 }
 
 export function NFTGrid({
@@ -30,6 +31,7 @@ export function NFTGrid({
   selectedNft,
   onSelectNft,
   isLoading = false,
+  onMintTestnet,
 }: NFTGridProps) {
   if (isLoading) {
     return (
@@ -63,12 +65,23 @@ export function NFTGrid({
           title="No Eligible Collectibles Found"
           description="Your connected wallet does not hold any verified NFTs from our curated collections, or all eligible collectibles are currently collateralized."
         />
-        <Link
-          href="/collections"
-          className="mt-3 inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-500 text-white transition-colors shadow-xs"
-        >
-          Explore Whitelisted Collections ↗
-        </Link>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          {onMintTestnet && (
+            <button
+              type="button"
+              onClick={onMintTestnet}
+              className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-xs cursor-pointer"
+            >
+              Mint Testnet NFT (1-Click) ⚡
+            </button>
+          )}
+          <Link
+            href="/collections"
+            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--panel)] hover:bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] transition-colors shadow-xs"
+          >
+            Explore Whitelisted Collections ↗
+          </Link>
+        </div>
       </div>
     );
   }
