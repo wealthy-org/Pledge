@@ -13,7 +13,6 @@ import { GET as getMarketStats } from '@/app/api/stats/market/route';
 import { indexerStore } from '@/lib/indexer/store';
 import * as blockscoutModule from '@/lib/blockscout';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
-import { CURATED_COLLECTIONS } from '@/config/collections';
 import { NextRequest } from 'next/server';
 
 function createRequest(url: string): NextRequest {
@@ -21,7 +20,7 @@ function createRequest(url: string): NextRequest {
 }
 
 describe('TICKET-21: Live API Route Handlers Test Suite', () => {
-  const RHG_ADDRESS = CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID];
+  const RHG_ADDRESS = '0xe80385cf259c82359cf5ea4ea98cd6514d9257a9';
   const WALLET_A = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
   const WALLET_B = '0xfB5870428d00B1a18274737609825b74c8C12e2B';
 

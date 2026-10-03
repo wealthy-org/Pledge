@@ -1,6 +1,7 @@
 import { RawPledgeLog, IndexingResult } from '@/lib/indexer/types';
 import { dispatchLog } from '@/lib/indexer/dispatcher';
 import { saveCheckpoint } from '@/lib/indexer/checkpoint';
+import { clearSnapshotCache } from '@/lib/protocol/snapshot';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 
 export async function processLogBatch(logs: RawPledgeLog[]): Promise<IndexingResult> {
@@ -30,6 +31,10 @@ export async function processLogBatch(logs: RawPledgeLog[]): Promise<IndexingRes
 
   if (lastBlock > 0 && contractAddress) {
     await saveCheckpoint(chainId, contractAddress, lastBlock, lastBlockHash);
+  }
+
+  if (logs.length > 0) {
+    clearSnapshotCache(chainId);
   }
 
   return {

@@ -13,6 +13,7 @@ export interface BorrowableNft {
   name: string;
   imageUrl?: string;
   bestOfferWei?: string;
+  termInterestBps?: number;
   offerCount: number;
   isInLoan?: boolean;
 }
@@ -100,10 +101,15 @@ export function NFTGrid({
           selectedNft?.contractAddress.toLowerCase() === nft.contractAddress.toLowerCase() &&
           selectedNft?.tokenId === nft.tokenId;
 
-        const bestOfferEth =
-          nft.bestOfferWei && BigInt(nft.bestOfferWei) > 0n
-            ? `${Number(formatUnits(BigInt(nft.bestOfferWei), 18)).toFixed(3)} ETH`
-            : '0.800 ETH';
+        const hasOffer = Boolean(nft.bestOfferWei && BigInt(nft.bestOfferWei) > 0n);
+        const bestOfferEth = hasOffer
+          ? `${Number(formatUnits(BigInt(nft.bestOfferWei!), 18)).toFixed(3)} ETH`
+          : '—';
+        const termInterestStr = nft.termInterestBps !== undefined
+          ? `${(nft.termInterestBps / 100).toFixed(1)}%`
+          : hasOffer
+          ? 'Fixed'
+          : '—';
 
         return (
           <article
@@ -151,7 +157,7 @@ export function NFTGrid({
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-[#627478] dark:text-[#8ca197]">Term interest</span>
-                    <span className="font-medium text-[var(--lime)]">5.0%</span>
+                    <span className="font-medium text-[var(--lime)]">{termInterestStr}</span>
                   </div>
                 </div>
               </div>

@@ -6,7 +6,6 @@ import { LoanCountdown } from '@/components/loan/LoanCountdown';
 import { LoanTermsCard } from '@/components/loan/LoanTermsCard';
 import { LoanActionButtons } from '@/components/loan/LoanActionButtons';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
-import { CURATED_COLLECTIONS } from '@/config/collections';
 import type { LoanItem } from '@/types/api';
 
 const mockBorrower = '0xfB5870428d00B1a18274737609825b74c8C12e2B';
@@ -19,7 +18,7 @@ const mockActiveLoan: LoanItem = {
   chainId: TESTNET_CHAIN_ID,
   lender: mockLender,
   borrower: mockBorrower,
-  collection: CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID],
+  collection: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D',
   tokenId: '42',
   principalWei: '1000000000000000000',
   interestWei: '40000000000000000',
@@ -271,7 +270,7 @@ describe('TICKET-39: Loan Detail Page & Components', () => {
       render(await LoanDetailPage({ params: pagePromise }));
 
       expect(screen.getAllByText(/loan #1/i).length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('Robinhood Genesis Pass')).toBeDefined();
+      expect(screen.getByText('Nottingham Guild Pledges')).toBeDefined();
       expect(screen.getByText('1.00 ETH')).toBeDefined();
     });
 

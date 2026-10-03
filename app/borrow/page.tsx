@@ -106,6 +106,7 @@ function BorrowContent() {
   const { data: offersData } = useOffers({
     collection: selectedNft?.contractAddress,
     status: 'open',
+    chainId,
   });
 
   const activeCollectionOffers = offersData?.offers || [];

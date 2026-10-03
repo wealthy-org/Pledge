@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCollections } from '@/hooks/api/useCollections';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCuratedCollections } from '@/config/collections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
 import type { CollectionItemResponse } from '@/types/api';
@@ -26,25 +25,8 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const chainId = useSafeChainId();
   const { data: curatedData } = useCollections(chainId);
 
-  const fallbackCollections: CollectionItemResponse[] = useMemo(() => {
-    const raw = getCuratedCollections(chainId);
-    return raw.map((c) => ({
-      address: c.contractAddress,
-      name: c.name,
-      symbol: c.symbol,
-      imageUrl: resolveCollectionImageUrl(c.name),
-      description: `${c.name} on Robinhood Chain`,
-      bestOfferWei: null,
-      activeLoansCount: 0,
-      offerCount: 0,
-      poolSizeWei: '0',
-    }));
-  }, [chainId]);
-
   const displayCollections = useMemo(() => {
-    const baseList = curatedData?.collections && curatedData.collections.length > 0
-      ? curatedData.collections
-      : fallbackCollections;
+    const baseList = curatedData?.collections || [];
 
     const mergedMap = new Map<string, CollectionItemResponse>();
     for (const item of baseList) {
@@ -66,7 +48,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         c.symbol.toLowerCase().includes(q) ||
         c.address.toLowerCase().includes(q)
     );
-  }, [curatedData, fallbackCollections, apiResults, query]);
+  }, [curatedData, apiResults, query]);
 
   useEffect(() => {
     try {

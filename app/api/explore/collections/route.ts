@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import { getBlockscoutClient } from '@/lib/blockscout';
-import { getCuratedCollections } from '@/config/collections';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse } from '@/lib/api/response';

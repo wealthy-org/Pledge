@@ -1,7 +1,14 @@
-import { getCollectionByAddress, getCuratedCollections } from '@/config/collections';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { fetchOnChainCollectionInfo, resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { getProtocolSnapshot } from '@/lib/protocol/snapshot';
+import {
+  computeCollectionStats,
+  computeMarketStats,
+  filterSnapshotOffers,
+  filterSnapshotLoans,
+  getDistinctCollectionsFromSnapshot,
+} from '@/lib/protocol/aggregate';
 import {
   CollectionItemResponse,
   CollectionDetailResponse,
@@ -11,14 +18,12 @@ import {
   WalletLoansResponse,
   ActivityResponse,
   MarketStatsResponse,
-  OfferItem,
-  LoanItem,
   ActivityItem,
 } from '@/types/api';
 import { OfferStatus, LoanStatus } from '@/types/database';
 
 function resolveChainId(chainId?: number): number {
-  if (chainId !== undefined) return chainId;
+  if (chainId !== undefined && !isNaN(chainId) && chainId > 0) return chainId;
   const envChainId = process.env.NEXT_PUBLIC_CHAIN_ID;
   if (!envChainId) {
     throw new Error('Chain ID is not configured. NEXT_PUBLIC_CHAIN_ID must be set.');
@@ -32,13 +37,22 @@ function resolveChainId(chainId?: number): number {
 
 export async function getLastIndexedBlock(chainId?: number): Promise<number> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-  let highest = 120;
+  try {
+    await syncOnChainLogs(targetChain);
+  } catch {}
+
+  let highest = 0;
   for (const checkpoint of indexerStore.checkpoints.values()) {
     if (checkpoint.chain_id === targetChain && checkpoint.last_block_number > highest) {
       highest = checkpoint.last_block_number;
     }
   }
+
+  if (highest === 0) {
+    const snapshot = await getProtocolSnapshot(targetChain);
+    highest = snapshot.blockNumber;
+  }
+
   return highest;
 }
 
@@ -47,91 +61,28 @@ export async function getCollectionStatsFromStore(
   chainId?: number
 ): Promise<CollectionStatsResponse> {
   const targetChain = resolveChainId(chainId);
-  const target = collectionAddress.toLowerCase();
-  const openOffers: OfferItem[] = [];
-
-  for (const row of indexerStore.offers.values()) {
-    if (row.chain_id === targetChain && row.collection.toLowerCase() === target && row.status === 'open') {
-      openOffers.push({
-        offerId: row.offer_id,
-        chainId: row.chain_id,
-        lender: row.lender,
-        collection: row.collection,
-        principalWei: row.principal_wei,
-        termInterestBps: row.term_interest_bps,
-        feeBpsSnapshot: row.fee_bps_snapshot,
-        durationSeconds: row.duration_seconds,
-        expiresAt: row.expires_at,
-        status: row.status,
-        blockNumber: row.block_number,
-        txHash: row.tx_hash,
-        createdAt: row.indexed_at,
-      });
-    }
-  }
-
-  let bestOfferBigInt = 0n;
-  let poolSizeBigInt = 0n;
-
-  for (const offer of openOffers) {
-    const val = BigInt(offer.principalWei);
-    poolSizeBigInt += val;
-    if (val > bestOfferBigInt) {
-      bestOfferBigInt = val;
-    }
-  }
-
-  let activeLoansCount = 0;
-  for (const row of indexerStore.loans.values()) {
-    if (row.chain_id === targetChain && row.collection.toLowerCase() === target && row.status === 'active') {
-      activeLoansCount++;
-    }
-  }
-
+  const snapshot = await getProtocolSnapshot(targetChain);
+  const stats = computeCollectionStats(snapshot, collectionAddress);
   const lastBlock = await getLastIndexedBlock(targetChain);
 
   return {
-    bestOfferWei: bestOfferBigInt > 0n ? bestOfferBigInt.toString() : null,
-    poolSizeWei: poolSizeBigInt.toString(),
-    offerCount: openOffers.length,
-    activeLoansCount,
+    bestOfferWei: stats.bestOfferWei,
+    poolSizeWei: stats.poolSizeWei,
+    offerCount: stats.offerCount,
+    activeLoansCount: stats.activeLoansCount,
     lastIndexedBlock: lastBlock,
   };
 }
 
 export async function fetchCollectionsWithStats(chainId?: number): Promise<CollectionItemResponse[]> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-
-  const addressSet = new Set<string>();
-
-  for (const colRow of indexerStore.collections.values()) {
-    if (colRow.chain_id === targetChain && colRow.is_enabled) {
-      addressSet.add(colRow.address.toLowerCase());
-    }
-  }
-
-  for (const offer of indexerStore.offers.values()) {
-    if (offer.chain_id === targetChain && offer.collection) {
-      addressSet.add(offer.collection.toLowerCase());
-    }
-  }
-
-  for (const loan of indexerStore.loans.values()) {
-    if (loan.chain_id === targetChain && loan.collection) {
-      addressSet.add(loan.collection.toLowerCase());
-    }
-  }
-
-  const curated = getCuratedCollections(targetChain);
-  for (const c of curated) {
-    addressSet.add(c.contractAddress.toLowerCase());
-  }
+  const snapshot = await getProtocolSnapshot(targetChain);
+  const distinctAddresses = getDistinctCollectionsFromSnapshot(snapshot);
 
   const results: CollectionItemResponse[] = [];
-  for (const addr of addressSet) {
+  for (const addr of distinctAddresses) {
     const onChain = await fetchOnChainCollectionInfo(addr, targetChain);
-    const stats = await getCollectionStatsFromStore(addr, targetChain);
+    const stats = computeCollectionStats(snapshot, addr);
 
     results.push({
       address: onChain.address,
@@ -154,26 +105,22 @@ export async function fetchCollectionDetail(
   chainId?: number
 ): Promise<CollectionDetailResponse | null> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-
   const target = address.toLowerCase();
-  const known = getCollectionByAddress(address, targetChain);
-  const isEnabledInStore = indexerStore.collections.get(`${targetChain}:${target}`)?.is_enabled;
-  const hasOffers = Array.from(indexerStore.offers.values()).some(
-    (o) => o.chain_id === targetChain && o.collection.toLowerCase() === target
-  );
-  const hasLoans = Array.from(indexerStore.loans.values()).some(
-    (l) => l.chain_id === targetChain && l.collection.toLowerCase() === target
-  );
+  const snapshot = await getProtocolSnapshot(targetChain);
+
+  const isEnabled = snapshot.enabledCollections.some((a) => a.toLowerCase() === target);
+  const hasOffers = snapshot.offers.some((o) => o.collection.toLowerCase() === target);
+  const hasLoans = snapshot.loans.some((l) => l.collection.toLowerCase() === target);
 
   const onChain = await fetchOnChainCollectionInfo(address, targetChain);
-  const isValidOnChain = (onChain.name && onChain.name !== 'ERC721 Collection') || known !== null;
+  const isValidOnChain = Boolean(onChain.name && onChain.name !== 'ERC721 Collection');
 
-  if (!known && !isEnabledInStore && !hasOffers && !hasLoans && !isValidOnChain) {
+  if (!isEnabled && !hasOffers && !hasLoans && !isValidOnChain) {
     return null;
   }
 
-  const stats = await getCollectionStatsFromStore(address, targetChain);
+  const stats = computeCollectionStats(snapshot, address);
+  const lastBlock = await getLastIndexedBlock(targetChain);
 
   return {
     collection: {
@@ -187,7 +134,13 @@ export async function fetchCollectionDetail(
       offerCount: stats.offerCount,
       activeLoansCount: stats.activeLoansCount,
     },
-    stats,
+    stats: {
+      bestOfferWei: stats.bestOfferWei,
+      poolSizeWei: stats.poolSizeWei,
+      offerCount: stats.offerCount,
+      activeLoansCount: stats.activeLoansCount,
+      lastIndexedBlock: lastBlock,
+    },
   };
 }
 
@@ -200,94 +153,54 @@ export async function fetchCollectionOffers(
   chainId?: number
 ): Promise<OffersListResponse> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-  const target = address.toLowerCase();
-  const allOffers: OfferItem[] = [];
-
-  for (const row of indexerStore.offers.values()) {
-    if (row.chain_id === targetChain && row.collection.toLowerCase() === target) {
-      allOffers.push({
-        offerId: row.offer_id,
-        chainId: row.chain_id,
-        lender: row.lender,
-        collection: row.collection,
-        principalWei: row.principal_wei,
-        termInterestBps: row.term_interest_bps,
-        feeBpsSnapshot: row.fee_bps_snapshot,
-        durationSeconds: row.duration_seconds,
-        expiresAt: row.expires_at,
-        status: row.status,
-        blockNumber: row.block_number,
-        txHash: row.tx_hash,
-        createdAt: row.indexed_at,
-      });
-    }
-  }
-
-  let filtered = allOffers;
-  if (status) {
-    filtered = filtered.filter((o) => o.status === status);
-  }
-
-  filtered.sort((a, b) => {
-    if (sort === 'principal') {
-      const diff = BigInt(b.principalWei) - BigInt(a.principalWei);
-      return diff > 0n ? 1 : diff < 0n ? -1 : 0;
-    }
-    if (sort === 'interest') {
-      return a.termInterestBps - b.termInterestBps;
-    }
-    if (sort === 'expiry') {
-      return new Date(a.expiresAt).getTime() - new Date(b.expiresAt).getTime();
-    }
-    return b.offerId - a.offerId;
+  const snapshot = await getProtocolSnapshot(targetChain);
+  const allFiltered = filterSnapshotOffers(snapshot, {
+    collection: address,
+    status,
+    sort,
   });
 
   const startIndex = cursor ? parseInt(cursor, 10) : 0;
-  const paginated = filtered.slice(startIndex, startIndex + limit);
-  const nextCursor = startIndex + limit < filtered.length ? (startIndex + limit).toString() : null;
+  const paginated = allFiltered.slice(startIndex, startIndex + limit);
+  const nextCursor = startIndex + limit < allFiltered.length ? (startIndex + limit).toString() : null;
 
   return {
     offers: paginated,
     nextCursor,
-    total: filtered.length,
+    total: allFiltered.length,
   };
 }
 
 export async function fetchLoanDetail(loanId: number, chainId?: number): Promise<LoanDetailResponse | null> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-  const fromStore = indexerStore.getLoan(targetChain, loanId);
-  if (!fromStore) return null;
+  const snapshot = await getProtocolSnapshot(targetChain);
+  const fromSnapshot = snapshot.loans.find((l) => l.loanId === loanId);
+  if (!fromSnapshot) return null;
 
-  const loan: LoanItem = {
-    loanId: fromStore.loan_id,
-    offerId: fromStore.offer_id,
-    chainId: fromStore.chain_id,
-    lender: fromStore.lender,
-    borrower: fromStore.borrower,
-    collection: fromStore.collection,
-    tokenId: fromStore.token_id,
-    principalWei: fromStore.principal_wei,
-    interestWei: fromStore.interest_wei,
-    feeBpsSnapshot: fromStore.fee_bps_snapshot,
-    startedAt: fromStore.started_at,
-    dueAt: fromStore.due_at,
-    status: fromStore.status,
-    blockNumber: fromStore.block_number,
-    txHash: fromStore.tx_hash,
-  };
-
-  const onChain = await fetchOnChainCollectionInfo(loan.collection, targetChain);
+  const onChain = await fetchOnChainCollectionInfo(fromSnapshot.collection, targetChain);
   const collectionName = onChain.name;
-  const imageUrl = resolveCollectionImageUrl(loan.collection, onChain.symbol || collectionName);
-  const totalRepayment = BigInt(loan.principalWei) + BigInt(loan.interestWei);
+  const imageUrl = resolveCollectionImageUrl(fromSnapshot.collection, onChain.symbol || collectionName);
+  const totalRepayment = BigInt(fromSnapshot.principalWei) + BigInt(fromSnapshot.interestWei);
 
   return {
     loan: {
-      ...loan,
+      loanId: fromSnapshot.loanId,
+      offerId: fromSnapshot.offerId,
+      chainId: targetChain,
+      lender: fromSnapshot.lender,
+      borrower: fromSnapshot.borrower,
+      collection: fromSnapshot.collection,
+      tokenId: fromSnapshot.tokenId,
+      principalWei: fromSnapshot.principalWei,
+      interestWei: fromSnapshot.interestWei,
+      feeBpsSnapshot: fromSnapshot.feeBpsSnapshot,
+      startedAt: fromSnapshot.startedAt,
+      dueAt: fromSnapshot.dueAt,
+      status: fromSnapshot.status,
+      blockNumber: snapshot.blockNumber,
+      txHash: '',
       nftMetadata: {
-        name: `${collectionName} #${loan.tokenId}`,
+        name: `${collectionName} #${fromSnapshot.tokenId}`,
         imageUrl,
         collectionName,
       },
@@ -305,43 +218,17 @@ export async function fetchWalletLoans(
   chainId?: number
 ): Promise<WalletLoansResponse> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
+  const snapshot = await getProtocolSnapshot(targetChain);
   const target = address.toLowerCase();
-  const allLoans: LoanItem[] = [];
 
-  for (const row of indexerStore.loans.values()) {
-    if (row.chain_id === targetChain) {
-      allLoans.push({
-        loanId: row.loan_id,
-        offerId: row.offer_id,
-        chainId: row.chain_id,
-        lender: row.lender,
-        borrower: row.borrower,
-        collection: row.collection,
-        tokenId: row.token_id,
-        principalWei: row.principal_wei,
-        interestWei: row.interest_wei,
-        feeBpsSnapshot: row.fee_bps_snapshot,
-        startedAt: row.started_at,
-        dueAt: row.due_at,
-        status: row.status,
-        blockNumber: row.block_number,
-        txHash: row.tx_hash,
-      });
-    }
+  let filtered = filterSnapshotLoans(snapshot, { status });
+  if (role === 'borrower') {
+    filtered = filtered.filter((l) => l.borrower.toLowerCase() === target);
+  } else if (role === 'lender') {
+    filtered = filtered.filter((l) => l.lender.toLowerCase() === target);
+  } else {
+    filtered = filtered.filter((l) => l.borrower.toLowerCase() === target || l.lender.toLowerCase() === target);
   }
-
-  let filtered = allLoans.filter((l) => {
-    if (role === 'borrower') return l.borrower.toLowerCase() === target;
-    if (role === 'lender') return l.lender.toLowerCase() === target;
-    return l.borrower.toLowerCase() === target || l.lender.toLowerCase() === target;
-  });
-
-  if (status) {
-    filtered = filtered.filter((l) => l.status === status);
-  }
-
-  filtered.sort((a, b) => b.loanId - a.loanId);
 
   const startIndex = cursor ? parseInt(cursor, 10) : 0;
   const paginated = filtered.slice(startIndex, startIndex + limit);
@@ -362,45 +249,20 @@ export async function fetchOffersForWallet(
   chainId?: number
 ): Promise<OffersListResponse> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-  const target = address.toLowerCase();
-  const allOffers: OfferItem[] = [];
-
-  for (const row of indexerStore.offers.values()) {
-    if (row.chain_id === targetChain && row.lender.toLowerCase() === target) {
-      allOffers.push({
-        offerId: row.offer_id,
-        chainId: row.chain_id,
-        lender: row.lender,
-        collection: row.collection,
-        principalWei: row.principal_wei,
-        termInterestBps: row.term_interest_bps,
-        feeBpsSnapshot: row.fee_bps_snapshot,
-        durationSeconds: row.duration_seconds,
-        expiresAt: row.expires_at,
-        status: row.status,
-        blockNumber: row.block_number,
-        txHash: row.tx_hash,
-        createdAt: row.indexed_at,
-      });
-    }
-  }
-
-  let filtered = allOffers;
-  if (status) {
-    filtered = filtered.filter((o) => o.status === status);
-  }
-
-  filtered.sort((a, b) => b.offerId - a.offerId);
+  const snapshot = await getProtocolSnapshot(targetChain);
+  const allFiltered = filterSnapshotOffers(snapshot, {
+    lender: address,
+    status,
+  });
 
   const startIndex = cursor ? parseInt(cursor, 10) : 0;
-  const paginated = filtered.slice(startIndex, startIndex + limit);
-  const nextCursor = startIndex + limit < filtered.length ? (startIndex + limit).toString() : null;
+  const paginated = allFiltered.slice(startIndex, startIndex + limit);
+  const nextCursor = startIndex + limit < allFiltered.length ? (startIndex + limit).toString() : null;
 
   return {
     offers: paginated,
     nextCursor,
-    total: filtered.length,
+    total: allFiltered.length,
   };
 }
 
@@ -412,9 +274,11 @@ export async function fetchActivityFeed(
   chainId?: number
 ): Promise<ActivityResponse> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-  const allActivity: ActivityItem[] = [];
+  try {
+    await syncOnChainLogs(targetChain);
+  } catch {}
 
+  const allActivity: ActivityItem[] = [];
   for (const eventRow of indexerStore.events) {
     if (eventRow.chain_id === targetChain) {
       allActivity.push({
@@ -461,34 +325,13 @@ export async function fetchActivityFeed(
 
 export async function fetchMarketStats(chainId?: number): Promise<MarketStatsResponse> {
   const targetChain = resolveChainId(chainId);
-  await syncOnChainLogs(targetChain);
-  let totalPoolSize = 0n;
-  let totalVolume = 0n;
-  let activeLoansCount = 0;
-  let totalOffersCount = 0;
-
-  for (const offerRow of indexerStore.offers.values()) {
-    if (offerRow.chain_id === targetChain) {
-      totalOffersCount++;
-      if (offerRow.status === 'open') {
-        totalPoolSize += BigInt(offerRow.principal_wei);
-      }
-    }
-  }
-
-  for (const loanRow of indexerStore.loans.values()) {
-    if (loanRow.chain_id === targetChain) {
-      totalVolume += BigInt(loanRow.principal_wei);
-      if (loanRow.status === 'active') {
-        activeLoansCount++;
-      }
-    }
-  }
+  const snapshot = await getProtocolSnapshot(targetChain);
+  const stats = computeMarketStats(snapshot);
 
   return {
-    totalPoolSizeWei: totalPoolSize.toString(),
-    totalActiveLoansCount: activeLoansCount,
-    totalVolumeWei: totalVolume.toString(),
-    totalOffersCount,
+    totalPoolSizeWei: stats.totalPoolSizeWei,
+    totalActiveLoansCount: stats.totalActiveLoansCount,
+    totalVolumeWei: stats.totalVolumeWei,
+    totalOffersCount: stats.totalOffersCount,
   };
 }

@@ -30,9 +30,9 @@ export function LendCollectionCard({
   onMakeOffer,
 }: LendCollectionCardProps) {
   const contractAddr =
-    collection.contractAddress ||
-    (collection as any).address ||
-    (collection as any).id ||
+    collection?.contractAddress ||
+    (collection as any)?.address ||
+    (collection as any)?.id ||
     '';
   const displayPool = poolSizeEth ? `${poolSizeEth} ETH` : '—';
   const activeCount = activeLoansCount !== undefined ? activeLoansCount : 0;
@@ -42,10 +42,10 @@ export function LendCollectionCard({
       <div className="relative aspect-square w-full bg-[var(--panel)] overflow-hidden group flex items-center justify-center">
         <NftImage
           src={imageUrl}
-          alt={collection.name}
+          alt={collection?.name || 'Collection'}
           contractAddress={contractAddr}
           tokenId=""
-          symbol={collection.symbol || collection.name}
+          symbol={collection?.symbol || collection?.name || ''}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
@@ -56,7 +56,7 @@ export function LendCollectionCard({
             Open Market
           </div>
           <h3 className="text-xs sm:text-sm font-semibold text-[var(--text)] mt-0.5 mb-2 sm:mb-3 truncate">
-            {collection.name}
+            {collection?.name || 'Unknown Collection'}
           </h3>
 
           <div className="space-y-1.5 sm:space-y-2 text-[11px] sm:text-xs pb-2 sm:pb-3 border-b border-[var(--line)]">

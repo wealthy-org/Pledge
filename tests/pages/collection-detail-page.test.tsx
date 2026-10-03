@@ -6,7 +6,6 @@ import { CollectionHeader } from '@/components/collection/CollectionHeader';
 import { CollectionOffersTable } from '@/components/collection/CollectionOffersTable';
 import { CollectionLoanHistoryTable } from '@/components/collection/CollectionLoanHistoryTable';
 import { CollectionRiskNotes } from '@/components/collection/CollectionRiskNotes';
-import { getCuratedCollections } from '@/config/collections';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 import type { OfferItem, LoanItem } from '@/types/api';
 
@@ -19,7 +18,16 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-const mockCollection = getCuratedCollections(TESTNET_CHAIN_ID)[0];
+const mockCollection = {
+  id: '0x75599f7385dcdbe2ab3b3b0b8d4a3e2c8f02494d',
+  name: 'Nottingham Guild Pledges',
+  symbol: 'NGP',
+  contractAddress: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D' as `0x${string}`,
+  defaultDurations: [7, 14, 30] as [7, 14, 30],
+  addresses: {
+    [TESTNET_CHAIN_ID]: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D' as `0x${string}`,
+  },
+};
 
 const mockOffers: OfferItem[] = [
   {
@@ -189,7 +197,7 @@ describe('TICKET-38: Collection Detail Page & Components', () => {
       const pagePromise = Promise.resolve({ address: mockCollection.contractAddress });
       render(await CollectionDetailPage({ params: pagePromise }));
 
-      expect(screen.getByRole('heading', { level: 1, name: /Robinhood Genesis Pass/i })).toBeDefined();
+      expect(screen.getByRole('heading', { level: 1, name: /Nottingham Guild Pledges/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /offers/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /active loans/i })).toBeDefined();
       expect(screen.getByRole('tab', { name: /history/i })).toBeDefined();

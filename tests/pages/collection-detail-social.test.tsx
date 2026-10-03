@@ -15,8 +15,14 @@ describe('TICKET-73: Collection Detail On-Chain Explorer Links & Metadata Test S
   };
 
   const sampleCollection: ActiveCuratedCollection = {
-    ...CURATED_COLLECTIONS[0],
-    contractAddress: CURATED_COLLECTIONS[0].addresses[TESTNET_CHAIN_ID],
+    id: '0x75599f7385dcdbe2ab3b3b0b8d4a3e2c8f02494d',
+    name: 'Nottingham Guild Pledges',
+    symbol: 'NGP',
+    contractAddress: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D' as `0x${string}`,
+    defaultDurations: [7, 14, 30] as [7, 14, 30],
+    addresses: {
+      [TESTNET_CHAIN_ID]: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D' as `0x${string}`,
+    },
   };
 
   it('renders verified explorer link with target="_blank" and rel="noopener noreferrer"', () => {

@@ -8,6 +8,8 @@ export interface UseOffersParams {
   collection?: string;
   lender?: string;
   status?: string;
+  chainId?: number;
+  sort?: string;
 }
 
 export function useOffers(params?: UseOffersParams) {
@@ -21,6 +23,8 @@ export function useOffers(params?: UseOffersParams) {
         if (params?.collection) searchParams.set('collection', params.collection);
         if (params?.lender) searchParams.set('lender', params.lender);
         if (params?.status) searchParams.set('status', params.status);
+        if (params?.chainId) searchParams.set('chainId', params.chainId.toString());
+        if (params?.sort) searchParams.set('sort', params.sort);
 
         const qs = searchParams.toString();
         const url = qs ? `/api/offers?${qs}` : '/api/offers';
@@ -36,8 +40,8 @@ export function useOffers(params?: UseOffersParams) {
 
         return res.json();
       },
-      staleTime: 10000,
-      refetchInterval: 20000,
+      staleTime: 5000,
+      refetchInterval: 10000,
     },
     queryClient
   );

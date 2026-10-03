@@ -277,7 +277,8 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
               {filteredAndSorted.map((c, index) => {
                 const isStarred = watchlist.includes(c.address);
                 const floorPriceStr = c.floorPriceEth ? `${parseFloat(c.floorPriceEth).toFixed(2)} ETH` : '—';
-                const changePct = c.priceChange24hPct !== undefined ? c.priceChange24hPct : ((index % 2 === 0 ? 1 : -1) * (2.1 + (index * 1.3)));
+                const hasChange = c.priceChange24hPct !== undefined;
+                const changePct = c.priceChange24hPct ?? 0;
                 const isPositive = changePct >= 0;
 
                 return (
@@ -335,15 +336,19 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                     </td>
 
                     <td className="py-3.5 px-3">
-                      <span
-                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium ${
-                          isPositive
-                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-                            : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                        }`}
-                      >
-                        {isPositive ? `+${changePct.toFixed(1)}%` : `${changePct.toFixed(1)}%`}
-                      </span>
+                      {hasChange ? (
+                        <span
+                          className={`inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-mono font-medium ${
+                            isPositive
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                          }`}
+                        >
+                          {isPositive ? `+${changePct.toFixed(1)}%` : `${changePct.toFixed(1)}%`}
+                        </span>
+                      ) : (
+                        <span className="text-[11px] font-mono text-[var(--muted)]">—</span>
+                      )}
                     </td>
 
                     <td className="py-3.5 px-3 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400">

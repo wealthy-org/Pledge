@@ -2,12 +2,41 @@ import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GlobalSearch } from '@/components/ui/GlobalSearch';
-import { CURATED_COLLECTIONS } from '@/config/collections';
 
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
+  }),
+}));
+
+const mockCollections = [
+  {
+    address: '0x1111111111111111111111111111111111111111',
+    name: 'Nottingham Punks',
+    symbol: 'PUNK',
+    imageUrl: '',
+    poolSizeWei: '0',
+    offerCount: 0,
+    activeLoansCount: 0,
+  },
+  {
+    address: '0x2222222222222222222222222222222222222222',
+    name: 'Sherwood Foresters',
+    symbol: 'SHER',
+    imageUrl: '',
+    poolSizeWei: '0',
+    offerCount: 0,
+    activeLoansCount: 0,
+  },
+];
+
+vi.mock('@/hooks/api/useCollections', () => ({
+  useCollections: () => ({
+    data: {
+      collections: mockCollections,
+    },
+    isLoading: false,
   }),
 }));
 
@@ -28,14 +57,13 @@ describe('TICKET-63: GlobalSearch Combobox & Keyboard Navigation Test Suite', ()
     expect(input.getAttribute('aria-autocomplete')).toBe('list');
   });
 
-  it('filters curated collections when typing', () => {
+  it('filters collections when typing', () => {
     render(<GlobalSearch isOpen={true} onClose={mockClose} />);
 
     const input = screen.getByRole('combobox');
-    const firstCol = CURATED_COLLECTIONS[0];
-    fireEvent.change(input, { target: { value: firstCol.symbol } });
+    fireEvent.change(input, { target: { value: 'PUNK' } });
 
-    expect(screen.getAllByText(new RegExp(firstCol.symbol, 'i')).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/PUNK/i).length).toBeGreaterThan(0);
   });
 
   it('supports keyboard ArrowDown and Enter navigation to select collection', () => {
@@ -53,8 +81,7 @@ describe('TICKET-63: GlobalSearch Combobox & Keyboard Navigation Test Suite', ()
     render(<GlobalSearch isOpen={true} onClose={mockClose} />);
 
     const input = screen.getByRole('combobox');
-    const secondCol = CURATED_COLLECTIONS[1];
-    fireEvent.change(input, { target: { value: secondCol.symbol } });
+    fireEvent.change(input, { target: { value: 'SHER' } });
     fireEvent.keyDown(input, { key: 'Enter' });
 
     const recent = JSON.parse(localStorage.getItem('pledge:recent-searches') || '[]');

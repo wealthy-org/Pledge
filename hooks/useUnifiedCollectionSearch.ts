@@ -3,7 +3,6 @@
 import { useMemo } from 'react';
 import { useCollections } from '@/hooks/api/useCollections';
 import { useExploreCollections } from '@/hooks/api/useExploreCollections';
-import { getCuratedCollections } from '@/config/collections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { CollectionItemResponse, ExploreCollectionItem } from '@/types/api';
 
@@ -47,21 +46,6 @@ export function useUnifiedCollectionSearch({
     limit,
   });
 
-  const fallbackCurated: UnifiedCollectionItem[] = useMemo(() => {
-    const raw = getCuratedCollections(chainId);
-    return raw.map((c) => ({
-      address: c.contractAddress,
-      name: c.name,
-      symbol: c.symbol,
-      imageUrl: resolveCollectionImageUrl(c.name),
-      poolSizeWei: '0',
-      offerCount: 0,
-      activeLoansCount: 0,
-      bestOfferWei: null,
-      isVerifiedErc721: true,
-    }));
-  }, [chainId]);
-
   const collections = useMemo(() => {
     const map = new Map<string, UnifiedCollectionItem>();
 
@@ -75,7 +59,7 @@ export function useUnifiedCollectionSearch({
             activeLoansCount: item.activeLoansCount || 0,
             isVerifiedErc721: true,
           }))
-        : fallbackCurated;
+        : [];
 
     for (const item of baseList) {
       map.set(item.address.toLowerCase(), {
@@ -128,7 +112,7 @@ export function useUnifiedCollectionSearch({
     }
 
     return result;
-  }, [protocolCollectionsData, fallbackCurated, exploreData, query, hasOffersOnly]);
+  }, [protocolCollectionsData, exploreData, query, hasOffersOnly]);
 
   return {
     collections,

@@ -395,7 +395,7 @@ export function CreateOfferDrawer({
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-[var(--muted)]">Protocol Fee (2.0% of interest)</span>
+              <span className="text-[var(--muted)]">Protocol Fee (2% of interest)</span>
               <span className="font-mono text-[var(--muted)]">
                 {preview.feeEth} ETH
               </span>

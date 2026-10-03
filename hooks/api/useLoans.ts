@@ -9,6 +9,7 @@ export interface UseLoansParams {
   borrower?: string;
   lender?: string;
   status?: string;
+  chainId?: number;
 }
 
 export function useLoans(params?: UseLoansParams) {
@@ -23,6 +24,7 @@ export function useLoans(params?: UseLoansParams) {
         if (params?.borrower) searchParams.set('borrower', params.borrower);
         if (params?.lender) searchParams.set('lender', params.lender);
         if (params?.status) searchParams.set('status', params.status);
+        if (params?.chainId) searchParams.set('chainId', params.chainId.toString());
 
         const qs = searchParams.toString();
         const url = qs ? `/api/loans?${qs}` : '/api/loans';

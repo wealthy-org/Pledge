@@ -4,30 +4,31 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { useCollections } from '@/hooks/api/useCollections';
+import { useMarketStats } from '@/hooks/api/useMarketStats';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
-import { UniqueListingsSection, type UniqueListingItem } from '@/components/home/UniqueListingsSection';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function HomePage() {
   const chainId = useSafeChainId();
   const { data: apiData, isLoading: isLoadingCollections } = useCollections(chainId);
+  const { data: liveMarketStats, isLoading: isLoadingStats } = useMarketStats(chainId);
 
   const [selectedFilter, setSelectedFilter] = useState<'has_offers' | 'all'>('has_offers');
 
   const collections: MarketCollectionItem[] = useMemo(() => {
     if (!apiData?.collections) return [];
-    return apiData.collections.map((item, idx) => ({
+    return apiData.collections.map((item) => ({
       address: item.address,
       name: item.name,
       symbol: item.symbol,
-      imageUrl: item.imageUrl || resolveCollectionImageUrl(item.name),
-      floorPriceEth: item.floorPriceEth || (1.25 + (idx * 0.4)).toFixed(2),
+      imageUrl: item.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
+      floorPriceEth: item.floorPriceEth || undefined,
       bestOfferWei: item.bestOfferWei || undefined,
       poolSizeWei: item.poolSizeWei || '0',
       offerCount: item.offerCount || 0,
       activeLoansCount: item.activeLoansCount || 0,
-      priceChange24hPct: (idx % 2 === 0 ? 1 : -1) * (2.4 + (idx * 1.5)),
+      priceChange24hPct: item.priceChange24hPct || undefined,
       isVerified: true,
     }));
   }, [apiData]);
@@ -43,42 +44,23 @@ export default function HomePage() {
     return collections;
   }, [collections, activeOfferCollections, selectedFilter]);
 
-  const uniqueListings: UniqueListingItem[] = useMemo(() => {
-    const source = activeOfferCollections.length > 0 ? activeOfferCollections : collections;
-    if (source.length === 0) return [];
-    const statuses: ('floor' | 'lower_price' | 'in_loan' | 'off_market')[] = [
-      'in_loan',
-      'floor',
-      'lower_price',
-      'floor',
-      'in_loan',
-      'off_market',
-    ];
-
-    return source.slice(0, 6).map((c, idx) => ({
-      id: `${c.address}-${idx + 1}`,
-      collectionAddress: c.address,
-      collectionName: c.name,
-      tokenId: String(10 + idx * 37),
-      imageUrl: c.imageUrl,
-      floorPriceEth: c.floorPriceEth || '1.20',
-      bestOfferEth: c.bestOfferWei ? (Number(c.bestOfferWei) / 1e18).toFixed(2) : (0.85 + (idx * 0.2)).toFixed(2),
-      status: statuses[idx % statuses.length],
-      isVerified: true,
-      durationDays: 14,
-    }));
-  }, [activeOfferCollections, collections]);
-
   const marketStats = useMemo(() => {
+    if (liveMarketStats) {
+      return {
+        totalPoolSizeEth: (Number(BigInt(liveMarketStats.totalPoolSizeWei || '0')) / 1e18).toFixed(2),
+        totalActiveLoans: liveMarketStats.totalActiveLoansCount ?? 0,
+        totalVolumeEth: (Number(BigInt(liveMarketStats.totalVolumeWei || '0')) / 1e18).toFixed(2),
+      };
+    }
     const totalPoolWei = collections.reduce((acc, c) => acc + BigInt(c.poolSizeWei || '0'), 0n);
     const totalPoolEth = (Number(totalPoolWei) / 1e18).toFixed(2);
     const totalActive = collections.reduce((acc, c) => acc + (c.activeLoansCount || 0), 0);
     return {
       totalPoolSizeEth: totalPoolEth,
       totalActiveLoans: totalActive,
-      totalVolumeEth: '48.50',
+      totalVolumeEth: '0.00',
     };
-  }, [collections]);
+  }, [liveMarketStats, collections]);
 
   return (
     <div className="space-y-8">
@@ -115,10 +97,51 @@ export default function HomePage() {
 
       <MarketStatCards stats={marketStats} />
 
-      <UniqueListingsSection
-        items={uniqueListings}
-        isLoading={isLoadingCollections}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-500/10 via-[var(--surface)] to-[var(--panel)] border border-emerald-500/20 flex flex-col justify-between space-y-4">
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase font-mono tracking-wider font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span>Instant Liquidity</span>
+            </div>
+            <h3 className="text-base font-semibold text-[var(--text)]">Borrow Against Your NFTs</h3>
+            <p className="text-xs text-[var(--muted)] leading-relaxed">
+              Use your Robinhood Chain collectibles as collateral to access instant ETH liquidity with fixed terms and no margin calls.
+            </p>
+          </div>
+          <div>
+            <Link
+              href="/borrow"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs"
+            >
+              <span>Borrow Instantly</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+
+        <div className="p-5 rounded-xl bg-gradient-to-br from-sky-500/10 via-[var(--surface)] to-[var(--panel)] border border-sky-500/20 flex flex-col justify-between space-y-4">
+          <div className="space-y-1.5">
+            <div className="text-[10px] uppercase font-mono tracking-wider font-semibold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+              <span>Fixed-Rate Yield</span>
+            </div>
+            <h3 className="text-base font-semibold text-[var(--text)]">Lend & Earn Interest</h3>
+            <p className="text-xs text-[var(--muted)] leading-relaxed">
+              Deposit liquidity into open collection markets. Earn fixed interest upon borrower repayment with full smart contract protection.
+            </p>
+          </div>
+          <div>
+            <Link
+              href="/lend"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-colors shadow-xs"
+            >
+              <span>Provide Liquidity</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

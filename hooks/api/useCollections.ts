@@ -30,8 +30,8 @@ export function useCollections(chainId?: number) {
 
         return { data, indexedBlock };
       },
-      staleTime: 15000,
-      refetchInterval: 30000,
+      staleTime: 5000,
+      refetchInterval: 10000,
     },
     queryClient
   );

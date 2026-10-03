@@ -3,7 +3,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { NFTGrid, type BorrowableNft } from '@/components/borrow/NFTGrid';
 import { LendCollectionCard } from '@/components/lend/LendCollectionCard';
-import { CURATED_COLLECTIONS } from '@/config/collections';
 
 describe('TICKET-70: NFT Card Micro-Interactions & Hover Lift Test Suite', () => {
   const mockNft: BorrowableNft = {
@@ -30,7 +29,12 @@ describe('TICKET-70: NFT Card Micro-Interactions & Hover Lift Test Suite', () =>
   });
 
   it('applies hover lift and transition classes to LendCollectionCard', () => {
-    const col = CURATED_COLLECTIONS[0];
+    const col = {
+      id: '0x1111111111111111111111111111111111111111',
+      name: 'Robinhood Genesis Pass',
+      symbol: 'RHG',
+      contractAddress: '0x1111111111111111111111111111111111111111',
+    };
     render(
       <LendCollectionCard
         collection={col}

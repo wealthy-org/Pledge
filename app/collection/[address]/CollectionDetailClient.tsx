@@ -51,9 +51,9 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
 
   const targetAddress = collection.contractAddress.toLowerCase();
 
-  const { data: offersData } = useOffers({ collection: targetAddress });
-  const { data: loansData } = useLoans({ collection: targetAddress });
-  const { nfts: userNfts } = useEligibleNfts(address);
+  const { data: offersData } = useOffers({ collection: targetAddress, chainId });
+  const { data: loansData } = useLoans({ collection: targetAddress, chainId });
+  const { nfts: userNfts } = useEligibleNfts(address, chainId);
 
   const openOffers = useMemo(() => {
     return (offersData?.offers || []).filter((o) => o.status === 'open');

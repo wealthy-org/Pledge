@@ -1,10 +1,11 @@
 import { NextRequest } from 'next/server';
-import { indexerStore } from '@/lib/indexer/store';
+import { getProtocolSnapshot } from '@/lib/protocol/snapshot';
+import { filterSnapshotOffers } from '@/lib/protocol/aggregate';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
-import { BestOfferResponse, OfferItem } from '@/types/api';
+import { BestOfferResponse } from '@/types/api';
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   context: { params: Promise<{ address: string }> }
 ) {
   const { address } = await context.params;
@@ -17,33 +18,18 @@ export async function GET(
     );
   }
 
-  const target = address.toLowerCase();
-  let bestOffer: OfferItem | null = null;
-  let highestPrincipal = 0n;
+  const { searchParams } = new URL(request.url);
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
 
-  for (const row of indexerStore.offers.values()) {
-    if (row.collection.toLowerCase() === target && row.status === 'open') {
-      const principal = BigInt(row.principal_wei);
-      if (principal > highestPrincipal) {
-        highestPrincipal = principal;
-        bestOffer = {
-          offerId: row.offer_id,
-          chainId: row.chain_id,
-          lender: row.lender,
-          collection: row.collection,
-          principalWei: row.principal_wei,
-          termInterestBps: row.term_interest_bps,
-          feeBpsSnapshot: row.fee_bps_snapshot,
-          durationSeconds: row.duration_seconds,
-          expiresAt: row.expires_at,
-          status: row.status,
-          blockNumber: row.block_number,
-          txHash: row.tx_hash,
-          createdAt: row.indexed_at,
-        };
-      }
-    }
-  }
+  const snapshot = await getProtocolSnapshot(chainId);
+  const offers = filterSnapshotOffers(snapshot, {
+    collection: address,
+    status: 'open',
+    sort: 'principal',
+  });
+
+  const bestOffer = offers.length > 0 ? offers[0] : null;
 
   const response: BestOfferResponse = {
     bestOffer,

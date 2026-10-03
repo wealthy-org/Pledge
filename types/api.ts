@@ -13,6 +13,7 @@ export interface CollectionItemResponse {
   imageUrl?: string;
   description: string;
   floorPriceEth?: string;
+  priceChange24hPct?: number;
   bestOfferWei: string | null;
   poolSizeWei: string;
   offerCount: number;

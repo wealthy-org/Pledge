@@ -5,7 +5,6 @@ import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { getCuratedCollections } from '@/config/collections';
 import { getEffectiveWalletClient } from '@/lib/web3/getEffectiveWalletClient';
 
 const ERC721_MINT_ABI = [
@@ -37,11 +36,11 @@ export function useMintNft() {
 
   const mintNft = useCallback(
     async (params?: Partial<MintNftParams>): Promise<`0x${string}` | null> => {
-      const defaultCollections = getCuratedCollections(chainId);
-      const defaultCollection = defaultCollections[0];
-      const targetCollection = (params?.collectionAddress ||
-        defaultCollection?.contractAddress) as `0x${string}`;
-      const targetName = params?.collectionName || defaultCollection?.name || 'Curated Testnet NFT';
+      const targetCollection = params?.collectionAddress;
+      if (!targetCollection) {
+        throw new Error('Collection address is required to mint.');
+      }
+      const targetName = params?.collectionName || 'Testnet NFT';
       const tokenId = params?.tokenId ?? BigInt(Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 10000));
 
       let activeWalletClient: any = walletClient;

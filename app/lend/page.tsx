@@ -78,7 +78,7 @@ export default function LendPage() {
         poolSizeEth: item.poolSizeWei && item.poolSizeWei !== '0'
           ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
           : '0.00',
-        activeLoansCount: item.offerCount || 0,
+        activeLoansCount: item.activeLoansCount || 0,
       };
     }
     return map;
