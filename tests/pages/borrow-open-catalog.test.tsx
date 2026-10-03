@@ -17,9 +17,9 @@ describe('TICKET-78: Borrow Open Catalog & Empty-Offer Fallback State', () => {
       />
     );
 
-    expect(screen.getByText('Belum ada penawaran untuk koleksi ini.')).toBeDefined();
-    expect(screen.getByText('Jelajahi Koleksi Lain')).toBeDefined();
-    expect(screen.getByText('Buat Penawaran Likuiditas')).toBeDefined();
+    expect(screen.getByText('No offers available for this collection.')).toBeDefined();
+    expect(screen.getByText('Explore Other Collections')).toBeDefined();
+    expect(screen.getByText('Create Lending Offer')).toBeDefined();
   });
 
   it('TS-02: OfferComparisonList renders active offers when available', () => {

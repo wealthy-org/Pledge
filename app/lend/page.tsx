@@ -180,28 +180,28 @@ export default function LendPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
+          <div className="max-w-xl">
             <h1 className="text-3xl sm:text-4xl font-normal tracking-[-1.5px] text-[#142d2b] dark:text-[#f0fdf4]">
               Set the terms. Fund the loan.
             </h1>
 
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
-              Make offers on any verified ERC-721 collection across Robinhood Chain. Liquidity opportunities with fixed interest when borrowers repay.
+              Liquidity opportunities with fixed interest when borrowers repay.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             <Link
               href="/explore"
-              className="px-3.5 py-2 text-xs font-medium rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors shrink-0"
+              className="px-3.5 py-2 text-xs font-medium rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors whitespace-nowrap shrink-0"
             >
-              Browse Explore Catalog ↗
+              Explore ↗
             </Link>
 
             <button
               type="button"
               onClick={() => handleOpenDrawer()}
-              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs shrink-0 cursor-pointer"
+              className="px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs whitespace-nowrap shrink-0 cursor-pointer"
             >
               Create Offer +
             </button>

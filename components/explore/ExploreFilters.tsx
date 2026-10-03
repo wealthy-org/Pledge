@@ -24,8 +24,8 @@ export function ExploreFilters({
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Cari nama koleksi, simbol, atau 0x..."
-          aria-label="Cari koleksi"
+          placeholder="Search collection name, symbol, or 0x..."
+          aria-label="Search collections"
           className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-[var(--panel)] border border-[var(--line)] text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--primary)] transition-colors"
         />
         <svg
@@ -54,7 +54,7 @@ export function ExploreFilters({
         </label>
 
         <span className="text-xs text-[var(--muted)] font-mono">
-          {totalCount} Koleksi
+          {totalCount} Collections
         </span>
       </div>
     </div>

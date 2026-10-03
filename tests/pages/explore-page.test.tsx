@@ -32,7 +32,7 @@ describe('TICKET-79: Dedicated Explore Page & Directory Components', () => {
     expect(screen.getByText('3 Offers')).toBeDefined();
     expect(screen.getByText('1.50 ETH')).toBeDefined();
     expect(screen.getByText('5.00 ETH')).toBeDefined();
-    expect(screen.getByText(/Periksa alamat kontrak untuk menghindari peniruan nama/i)).toBeDefined();
+    expect(screen.getByText(/Verify contract address to avoid name spoofing/i)).toBeDefined();
   });
 
   it('TS-02: ExploreFilters handles search and toggle callbacks', () => {
@@ -49,7 +49,7 @@ describe('TICKET-79: Dedicated Explore Page & Directory Components', () => {
       />
     );
 
-    const input = screen.getByPlaceholderText('Cari nama koleksi, simbol, atau 0x...');
+    const input = screen.getByPlaceholderText('Search collection name, symbol, or 0x...');
     fireEvent.change(input, { target: { value: 'birds' } });
     expect(onSearchChange).toHaveBeenCalledWith('birds');
 
@@ -60,6 +60,6 @@ describe('TICKET-79: Dedicated Explore Page & Directory Components', () => {
 
   it('TS-03: ExploreGrid renders empty state when no items exist', () => {
     render(<ExploreGrid collections={[]} isLoading={false} />);
-    expect(screen.getByText('Tidak Ada Koleksi Ditemukan')).toBeDefined();
+    expect(screen.getByText('No Collections Found')).toBeDefined();
   });
 });

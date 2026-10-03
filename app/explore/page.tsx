@@ -35,7 +35,7 @@ function ExploreContent() {
               Explore Collections
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] mt-1">
-              Jelajahi seluruh koleksi ERC-721 yang terindeks di Robinhood Chain, pantau likuiditas, dan buat penawaran pinjaman P2P.
+              Explore indexed ERC-721 collections on Robinhood Chain, monitor liquidity, and create P2P lending offers.
             </p>
           </div>
 
@@ -60,7 +60,7 @@ function ExploreContent() {
         <div className="flex items-center gap-2.5">
           <span className="text-base">🛡️</span>
           <span>
-            <strong>Keamanan Koleksi Terbuka:</strong> Pastikan Anda selalu memeriksa alamat smart contract resmi untuk mencegah peniruan nama atau gambar koleksi.
+            <strong>Open Catalog Safety:</strong> Always verify the official smart contract address to prevent collection name or image spoofing.
           </span>
         </div>
       </div>
@@ -75,12 +75,12 @@ function ExploreContent() {
 
       {isError ? (
         <div className="p-8 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl text-center bg-red-50/50 dark:bg-red-950/10 space-y-3">
-          <h3 className="text-sm font-semibold text-[var(--text)]">Gagal memuat katalog koleksi</h3>
+          <h3 className="text-sm font-semibold text-[var(--text)]">Failed to load collections catalog</h3>
           <p className="text-xs text-[var(--muted)]">
-            {error instanceof Error ? error.message : 'Terjadi kendala saat menghubungi Blockscout Indexer API.'}
+            {error instanceof Error ? error.message : 'Unable to connect to the Blockscout Indexer API.'}
           </p>
           <Button onClick={() => refetch()} size="sm" variant="secondary">
-            Coba Lagi
+            Retry Connection
           </Button>
         </div>
       ) : (
@@ -92,7 +92,7 @@ function ExploreContent() {
 
 export default function ExplorePage() {
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-[var(--muted)]">Memuat Katalog Explore...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs font-mono text-[var(--muted)]">Loading Explore Catalog...</div>}>
       <ExploreContent />
     </Suspense>
   );

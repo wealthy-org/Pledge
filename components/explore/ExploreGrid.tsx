@@ -28,8 +28,8 @@ export function ExploreGrid({ collections, isLoading = false }: ExploreGridProps
     return (
       <div className="p-12 rounded-xl border border-[var(--line)] bg-[var(--surface)] text-center">
         <EmptyState
-          title="Tidak Ada Koleksi Ditemukan"
-          description="Coba ubah kata kunci pencarian atau matikan filter 'Active Offers Only' untuk melihat seluruh koleksi yang terindeks."
+          title="No Collections Found"
+          description="Try adjusting your search query or disable the 'Active Offers Only' filter to see all indexed collections."
         />
       </div>
     );

@@ -108,7 +108,7 @@ export function ExploreCard({ collection }: ExploreCardProps) {
         {collection.isDuplicateName && (
           <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-[11px] flex items-center gap-1.5">
             <span>⚠️</span>
-            <span className="truncate">Periksa alamat kontrak untuk menghindari peniruan nama.</span>
+            <span className="truncate">Verify contract address to avoid name spoofing.</span>
           </div>
         )}
 

@@ -78,7 +78,7 @@ describe('TICKET-80: Lend Page Open Selector & Custom Contract Validation', () =
     render(<LendPage />);
     expect(screen.getByText('Open Collection 1')).toBeDefined();
     expect(screen.getByText('Open Collection 2')).toBeDefined();
-    expect(screen.getByText('Browse Explore Catalog ↗')).toBeDefined();
+    expect(screen.getByText(/explore/i)).toBeDefined();
   });
 
   it('allows switching to custom ERC-721 mode in CreateOfferDrawer and verifies contract on-chain', async () => {
