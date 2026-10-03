@@ -82,7 +82,7 @@ export function Toast({
   return (
     <div
       role="alert"
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} ${config.text} animate-in slide-in-from-bottom-5 duration-200`}
+      className={`fixed top-20 right-4 sm:right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} ${config.text} animate-in slide-in-from-top-5 duration-200`}
     >
       {config.icon}
       <span className="text-xs font-medium leading-tight max-w-sm">{message}</span>

@@ -33,7 +33,7 @@ export function TransactionToast({
     <div
       role="status"
       aria-live="polite"
-      className="fixed bottom-6 right-6 z-50 max-w-sm w-full bg-[var(--surface)] border border-[var(--line)] shadow-2xl rounded-2xl p-4 animate-in slide-in-from-bottom-5 duration-200"
+      className="fixed top-20 right-4 sm:right-6 z-50 max-w-sm w-full bg-[var(--surface)] border border-[var(--line)] shadow-2xl rounded-2xl p-4 animate-in slide-in-from-top-5 duration-200"
     >
       <div className="flex items-start gap-3">
         <div className="shrink-0 mt-0.5">
