@@ -4,7 +4,7 @@
   "deployer": "0xD27e57beD346fB2ADA1Ed5798770d70ae0a43ff5",
   "contracts": {
     "PledgeLoans": {
-      "address": "0xA8452Ec99ce0C64f20701dB7dD3abDb607c00496",
+      "address": "0x481F5591D7B26661B651Ab2efB66c10c46958E33",
       "verified": true
     },
     "MockRHG": {

@@ -15,7 +15,7 @@ function createRequest(url: string): NextRequest {
 describe('TICKET-26: Real Database Integration & X-Indexed-Block Headers Test Suite', () => {
   const WALLET_A = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
   const WALLET_B = '0xfB5870428d00B1a18274737609825b74c8C12e2B';
-  const PLEDGE_ADDRESS = '0xA8452Ec99ce0C64f20701dB7dD3abDb607c00496';
+  const PLEDGE_ADDRESS = '0x481F5591D7B26661B651Ab2efB66c10c46958E33';
   const COLLECTION = '0x1111111111111111111111111111111111111111';
 
   beforeEach(() => {
