@@ -31,40 +31,53 @@ const collectionMetadataCache = new Map<string, { name: string; symbol: string }
 export async function fetchOnChainCollection(
   address: `0x${string}`,
   chainId?: number
-): Promise<ActiveCuratedCollection> {
+): Promise<ActiveCuratedCollection | null> {
   const chain = getActiveChain(chainId);
   const client = createPublicClient({
     chain,
     transport: http(chain.rpcUrls.default.http[0], { timeout: 3000 }),
   });
 
-  const [nameResult, symbolResult] = await Promise.all([
-    client.readContract({ address, abi: ERC721_ABI, functionName: 'name' as any }).catch(() => null),
-    client.readContract({ address, abi: ERC721_ABI, functionName: 'symbol' as any }).catch(() => null),
-  ]);
+  try {
+    const isCurated = CURATED_COLLECTION_ENTRIES.some((entry) =>
+      Object.values(entry).some((a) => a.toLowerCase() === address.toLowerCase())
+    );
 
-  const name = nameResult ? String(nameResult) : 'Robinhood NFT';
-  const symbol = symbolResult ? String(symbolResult) : 'RNFT';
-  const targetChain = chainId || TESTNET_CHAIN_ID;
+    const [nameResult, symbolResult, bytecode] = await Promise.all([
+      client.readContract({ address, abi: ERC721_ABI, functionName: 'name' as any }).catch(() => null),
+      client.readContract({ address, abi: ERC721_ABI, functionName: 'symbol' as any }).catch(() => null),
+      client.getBytecode({ address }).catch(() => null),
+    ]);
 
-  collectionMetadataCache.set(address.toLowerCase(), { name, symbol });
+    if (!isCurated && !nameResult && !symbolResult && (!bytecode || bytecode === '0x')) {
+      return null;
+    }
 
-  const knownEntry = CURATED_COLLECTION_ENTRIES.find((entry) =>
-    Object.values(entry).some((a) => a.toLowerCase() === address.toLowerCase())
-  );
+    const name = nameResult ? String(nameResult) : 'Robinhood NFT';
+    const symbol = symbolResult ? String(symbolResult) : 'RNFT';
+    const targetChain = chainId || TESTNET_CHAIN_ID;
 
-  return {
-    id: symbol.toLowerCase(),
-    name,
-    symbol,
-    defaultDurations: [7, 14, 30],
-    addresses: knownEntry || {
-      [TESTNET_CHAIN_ID]: address,
-      [MAINNET_CHAIN_ID]: address,
-      [targetChain]: address,
-    },
-    contractAddress: address,
-  };
+    collectionMetadataCache.set(address.toLowerCase(), { name, symbol });
+
+    const knownEntry = CURATED_COLLECTION_ENTRIES.find((entry) =>
+      Object.values(entry).some((a) => a.toLowerCase() === address.toLowerCase())
+    );
+
+    return {
+      id: symbol.toLowerCase(),
+      name,
+      symbol,
+      defaultDurations: [7, 14, 30],
+      addresses: knownEntry || {
+        [TESTNET_CHAIN_ID]: address,
+        [MAINNET_CHAIN_ID]: address,
+        [targetChain]: address,
+      },
+      contractAddress: address,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchCuratedCollections(
@@ -73,12 +86,23 @@ export async function fetchCuratedCollections(
   const targetChain = chainId || TESTNET_CHAIN_ID;
   const isMainnet = targetChain === MAINNET_CHAIN_ID;
 
-  return Promise.all(
-    CURATED_COLLECTION_ENTRIES.map((entry) => {
+  const results = await Promise.all(
+    CURATED_COLLECTION_ENTRIES.map(async (entry) => {
       const address = isMainnet ? entry[MAINNET_CHAIN_ID] : entry[TESTNET_CHAIN_ID];
-      return fetchOnChainCollection(address, targetChain);
+      const col = await fetchOnChainCollection(address, targetChain);
+      return (
+        col || {
+          id: 'rnft',
+          name: 'Robinhood NFT',
+          symbol: 'RNFT',
+          defaultDurations: [7, 14, 30] as [7, 14, 30],
+          addresses: entry,
+          contractAddress: address,
+        }
+      );
     })
   );
+  return results;
 }
 
 export function getCuratedCollections(chainId?: number): ActiveCuratedCollection[] {

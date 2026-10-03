@@ -166,12 +166,14 @@ export async function fetchCollectionDetail(
     (l) => l.chain_id === targetChain && l.collection.toLowerCase() === target
   );
 
-  if (!known && !isEnabledInStore && !hasOffers && !hasLoans) {
+  const onChain = await fetchOnChainCollectionInfo(address, targetChain);
+  const isValidOnChain = (onChain.name && onChain.name !== 'ERC721 Collection') || known !== null;
+
+  if (!known && !isEnabledInStore && !hasOffers && !hasLoans && !isValidOnChain) {
     return null;
   }
 
   const stats = await getCollectionStatsFromStore(address, targetChain);
-  const onChain = await fetchOnChainCollectionInfo(address, targetChain);
 
   return {
     collection: {

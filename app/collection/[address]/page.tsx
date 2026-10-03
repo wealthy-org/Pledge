@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { isAddress } from 'viem';
-import { fetchOnChainCollection, isCollectionAllowed } from '@/config/collections';
+import { fetchOnChainCollection } from '@/config/collections';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 import { CollectionDetailClient } from './CollectionDetailClient';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -36,7 +36,9 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
     ? Number(process.env.NEXT_PUBLIC_CHAIN_ID)
     : TESTNET_CHAIN_ID;
 
-  if (!isCollectionAllowed(address, chainId)) {
+  const collection = await fetchOnChainCollection(address as `0x${string}`, chainId);
+
+  if (!collection) {
     return (
       <div className="p-8 max-w-4xl mx-auto space-y-4">
         <EmptyState
@@ -53,8 +55,6 @@ export default async function CollectionDetailPage({ params }: CollectionPagePro
       </div>
     );
   }
-
-  const collection = await fetchOnChainCollection(address as `0x${string}`, chainId);
 
   return <CollectionDetailClient collection={collection} />;
 }
