@@ -22,12 +22,14 @@ export default function HomePage() {
       const remote = apiData?.collections?.find(
         (c) => c.address.toLowerCase() === address.toLowerCase()
       );
+      const name = remote?.name || col.name;
+      const symbol = remote?.symbol || col.symbol;
 
       return {
         address,
-        name: col.name,
-        symbol: col.symbol,
-        imageUrl: remote?.imageUrl || resolveCollectionImageUrl(col.name),
+        name,
+        symbol,
+        imageUrl: remote?.imageUrl || resolveCollectionImageUrl(name),
         bestOfferWei: remote?.bestOfferWei || undefined,
         poolSizeWei: remote?.poolSizeWei || '0',
         offerCount: remote?.offerCount || 0,

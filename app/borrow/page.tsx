@@ -77,13 +77,14 @@ function BorrowContent() {
       const remoteStats = collectionsData?.collections?.find(
         (c) => c.address.toLowerCase() === colAddress.toLowerCase()
       );
+      const name = remoteStats?.name || col.name;
 
       return {
         contractAddress: colAddress,
         tokenId: String(idx + 1),
-        collectionName: col.name,
-        name: `${col.name} #${idx + 1}`,
-        imageUrl: resolveCollectionImageUrl(col.name),
+        collectionName: name,
+        name: `${name} #${idx + 1}`,
+        imageUrl: remoteStats?.imageUrl || resolveCollectionImageUrl(name),
         bestOfferWei: remoteStats?.bestOfferWei || undefined,
         offerCount: remoteStats?.offerCount || 0,
         isInLoan: false,

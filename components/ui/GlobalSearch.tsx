@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getCuratedCollections, type ActiveCuratedCollection } from '@/config/collections';
+import { useCollections } from '@/hooks/api/useCollections';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
@@ -19,8 +20,24 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const chainId = useSafeChainId();
+  const { data: collectionsData } = useCollections(chainId);
 
-  const collections = getCuratedCollections(chainId);
+  const collections = useMemo(() => {
+    const raw = getCuratedCollections(chainId);
+    if (!collectionsData?.collections) return raw;
+    return raw.map((col) => {
+      const remote = collectionsData.collections.find(
+        (c) => c.address.toLowerCase() === col.contractAddress.toLowerCase()
+      );
+      if (!remote) return col;
+      return {
+        ...col,
+        id: remote.symbol.toLowerCase(),
+        name: remote.name,
+        symbol: remote.symbol,
+      };
+    });
+  }, [chainId, collectionsData]);
 
   useEffect(() => {
     try {

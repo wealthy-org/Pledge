@@ -48,7 +48,22 @@ export default function LendPage() {
     });
   }, [apiOffers, localOffers]);
 
-  const curated = useMemo(() => getCuratedCollections(chainId), [chainId]);
+  const curated = useMemo(() => {
+    const raw = getCuratedCollections(chainId);
+    if (!collectionsData?.collections) return raw;
+    return raw.map((col) => {
+      const remote = collectionsData.collections.find(
+        (c) => c.address.toLowerCase() === col.contractAddress.toLowerCase()
+      );
+      if (!remote) return col;
+      return {
+        ...col,
+        id: remote.symbol.toLowerCase(),
+        name: remote.name,
+        symbol: remote.symbol,
+      };
+    });
+  }, [chainId, collectionsData]);
 
   const collectionStats = useMemo(() => {
     const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
