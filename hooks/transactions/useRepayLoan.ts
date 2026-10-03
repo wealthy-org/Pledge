@@ -21,7 +21,7 @@ export interface RepayLoanParams {
 export function useRepayLoan() {
   const { address, isConnected } = useConnection();
   const chainId = useSafeChainId();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId });
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();
   const invalidateQueries = useInvalidateProtocolQueries();
@@ -69,7 +69,9 @@ export function useRepayLoan() {
 
           const balance = await publicClient.getBalance({ address });
           if (balance < params.totalDueWei) {
-            throw new Error('Insufficient ETH balance to cover loan repayment.');
+            const currentBal = Number(formatUnits(balance, 18)).toFixed(4);
+            const reqAmount = Number(formatUnits(params.totalDueWei, 18)).toFixed(4);
+            throw new Error(`Insufficient ETH balance to cover loan repayment. Balance: ${currentBal} ETH, Required: ${reqAmount} ETH.`);
           }
         },
         simulate: async () => {

@@ -46,5 +46,14 @@ vi.mock('wagmi', async (importOriginal) => {
     usePublicClient: () => undefined,
     useWalletClient: () => ({ data: undefined }),
     useConfig: () => ({}),
+    useBalance: () => ({
+      data: {
+        value: 10000000000000000000n,
+        decimals: 18,
+        symbol: 'ETH',
+        formatted: '10.0',
+      },
+      isLoading: false,
+    }),
   };
 });

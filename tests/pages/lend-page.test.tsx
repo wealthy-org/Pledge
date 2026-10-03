@@ -73,6 +73,10 @@ vi.mock('wagmi', () => ({
       writeContract: vi.fn().mockResolvedValue('0x9999999999999999999999999999999999999999999999999999999999999999'),
     },
   }),
+  useBalance: () => ({
+    data: { value: 10000000000000000000n, decimals: 18, symbol: 'ETH', formatted: '10.0' },
+    isLoading: false,
+  }),
 }));
 
 vi.mock('@/hooks/api/useOffers', () => ({

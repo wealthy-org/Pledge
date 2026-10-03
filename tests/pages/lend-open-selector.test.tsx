@@ -13,6 +13,10 @@ vi.mock('wagmi', () => ({
   useConnection: () => ({ address: '0x1111111111111111111111111111111111111111', isConnected: true }),
   useAccount: () => ({ address: '0x1111111111111111111111111111111111111111', isConnected: true }),
   useChainId: () => 46630,
+  useBalance: () => ({
+    data: { value: 10000000000000000000n, decimals: 18, symbol: 'ETH', formatted: '10.0' },
+    isLoading: false,
+  }),
 }));
 
 vi.mock('@/contexts/ConnectModalContext', () => ({
@@ -127,7 +131,7 @@ describe('TICKET-80: Lend Page Open Selector & Custom Contract Validation', () =
     expect(handleSubmit).toHaveBeenCalledWith(
       expect.objectContaining({
         collectionAddress: '0x3333333333333333333333333333333333333333',
-        principalWei: '1000000000000000000',
+        principalWei: '10000000000000000',
         termInterestBps: 500,
       })
     );

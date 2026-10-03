@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { parseUnits, formatUnits, isAddress } from 'viem';
+import { useConnection, useBalance } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { Drawer } from '@/components/ui/Drawer';
 import { Button } from '@/components/ui/Button';
@@ -60,13 +61,19 @@ export function CreateOfferDrawer({
   onConnect,
 }: CreateOfferDrawerProps) {
   const chainId = useSafeChainId();
+  const { address } = useConnection();
+  const { data: balanceData } = useBalance({
+    address: address as `0x${string}` | undefined,
+    chainId,
+  });
+
   const [mode, setMode] = useState<'catalog' | 'custom'>('catalog');
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [customAddress, setCustomAddress] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [customVerificationStatus, setCustomVerificationStatus] = useState<'idle' | 'valid' | 'invalid'>('idle');
 
-  const [principalInput, setPrincipalInput] = useState('1.0');
+  const [principalInput, setPrincipalInput] = useState('0.01');
   const [interestRateInput, setInterestRateInput] = useState('5.0');
   const [durationSeconds, setDurationSeconds] = useState(7 * 86400);
   const [expirySeconds, setExpirySeconds] = useState(3 * 86400);
@@ -142,8 +149,10 @@ export function CreateOfferDrawer({
 
   const preview = useMemo(() => {
     try {
-      const pNum = parseFloat(principalInput) || 0;
-      const rNum = parseFloat(interestRateInput) || 0;
+      const cleanPrincipal = principalInput.replace(',', '.').trim();
+      const cleanInterest = interestRateInput.replace(',', '.').trim();
+      const pNum = parseFloat(cleanPrincipal) || 0;
+      const rNum = parseFloat(cleanInterest) || 0;
 
       if (pNum <= 0 || rNum <= 0) {
         return {
@@ -157,7 +166,7 @@ export function CreateOfferDrawer({
         };
       }
 
-      const pWei = parseUnits(principalInput || '0', 18);
+      const pWei = parseUnits(cleanPrincipal || '0', 18);
       const bps = Math.round(rNum * 100);
       const interestWei = (pWei * BigInt(bps) + 9999n) / 10000n;
       const feeWei = (interestWei * 200n) / 10000n;
@@ -185,9 +194,34 @@ export function CreateOfferDrawer({
     }
   }, [principalInput, interestRateInput, isAddressValid]);
 
+  const userBalanceEth = balanceData ? Number(formatUnits(balanceData.value, 18)) : 0;
+  const isBalanceInsufficient = Boolean(
+    balanceData &&
+      preview.isValid &&
+      preview.principalWei !== '0' &&
+      BigInt(preview.principalWei) > balanceData.value
+  );
+  const isTightForGas = Boolean(
+    balanceData &&
+      preview.isValid &&
+      !isBalanceInsufficient &&
+      balanceData.value - BigInt(preview.principalWei) < parseUnits('0.0005', 18)
+  );
+
+  const handleSetMax = () => {
+    if (!balanceData) return;
+    const gasReserve = parseUnits('0.001', 18);
+    const maxSafeWei = balanceData.value > gasReserve ? balanceData.value - gasReserve : balanceData.value;
+    if (maxSafeWei > 0n) {
+      setPrincipalInput(Number(formatUnits(maxSafeWei, 18)).toFixed(4));
+    } else {
+      setPrincipalInput(Number(formatUnits(balanceData.value, 18)).toFixed(4));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!preview.isValid || !targetAddress) return;
+    if (!preview.isValid || !targetAddress || isBalanceInsufficient) return;
 
     onSubmit({
       collectionAddress: targetAddress,
@@ -295,33 +329,59 @@ export function CreateOfferDrawer({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <Input
-            id="lend-principal"
-            label="Principal"
-            type="number"
-            step="0.01"
-            min="0.01"
-            value={principalInput}
-            onChange={(e) => setPrincipalInput(e.target.value)}
-            suffix="ETH"
-            placeholder="1.0"
-            required
-          />
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <label htmlFor="lend-principal" className="text-xs font-semibold text-[var(--text)]">
+                Principal
+              </label>
+              {balanceData && (
+                <button
+                  type="button"
+                  onClick={handleSetMax}
+                  className="text-[10px] text-[var(--primary)] hover:underline font-mono cursor-pointer"
+                >
+                  Bal: {Number(formatUnits(balanceData.value, 18)).toFixed(4)} ETH (Max)
+                </button>
+              )}
+            </div>
+            <Input
+              id="lend-principal"
+              type="text"
+              inputMode="decimal"
+              value={principalInput}
+              onChange={(e) => setPrincipalInput(e.target.value)}
+              suffix="ETH"
+              placeholder="0.01"
+              required
+            />
+            {isBalanceInsufficient && (
+              <span className="text-[10px] text-[var(--error)] font-medium">
+                Insufficient balance ({userBalanceEth.toFixed(4)} ETH available)
+              </span>
+            )}
+            {!isBalanceInsufficient && isTightForGas && (
+              <span className="text-[10px] text-amber-500 font-medium">
+                Tip: Leave ~0.001 ETH for gas
+              </span>
+            )}
+          </div>
 
-          <Input
-            id="lend-interest"
-            label="Term Interest"
-            type="number"
-            step="0.1"
-            min="0.1"
-            max="100"
-            value={interestRateInput}
-            onChange={(e) => setInterestRateInput(e.target.value)}
-            suffix="%"
-            helperText={`${parseFloat(interestRateInput || '0').toFixed(1)}% for ${selectedDays}d`}
-            placeholder="5.0"
-            required
-          />
+          <div className="space-y-1">
+            <label htmlFor="lend-interest" className="text-xs font-semibold text-[var(--text)]">
+              Term Interest
+            </label>
+            <Input
+              id="lend-interest"
+              type="text"
+              inputMode="decimal"
+              value={interestRateInput}
+              onChange={(e) => setInterestRateInput(e.target.value)}
+              suffix="%"
+              helperText={`${parseFloat(interestRateInput.replace(',', '.') || '0').toFixed(1)}% for ${selectedDays}d`}
+              placeholder="5.0"
+              required
+            />
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -448,10 +508,10 @@ export function CreateOfferDrawer({
               type="submit"
               variant="primary"
               loading={isLoading}
-              disabled={!preview.isValid}
+              disabled={!preview.isValid || isBalanceInsufficient}
               className="flex-2"
             >
-              Deposit & Publish Offer
+              {isBalanceInsufficient ? 'Insufficient ETH Balance' : 'Deposit & Publish Offer'}
             </Button>
           )}
         </div>

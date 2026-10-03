@@ -21,7 +21,7 @@ export interface CreateOfferParams {
 export function useCreateOffer() {
   const { address, isConnected } = useConnection();
   const chainId = useSafeChainId();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId });
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();
   const invalidateQueries = useInvalidateProtocolQueries();
@@ -60,7 +60,9 @@ export function useCreateOffer() {
 
           const balance = await publicClient.getBalance({ address });
           if (balance < params.principalWei) {
-            throw new Error('Insufficient ETH balance to cover offer principal.');
+            const currentBal = Number(formatUnits(balance, 18)).toFixed(4);
+            const reqAmount = Number(formatUnits(params.principalWei, 18)).toFixed(4);
+            throw new Error(`Insufficient ETH balance to cover offer principal. Balance: ${currentBal} ETH, Required: ${reqAmount} ETH.`);
           }
         },
         simulate: async () => {

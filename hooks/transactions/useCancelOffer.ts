@@ -18,7 +18,7 @@ export interface CancelOfferParams {
 export function useCancelOffer() {
   const { address, isConnected } = useConnection();
   const chainId = useSafeChainId();
-  const publicClient = usePublicClient();
+  const publicClient = usePublicClient({ chainId });
   const { data: walletClient } = useWalletClient();
   const { state, executeTransaction, reset } = useTransactionFlow();
   const invalidateQueries = useInvalidateProtocolQueries();
