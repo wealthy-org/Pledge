@@ -234,6 +234,7 @@ function BorrowContent() {
       <TransactionModal
         isOpen={isTxModalOpen}
         state={txState}
+        chainId={chainId}
         onClose={() => {
           setIsTxModalOpen(false);
           resetTx();

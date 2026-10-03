@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { formatUnits } from 'viem';
 import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
@@ -19,29 +20,35 @@ export function useWithdrawProceeds() {
 
   const withdrawProceeds = useCallback(
     async (params?: WithdrawProceedsParams): Promise<`0x${string}` | null> => {
-      if (!isConnected || !address) {
-        throw new Error('Wallet not connected. Please connect your wallet to withdraw.');
-      }
-
-      if (!publicClient) {
-        throw new Error('RPC client unavailable.');
-      }
-
-      if (!walletClient) {
-        throw new Error('Wallet client unavailable.');
-      }
-
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
+      const claimableEth = params?.claimableWei
+        ? `${Number(formatUnits(BigInt(params.claimableWei), 18)).toFixed(4)} ETH`
+        : undefined;
 
       return executeTransaction({
         title: 'Withdraw Protocol Proceeds',
         description: 'Claiming accumulated loan yield and refunded offer capital to your wallet',
+        details: [
+          ...(claimableEth ? [{ label: 'Claimable Balance', value: claimableEth }] : []),
+          { label: 'Destination', value: address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connected Wallet' },
+        ],
         prepare: async () => {
+          if (!isConnected || !address) {
+            throw new Error('Wallet not connected. Please connect your wallet to withdraw.');
+          }
+          if (!publicClient) {
+            throw new Error('RPC client unavailable.');
+          }
+          if (!walletClient) {
+            throw new Error('Wallet client unavailable. Please unlock your wallet.');
+          }
+
           if (params?.claimableWei !== undefined && BigInt(params.claimableWei) === 0n) {
             throw new Error('No claimable proceeds available to withdraw.');
           }
         },
         simulate: async () => {
+          if (!publicClient || !address) return;
           await publicClient.simulateContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
@@ -50,6 +57,9 @@ export function useWithdrawProceeds() {
           });
         },
         write: async () => {
+          if (!walletClient || !address) {
+            throw new Error('Wallet client unavailable.');
+          }
           return await walletClient.writeContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
@@ -58,6 +68,7 @@ export function useWithdrawProceeds() {
           });
         },
         waitForReceipt: async (hash: `0x${string}`) => {
+          if (!publicClient) throw new Error('RPC client unavailable.');
           return await publicClient.waitForTransactionReceipt({ hash });
         },
         onSuccess: () => {

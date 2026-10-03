@@ -26,25 +26,28 @@ export function useForecloseLoan() {
 
   const forecloseLoan = useCallback(
     async (params: ForecloseLoanParams): Promise<`0x${string}` | null> => {
-      if (!isConnected || !address) {
-        throw new Error('Wallet not connected. Please connect your wallet to foreclose.');
-      }
-
-      if (!publicClient) {
-        throw new Error('RPC client unavailable.');
-      }
-
-      if (!walletClient) {
-        throw new Error('Wallet client unavailable.');
-      }
-
       const targetDestination = params.destination || address;
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
 
       return executeTransaction({
         title: `Foreclose Collateral #${params.loanId}`,
         description: `Transferring collateral for Loan #${params.loanId} to destination`,
+        details: [
+          { label: 'Loan ID', value: `#${params.loanId}` },
+          ...(params.collectionName ? [{ label: 'Collateral', value: `${params.collectionName} #${params.tokenId || ''}` }] : []),
+          ...(targetDestination ? [{ label: 'Destination', value: `${targetDestination.slice(0, 6)}...${targetDestination.slice(-4)}` }] : []),
+        ],
         prepare: async () => {
+          if (!isConnected || !address) {
+            throw new Error('Wallet not connected. Please connect your wallet to foreclose.');
+          }
+          if (!publicClient) {
+            throw new Error('RPC client unavailable.');
+          }
+          if (!walletClient) {
+            throw new Error('Wallet client unavailable. Please unlock your wallet.');
+          }
+
           if (params.lender.toLowerCase() !== address.toLowerCase()) {
             throw new Error('Unauthorized: Connected wallet is not the recorded lender.');
           }
@@ -71,6 +74,7 @@ export function useForecloseLoan() {
           }
         },
         simulate: async () => {
+          if (!publicClient || !address) return;
           await publicClient.simulateContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
@@ -80,6 +84,9 @@ export function useForecloseLoan() {
           });
         },
         write: async () => {
+          if (!walletClient || !address) {
+            throw new Error('Wallet client unavailable.');
+          }
           return await walletClient.writeContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
@@ -89,6 +96,7 @@ export function useForecloseLoan() {
           });
         },
         waitForReceipt: async (hash: `0x${string}`) => {
+          if (!publicClient) throw new Error('RPC client unavailable.');
           return await publicClient.waitForTransactionReceipt({ hash });
         },
         onSuccess: () => {

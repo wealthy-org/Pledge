@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { formatUnits } from 'viem';
 import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
@@ -8,6 +9,7 @@ import { getPledgeLoansAddress, PLEDGE_LOANS_ABI } from '@/config/contracts';
 
 export interface CreateOfferParams {
   collectionAddress: `0x${string}` | string;
+  collectionName?: string;
   principalWei: bigint;
   termInterestBps: number;
   durationSeconds: number;
@@ -23,31 +25,39 @@ export function useCreateOffer() {
 
   const createOffer = useCallback(
     async (params: CreateOfferParams): Promise<`0x${string}` | null> => {
-      if (!isConnected || !address) {
-        throw new Error('Wallet not connected. Please connect your wallet to create an offer.');
-      }
-
-      if (!publicClient) {
-        throw new Error('RPC client unavailable.');
-      }
-
-      if (!walletClient) {
-        throw new Error('Wallet client unavailable.');
-      }
-
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
       const expiresAt = BigInt(Math.floor(Date.now() / 1000) + params.expirySeconds);
+      const principalEth = `${Number(formatUnits(params.principalWei, 18)).toFixed(3)} ETH`;
+      const interestRate = `${(params.termInterestBps / 100).toFixed(1)}%`;
+      const durationDays = `${Math.round(params.durationSeconds / 86400)} Days`;
 
       return executeTransaction({
         title: 'Create Lending Offer',
-        description: `Publishing lending offer for collection ${params.collectionAddress}`,
+        description: `Publishing lending offer for ${params.collectionName || params.collectionAddress}`,
+        details: [
+          { label: 'Collection', value: params.collectionName || `${params.collectionAddress.slice(0, 6)}...${params.collectionAddress.slice(-4)}` },
+          { label: 'Committed Principal', value: principalEth },
+          { label: 'Term Interest', value: interestRate },
+          { label: 'Duration', value: durationDays },
+        ],
         prepare: async () => {
+          if (!isConnected || !address) {
+            throw new Error('Wallet not connected. Please connect your wallet to create an offer.');
+          }
+          if (!publicClient) {
+            throw new Error('RPC client unavailable.');
+          }
+          if (!walletClient) {
+            throw new Error('Wallet client unavailable. Please unlock your wallet.');
+          }
+
           const balance = await publicClient.getBalance({ address });
           if (balance < params.principalWei) {
             throw new Error('Insufficient ETH balance to cover offer principal.');
           }
         },
         simulate: async () => {
+          if (!publicClient || !address) return;
           await publicClient.simulateContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
@@ -63,6 +73,9 @@ export function useCreateOffer() {
           });
         },
         write: async () => {
+          if (!walletClient || !address) {
+            throw new Error('Wallet client unavailable.');
+          }
           return await walletClient.writeContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
@@ -78,6 +91,7 @@ export function useCreateOffer() {
           });
         },
         waitForReceipt: async (hash: `0x${string}`) => {
+          if (!publicClient) throw new Error('RPC client unavailable.');
           return await publicClient.waitForTransactionReceipt({ hash });
         },
         onSuccess: () => {

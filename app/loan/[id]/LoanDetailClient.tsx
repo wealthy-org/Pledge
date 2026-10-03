@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { formatEther } from 'viem';
 import { useConnection } from 'wagmi';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { LoanTermsCard } from '@/components/loan/LoanTermsCard';
 import { LoanCountdown } from '@/components/loan/LoanCountdown';
 import { LoanActionButtons } from '@/components/loan/LoanActionButtons';
@@ -26,6 +27,7 @@ export function LoanDetailClient({
   collectionName,
   imageUrl,
 }: LoanDetailClientProps) {
+  const chainId = useSafeChainId();
   const { address: connectedAddress } = useConnection();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
@@ -198,12 +200,14 @@ export function LoanDetailClient({
       <TransactionModal
         isOpen={repayTxState.stage !== 'IDLE'}
         state={repayTxState}
+        chainId={chainId}
         onClose={resetRepayTx}
       />
 
       <TransactionModal
         isOpen={forecloseTxState.stage !== 'IDLE'}
         state={forecloseTxState}
+        chainId={chainId}
         onClose={resetForecloseTx}
       />
 

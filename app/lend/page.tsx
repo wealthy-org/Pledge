@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { type CuratedCollectionDefinition, type ActiveCuratedCollection } from '@/config/collections';
+import { type CuratedCollectionDefinition, type ActiveCuratedCollection, getCollectionByAddress } from '@/config/collections';
 import { LendCollectionCard } from '@/components/lend/LendCollectionCard';
 import { MyOpenOffersList } from '@/components/lend/MyOpenOffersList';
 import { CreateOfferDrawer, type CreateOfferFormData } from '@/components/lend/CreateOfferDrawer';
@@ -44,19 +44,17 @@ export default function LendPage() {
   const [cancellingOffer, setCancellingOffer] = useState<OfferItem | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
-  const [localOffers, setLocalOffers] = useState<OfferItem[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const displayOffers = useMemo(() => {
     const fromApi = apiOffers?.offers || [];
-    const combined = [...localOffers, ...fromApi];
     const seen = new Set<number>();
-    return combined.filter((o) => {
+    return fromApi.filter((o) => {
       if (seen.has(o.offerId)) return false;
       seen.add(o.offerId);
       return o.status === 'open';
     });
-  }, [apiOffers, localOffers]);
+  }, [apiOffers]);
 
   const curated: ActiveCuratedCollection[] = useMemo(() => {
     if (!collectionsData?.collections) return [];
@@ -115,33 +113,19 @@ export default function LendPage() {
     setIsTxModalOpen(true);
 
     try {
-      await createOffer({
+      const hash = await createOffer({
         collectionAddress: pendingFormData.collectionAddress,
+        collectionName: selectedCol?.name,
         principalWei: BigInt(pendingFormData.principalWei),
         termInterestBps: pendingFormData.termInterestBps,
         durationSeconds: pendingFormData.durationSeconds,
         expirySeconds: pendingFormData.expirySeconds,
       });
 
-      const newOffer: OfferItem = {
-        offerId: Date.now(),
-        chainId,
-        lender: address || '',
-        collection: pendingFormData.collectionAddress,
-        principalWei: pendingFormData.principalWei,
-        termInterestBps: pendingFormData.termInterestBps,
-        feeBpsSnapshot: 200,
-        durationSeconds: pendingFormData.durationSeconds,
-        expiresAt: new Date(Date.now() + pendingFormData.expirySeconds * 1000).toISOString(),
-        status: 'open',
-        blockNumber: 0,
-        txHash: '',
-        createdAt: new Date().toISOString(),
-      };
-      setLocalOffers((prev) => [newOffer, ...prev]);
-      setIsTxModalOpen(false);
-      setToastMessage('Lending offer created successfully! Capital committed to escrow.');
-      refetchOffers();
+      if (hash) {
+        setToastMessage('Lending offer created successfully! Capital committed to escrow.');
+        refetchOffers();
+      }
     } catch {}
   };
 
@@ -158,14 +142,17 @@ export default function LendPage() {
     setIsCancelModalOpen(false);
 
     try {
-      await cancelOffer({
+      const colDef = getCollectionByAddress(cancellingOffer.collection, chainId);
+      const hash = await cancelOffer({
         offerId: cancellingOffer.offerId,
         principalWei: cancellingOffer.principalWei,
+        collectionName: colDef?.name,
       });
 
-      setLocalOffers((prev) => prev.filter((o) => o.offerId !== cancellingOffer.offerId));
-      setToastMessage(`Offer #${cancellingOffer.offerId} cancelled. Capital returned to claimable proceeds.`);
-      refetchOffers();
+      if (hash) {
+        setToastMessage(`Offer #${cancellingOffer.offerId} cancelled. Capital returned to claimable proceeds.`);
+        refetchOffers();
+      }
     } catch {}
   };
 
@@ -317,6 +304,7 @@ export default function LendPage() {
       <TransactionModal
         isOpen={isTxModalOpen}
         state={txState}
+        chainId={chainId}
         onClose={() => {
           setIsTxModalOpen(false);
           resetTx();
@@ -327,6 +315,7 @@ export default function LendPage() {
       <TransactionModal
         isOpen={cancelTxState.stage !== 'IDLE'}
         state={cancelTxState}
+        chainId={chainId}
         onClose={resetCancelTx}
       />
 

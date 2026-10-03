@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useConnection } from 'wagmi';
+import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { formatUnits } from 'viem';
 import { ClaimableProceedsBanner } from '@/components/portfolio/ClaimableProceedsBanner';
 import { BorrowingTab } from '@/components/portfolio/BorrowingTab';
@@ -19,6 +20,7 @@ import { useOffers } from '@/hooks/api/useOffers';
 import type { OfferItem, LoanItem } from '@/types/api';
 
 export default function PortfolioPage() {
+  const chainId = useSafeChainId();
   const { address: userAddress } = useConnection();
   const effectiveAddress = userAddress || '';
 
@@ -275,12 +277,14 @@ export default function PortfolioPage() {
       <TransactionModal
         isOpen={withdrawTxState.stage !== 'IDLE'}
         state={withdrawTxState}
+        chainId={chainId}
         onClose={resetWithdrawTx}
       />
 
       <TransactionModal
         isOpen={cancelTxState.stage !== 'IDLE'}
         state={cancelTxState}
+        chainId={chainId}
         onClose={resetCancelTx}
       />
 

@@ -6,7 +6,7 @@ export { robinhoodTestnet, robinhoodMainnet, SUPPORTED_CHAINS };
 
 function getRpcUrl(defaultFallback: string): string {
   const configured = process.env.NEXT_PUBLIC_RPC_URL;
-  if (configured && !configured.includes('testnet.robinhood.com')) {
+  if (configured && !configured.startsWith('/')) {
     return configured;
   }
   if (typeof window !== 'undefined') {
@@ -33,11 +33,12 @@ export const config = createConfig({
   ],
   transports: {
     [robinhoodTestnet.id]: fallback([
-      http(getRpcUrl('/api/rpc'), { retryCount: 1, timeout: 3000 }),
+      http(getRpcUrl('https://rpc.testnet.chain.robinhood.com'), { retryCount: 2, timeout: 8000 }),
+      http('/api/rpc', { retryCount: 1, timeout: 8000 }),
     ]),
     [robinhoodMainnet.id]: fallback([
-      http(getRpcUrl('/api/rpc'), { retryCount: 1, timeout: 3000 }),
+      http(getRpcUrl('https://rpc.mainnet.chain.robinhood.com'), { retryCount: 2, timeout: 8000 }),
+      http('/api/rpc', { retryCount: 1, timeout: 8000 }),
     ]),
   },
 });
-
