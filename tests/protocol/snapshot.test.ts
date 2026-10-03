@@ -3,6 +3,16 @@ import { getProtocolSnapshot, clearSnapshotCache } from '@/lib/protocol/snapshot
 import { indexerStore } from '@/lib/indexer/store';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 
+vi.mock('viem', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('viem')>();
+  return {
+    ...actual,
+    createPublicClient: () => {
+      throw new Error('Test RPC Offline');
+    },
+  };
+});
+
 describe('ProtocolSnapshot Service Suite', () => {
   beforeEach(() => {
     clearSnapshotCache();

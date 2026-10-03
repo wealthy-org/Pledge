@@ -11,6 +11,7 @@ import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/ui/Pagination';
 import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
@@ -20,6 +21,8 @@ import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
 import type { OfferItem } from '@/types/api';
+
+const COLLECTIONS_PAGE_SIZE = 8;
 
 export default function LendPage() {
   const chainId = useSafeChainId();
@@ -32,6 +35,7 @@ export default function LendPage() {
   });
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [collectionPage, setCollectionPage] = useState(1);
   const {
     collections: unifiedCollections,
     isLoading: isLoadingCollections,
@@ -42,6 +46,11 @@ export default function LendPage() {
 
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
+
+  const handleSearchChange = (val: string) => {
+    setSearchQuery(val);
+    setCollectionPage(1);
+  };
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCollectionId, setSelectedCollectionId] = useState<string>('');
@@ -87,6 +96,12 @@ export default function LendPage() {
     }
     return map;
   }, [unifiedCollections]);
+
+  const totalCollectionPages = Math.ceil(collectionsList.length / COLLECTIONS_PAGE_SIZE);
+  const paginatedCollections = useMemo(() => {
+    const start = (collectionPage - 1) * COLLECTIONS_PAGE_SIZE;
+    return collectionsList.slice(start, start + COLLECTIONS_PAGE_SIZE);
+  }, [collectionsList, collectionPage]);
 
   const selectedCol = useMemo(() => {
     if (!pendingFormData) return null;
@@ -226,7 +241,7 @@ export default function LendPage() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search collections or address..."
               className="w-full pl-9 pr-4 py-2 text-xs bg-[var(--surface)] border border-[var(--line)] rounded-lg text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--lime)] transition-colors"
             />
@@ -276,16 +291,26 @@ export default function LendPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
-            {collectionsList.map((col) => (
-              <LendCollectionCard
-                key={col.contractAddress || col.id}
-                collection={col}
-                poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
-                activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
-                onMakeOffer={handleOpenDrawer}
-              />
-            ))}
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-5">
+              {paginatedCollections.map((col) => (
+                <LendCollectionCard
+                  key={col.contractAddress || col.id}
+                  collection={col}
+                  poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
+                  activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
+                  onMakeOffer={handleOpenDrawer}
+                />
+              ))}
+            </div>
+            <Pagination
+              currentPage={collectionPage}
+              totalPages={totalCollectionPages}
+              totalItems={collectionsList.length}
+              pageSize={COLLECTIONS_PAGE_SIZE}
+              itemName="collections"
+              onPageChange={setCollectionPage}
+            />
           </div>
         )}
       </div>

@@ -1,13 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
+import { Pagination } from '@/components/ui/Pagination';
 import { getCollectionByAddress } from '@/config/collections';
 import type { OfferItem } from '@/types/api';
+
+const OFFERS_PAGE_SIZE = 5;
 
 export interface MyOpenOffersListProps {
   offers: OfferItem[];
@@ -28,6 +31,12 @@ export function MyOpenOffersList({
 }: MyOpenOffersListProps) {
   const hookChainId = useSafeChainId();
   const chainId = propChainId || hookChainId;
+  const [page, setPage] = useState(1);
+
+  const totalPages = Math.ceil(offers.length / OFFERS_PAGE_SIZE);
+  const paginatedOffers = useMemo(() => {
+    return offers.slice((page - 1) * OFFERS_PAGE_SIZE, page * OFFERS_PAGE_SIZE);
+  }, [offers, page]);
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -75,77 +84,88 @@ export function MyOpenOffersList({
   }
 
   return (
-    <div className="space-y-3">
-      {offers.map((offer) => {
-        const colDef = getCollectionByAddress(offer.collection, chainId);
+    <div className="space-y-4">
+      <div className="space-y-3">
+        {paginatedOffers.map((offer) => {
+          const colDef = getCollectionByAddress(offer.collection, chainId);
 
-        const principalEth = `${Number(formatUnits(BigInt(offer.principalWei), 18)).toFixed(2)} ETH`;
-        const days = Math.round(offer.durationSeconds / 86400);
-        const termRateDisplay = `${(offer.termInterestBps / 100).toFixed(1)}% for ${days}d`;
-        const expiresDate = new Date(offer.expiresAt).toLocaleDateString(undefined, {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-        });
+          const principalEth = `${Number(formatUnits(BigInt(offer.principalWei), 18)).toFixed(2)} ETH`;
+          const days = Math.round(offer.durationSeconds / 86400);
+          const termRateDisplay = `${(offer.termInterestBps / 100).toFixed(1)}% for ${days}d`;
+          const expiresDate = new Date(offer.expiresAt).toLocaleDateString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          });
 
-        return (
-          <div
-            key={offer.offerId}
-            className="p-4 rounded-xl bg-[var(--panel)] border border-[var(--line)] hover:border-[var(--line-strong)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-          >
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-              <Badge status="open">Offer #{offer.offerId}</Badge>
+          return (
+            <div
+              key={offer.offerId}
+              className="p-4 rounded-xl bg-[var(--panel)] border border-[var(--line)] hover:border-[var(--line-strong)] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+            >
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+                <Badge status="open">Offer #{offer.offerId}</Badge>
 
-              <div>
-                <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
-                  Collection
-                </span>
-                <span className="text-sm font-bold text-[var(--text)]">
-                  {colDef?.name || 'Curated Collection'}
-                </span>
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
+                    Collection
+                  </span>
+                  <span className="text-sm font-bold text-[var(--text)]">
+                    {colDef?.name || 'Curated Collection'}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
+                    Principal
+                  </span>
+                  <span className="text-base font-bold font-mono text-[var(--primary)]">
+                    {principalEth}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
+                    Fixed Term Return
+                  </span>
+                  <span className="text-xs font-semibold font-mono text-[var(--text)]">
+                    {termRateDisplay}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
+                    Expires On
+                  </span>
+                  <span className="text-xs font-mono text-[var(--muted)]">
+                    {expiresDate}
+                  </span>
+                </div>
               </div>
 
               <div>
-                <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
-                  Principal
-                </span>
-                <span className="text-base font-bold font-mono text-[var(--primary)]">
-                  {principalEth}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
-                  Fixed Term Return
-                </span>
-                <span className="text-xs font-semibold font-mono text-[var(--text)]">
-                  {termRateDisplay}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">
-                  Expires On
-                </span>
-                <span className="text-xs font-mono text-[var(--muted)]">
-                  {expiresDate}
-                </span>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => onCancelOffer(offer.offerId)}
+                  className="w-full sm:w-auto"
+                >
+                  Cancel Offer
+                </Button>
               </div>
             </div>
+          );
+        })}
+      </div>
 
-            <div>
-              <Button
-                variant="danger"
-                size="sm"
-                onClick={() => onCancelOffer(offer.offerId)}
-                className="w-full sm:w-auto"
-              >
-                Cancel Offer
-              </Button>
-            </div>
-          </div>
-        );
-      })}
+      <Pagination
+        currentPage={page}
+        totalPages={totalPages}
+        totalItems={offers.length}
+        pageSize={OFFERS_PAGE_SIZE}
+        itemName="offers"
+        onPageChange={setPage}
+      />
     </div>
   );
 }

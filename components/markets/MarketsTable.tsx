@@ -11,6 +11,9 @@ import { Tooltip } from '@/components/common/Tooltip';
 import { SparklineChart } from '@/components/home/SparklineChart';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { NftImage } from '@/components/nft/NftImage';
+import { Pagination } from '@/components/ui/Pagination';
+
+const MARKETS_PAGE_SIZE = 10;
 
 export interface MarketCollectionItem {
   address: string;
@@ -41,6 +44,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
   const [sortField, setSortField] = useState<SortField>('poolSize');
   const { watchlist, toggleWatchlist } = useWatchlist();
   const [activeTab, setActiveTab] = useState<'all' | 'watchlist'>('all');
+  const [page, setPage] = useState(1);
 
   const filteredAndSorted = useMemo(() => {
     let list = [...collections];
@@ -70,6 +74,11 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
       return b.offerCount - a.offerCount;
     });
   }, [collections, activeTab, watchlist, rankingTab, sortField]);
+
+  const totalPages = Math.ceil(filteredAndSorted.length / MARKETS_PAGE_SIZE);
+  const paginatedList = useMemo(() => {
+    return filteredAndSorted.slice((page - 1) * MARKETS_PAGE_SIZE, page * MARKETS_PAGE_SIZE);
+  }, [filteredAndSorted, page]);
 
   const formatEthValue = (weiString?: string) => {
     if (!weiString || weiString === '0') return '—';
@@ -160,7 +169,10 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="bg-[var(--surface)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
             <button
-              onClick={() => setActiveTab('all')}
+              onClick={() => {
+                setActiveTab('all');
+                setPage(1);
+              }}
               className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'all'
                   ? 'bg-[var(--panel)] text-[var(--text)] border-[var(--line)] shadow-xs'
@@ -170,7 +182,10 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
               All markets <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-violet-500/15 text-violet-700 dark:text-violet-300 font-semibold ml-1">{collections.length}</span>
             </button>
             <button
-              onClick={() => setActiveTab('watchlist')}
+              onClick={() => {
+                setActiveTab('watchlist');
+                setPage(1);
+              }}
               className={`text-xs font-medium py-1.5 px-3 rounded-md transition-colors cursor-pointer border ${
                 activeTab === 'watchlist'
                   ? 'bg-[var(--panel)] text-[var(--text)] border-[var(--line)] shadow-xs'
@@ -181,8 +196,20 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
             </button>
           </div>
 
-          <RankingTabs activeTab={rankingTab} onTabChange={setRankingTab} />
-          <TimeframeSelector timeframe={timeframe} onSelectTimeframe={setTimeframe} />
+          <RankingTabs
+            activeTab={rankingTab}
+            onTabChange={(tab) => {
+              setRankingTab(tab);
+              setPage(1);
+            }}
+          />
+          <TimeframeSelector
+            timeframe={timeframe}
+            onSelectTimeframe={(tf) => {
+              setTimeframe(tf);
+              setPage(1);
+            }}
+          />
         </div>
 
         <div className="flex items-center gap-3">
@@ -190,7 +217,10 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
             <span>Sort by</span>
             <select
               value={sortField}
-              onChange={(e) => setSortField(e.target.value as SortField)}
+              onChange={(e) => {
+                setSortField(e.target.value as SortField);
+                setPage(1);
+              }}
               className="text-xs bg-[var(--surface)] border border-[var(--line)] rounded-md px-2.5 py-1 text-[var(--text)] focus:outline-hidden focus:border-[var(--lime)] cursor-pointer"
             >
               <option value="poolSize">Total liquidity</option>
@@ -274,7 +304,8 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
               </tr>
             </thead>
             <tbody>
-              {filteredAndSorted.map((c, index) => {
+              {paginatedList.map((c, index) => {
+                const itemIndex = (page - 1) * MARKETS_PAGE_SIZE + index + 1;
                 const isStarred = watchlist.includes(c.address);
                 const floorPriceStr = c.floorPriceEth ? `${parseFloat(c.floorPriceEth).toFixed(2)} ETH` : '—';
                 const hasChange = c.priceChange24hPct !== undefined;
@@ -287,7 +318,7 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                     className="border-b border-[var(--line)] hover:bg-[var(--surface)] transition-colors group"
                   >
                     <td className="py-3.5 px-3 text-[11px] font-mono text-[var(--muted)]">
-                      {index + 1}
+                      {itemIndex}
                     </td>
 
                     <td className="py-3.5 px-3">
@@ -386,6 +417,17 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
             </tbody>
           </table>
         </div>
+      )}
+
+      {!isLoading && filteredAndSorted.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={filteredAndSorted.length}
+          pageSize={MARKETS_PAGE_SIZE}
+          itemName="collections"
+          onPageChange={setPage}
+        />
       )}
     </div>
   );

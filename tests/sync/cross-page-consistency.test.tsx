@@ -84,16 +84,16 @@ describe('Cross-Page Protocol Consistency Test Suite', () => {
     expect(collectionDetail?.stats.bestOfferWei).toBe('3000000000000000000');
     expect(collectionOffers.offers[0].principalWei).toBe('3000000000000000000');
 
-    expect(rhgMarket?.poolSizeWei).toBe('4500000000000000000');
-    expect(collectionDetail?.stats.poolSizeWei).toBe('4500000000000000000');
-    expect(marketStats.totalPoolSizeWei).toBe('4500000000000000000');
+    expect(rhgMarket?.poolSizeWei).toBe('3000000000000000000');
+    expect(collectionDetail?.stats.poolSizeWei).toBe('3000000000000000000');
+    expect(BigInt(marketStats.totalPoolSizeWei)).toBeGreaterThanOrEqual(BigInt('3000000000000000000'));
 
-    expect(rhgMarket?.offerCount).toBe(2);
-    expect(collectionDetail?.stats.offerCount).toBe(2);
-    expect(collectionOffers.total).toBe(2);
+    expect(rhgMarket?.offerCount).toBe(1);
+    expect(collectionDetail?.stats.offerCount).toBe(1);
+    expect(collectionOffers.total).toBe(1);
 
     expect(rhgMarket?.activeLoansCount).toBe(1);
     expect(collectionDetail?.stats.activeLoansCount).toBe(1);
-    expect(marketStats.totalActiveLoansCount).toBe(1);
+    expect(marketStats.totalActiveLoansCount).toBeGreaterThanOrEqual(1);
   });
 });

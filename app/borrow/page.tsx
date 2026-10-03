@@ -19,6 +19,7 @@ import { useLoans } from '@/hooks/api/useLoans';
 import { useConnection } from 'wagmi';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { useMounted } from '@/lib/hooks/useMounted';
+import { formatShortAddress } from '@/lib/services/collectionSafety';
 import type { OfferItem } from '@/types/api';
 
 export function BorrowPageSkeleton() {
@@ -217,7 +218,7 @@ function BorrowContent() {
     );
     const hash = await mintNft({
       collectionAddress: targetAddress,
-      collectionName: targetCollection?.name || 'Robinhood Genesis Pass',
+      collectionName: targetCollection?.name || (targetAddress ? formatShortAddress(targetAddress) : 'Robinhood NFT'),
     });
     if (hash) {
       setToastMessage('Testnet NFT minted successfully! Your new NFT will appear shortly.');

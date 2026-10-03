@@ -51,52 +51,60 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
         await syncOnChainLogs(targetChainId);
       } catch {}
 
-      const chain = getActiveChain(targetChainId);
-      const rpcUrl = chain.rpcUrls.default.http[0];
-      const contractAddress = getPledgeLoansAddress(targetChainId);
-
-      const client = createPublicClient({
-        chain,
-        transport: http(rpcUrl, { timeout: RPC_TIMEOUT_MS, batch: true }),
-      });
+      let contractAddress: `0x${string}` = '0x0000000000000000000000000000000000000000';
+      try {
+        contractAddress = getPledgeLoansAddress(targetChainId) as `0x${string}`;
+      } catch {}
 
       let blockNumber = 0;
       let protocolFeeBps = 200;
       let newActivityPaused = false;
       let nextOfferId = 1n;
       let nextLoanId = 1n;
+      let client: ReturnType<typeof createPublicClient> | null = null;
 
       try {
-        const [block, fee, paused, nextOffer, nextLoan] = await Promise.all([
-          client.getBlockNumber(),
-          client.readContract({
-            address: contractAddress,
-            abi: PLEDGE_LOANS_ABI,
-            functionName: 'protocolFeeBps',
-          }).catch(() => 200),
-          client.readContract({
-            address: contractAddress,
-            abi: PLEDGE_LOANS_ABI,
-            functionName: 'newActivityPaused',
-          }).catch(() => false),
-          client.readContract({
-            address: contractAddress,
-            abi: PLEDGE_LOANS_ABI,
-            functionName: 'nextOfferId',
-          }).catch(() => 1n),
-          client.readContract({
-            address: contractAddress,
-            abi: PLEDGE_LOANS_ABI,
-            functionName: 'nextLoanId',
-          }).catch(() => 1n),
-        ]);
-
-        blockNumber = Number(block);
-        protocolFeeBps = Number(fee);
-        newActivityPaused = Boolean(paused);
-        nextOfferId = BigInt(nextOffer as bigint);
-        nextLoanId = BigInt(nextLoan as bigint);
+        const chain = getActiveChain(targetChainId);
+        const rpcUrl = chain.rpcUrls.default.http[0];
+        client = createPublicClient({
+          chain,
+          transport: http(rpcUrl, { timeout: RPC_TIMEOUT_MS, batch: true }),
+        });
       } catch {}
+
+      if (client) {
+        try {
+          const [block, fee, paused, nextOffer, nextLoan] = await Promise.all([
+            client.getBlockNumber(),
+            client.readContract({
+              address: contractAddress,
+              abi: PLEDGE_LOANS_ABI,
+              functionName: 'protocolFeeBps',
+            }).catch(() => 200),
+            client.readContract({
+              address: contractAddress,
+              abi: PLEDGE_LOANS_ABI,
+              functionName: 'newActivityPaused',
+            }).catch(() => false),
+            client.readContract({
+              address: contractAddress,
+              abi: PLEDGE_LOANS_ABI,
+              functionName: 'nextOfferId',
+            }).catch(() => 1n),
+            client.readContract({
+              address: contractAddress,
+              abi: PLEDGE_LOANS_ABI,
+              functionName: 'nextLoanId',
+            }).catch(() => 1n),
+          ]);
+
+          blockNumber = Number(block);
+          protocolFeeBps = Number(fee);
+          newActivityPaused = Boolean(paused);
+          nextOfferId = BigInt(nextOffer as bigint);
+          nextLoanId = BigInt(nextLoan as bigint);
+        } catch {}
+      }
 
       const offersMap = new Map<number, RawContractOffer>();
       const loansMap = new Map<number, RawContractLoan>();
@@ -105,16 +113,17 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
       const nowSeconds = Math.floor(now / 1000);
 
       const offerPromises: Promise<void>[] = [];
-      for (let i = 1n; i < nextOfferId; i++) {
-        const id = Number(i);
-        offerPromises.push(
-          client
-            .readContract({
-              address: contractAddress,
-              abi: PLEDGE_LOANS_ABI,
-              functionName: 'offers',
-              args: [i],
-            })
+      if (client) {
+        for (let i = 1n; i < nextOfferId; i++) {
+          const id = Number(i);
+          offerPromises.push(
+            client
+              .readContract({
+                address: contractAddress,
+                abi: PLEDGE_LOANS_ABI,
+                functionName: 'offers',
+                args: [i],
+              })
             .then((res) => {
               const tuple = res as readonly [
                 string,
@@ -154,20 +163,22 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
               });
             })
             .catch(() => {})
-        );
+          );
+        }
       }
 
       const loanPromises: Promise<void>[] = [];
-      for (let i = 1n; i < nextLoanId; i++) {
-        const id = Number(i);
-        loanPromises.push(
-          client
-            .readContract({
-              address: contractAddress,
-              abi: PLEDGE_LOANS_ABI,
-              functionName: 'loans',
-              args: [i],
-            })
+      if (client) {
+        for (let i = 1n; i < nextLoanId; i++) {
+          const id = Number(i);
+          loanPromises.push(
+            client
+              .readContract({
+                address: contractAddress,
+                abi: PLEDGE_LOANS_ABI,
+                functionName: 'loans',
+                args: [i],
+              })
             .then((res) => {
               const tuple = res as readonly [
                 bigint,
@@ -215,7 +226,8 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
               });
             })
             .catch(() => {})
-        );
+          );
+        }
       }
 
       await Promise.all([...offerPromises, ...loanPromises]);

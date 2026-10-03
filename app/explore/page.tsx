@@ -7,6 +7,9 @@ import { useUnifiedCollectionSearch } from '@/hooks/useUnifiedCollectionSearch';
 import { ExploreFilters, type ExploreSortBy, type ExploreViewMode } from '@/components/explore/ExploreFilters';
 import { ExploreGrid } from '@/components/explore/ExploreGrid';
 import { Button } from '@/components/ui/Button';
+import { Pagination } from '@/components/ui/Pagination';
+
+const EXPLORE_PAGE_SIZE = 12;
 
 function ExploreContent() {
   const chainId = useSafeChainId();
@@ -14,6 +17,7 @@ function ExploreContent() {
   const [hasOffersOnly, setHasOffersOnly] = useState(false);
   const [sortBy, setSortBy] = useState<ExploreSortBy>('volume');
   const [viewMode, setViewMode] = useState<ExploreViewMode>('grid');
+  const [page, setPage] = useState(1);
 
   const { collections: rawCollections, isLoading, isError, error, refetch } = useUnifiedCollectionSearch({
     chainId,
@@ -45,6 +49,27 @@ function ExploreContent() {
       return (b.offerCount || 0) - (a.offerCount || 0);
     });
   }, [rawCollections, sortBy]);
+
+  const totalPages = Math.ceil(collections.length / EXPLORE_PAGE_SIZE);
+  const paginatedCollections = useMemo(() => {
+    const start = (page - 1) * EXPLORE_PAGE_SIZE;
+    return collections.slice(start, start + EXPLORE_PAGE_SIZE);
+  }, [collections, page]);
+
+  const handleSearchChange = (val: string) => {
+    setSearch(val);
+    setPage(1);
+  };
+
+  const handleToggleHasOffers = (val: boolean) => {
+    setHasOffersOnly(val);
+    setPage(1);
+  };
+
+  const handleSortChange = (val: ExploreSortBy) => {
+    setSortBy(val);
+    setPage(1);
+  };
 
   return (
     <div className="space-y-6">
@@ -92,11 +117,11 @@ function ExploreContent() {
 
       <ExploreFilters
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         hasOffersOnly={hasOffersOnly}
-        onToggleHasOffers={setHasOffersOnly}
+        onToggleHasOffers={handleToggleHasOffers}
         sortBy={sortBy}
-        onSortChange={setSortBy}
+        onSortChange={handleSortChange}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         totalCount={collections.length}
@@ -113,11 +138,23 @@ function ExploreContent() {
           </Button>
         </div>
       ) : (
-        <ExploreGrid
-          collections={collections}
-          isLoading={isLoading}
-          viewMode={viewMode}
-        />
+        <div className="space-y-6">
+          <ExploreGrid
+            collections={paginatedCollections}
+            isLoading={isLoading}
+            viewMode={viewMode}
+          />
+          {!isLoading && collections.length > 0 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              totalItems={collections.length}
+              pageSize={EXPLORE_PAGE_SIZE}
+              itemName="collections"
+              onPageChange={setPage}
+            />
+          )}
+        </div>
       )}
     </div>
   );

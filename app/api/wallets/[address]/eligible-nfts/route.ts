@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getBlockscoutClient } from '@/lib/blockscout';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { formatShortAddress } from '@/lib/services/collectionSafety';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
 import { WalletNftsResponse, WalletNftItem } from '@/types/api';
 
@@ -32,7 +33,7 @@ export async function GET(
     if (cursor) queryParams.cursor = cursor;
     const result = await client.fetchWalletNFTs(address, queryParams);
     for (const item of result.items) {
-      const collectionName = item.collectionName || 'Robinhood NFT';
+      const collectionName = item.collectionName || (item.collectionAddress ? formatShortAddress(item.collectionAddress) : 'Robinhood Verified NFT');
       const name = item.name || `${collectionName} #${item.tokenId}`;
       const imageUrl = item.imageUrl || resolveCollectionImageUrl(collectionName);
 
