@@ -1,5 +1,6 @@
 export interface BlockscoutRawToken {
-  address: string;
+  address?: string | null;
+  address_hash?: string | null;
   name?: string | null;
   symbol?: string | null;
   type?: string | null;

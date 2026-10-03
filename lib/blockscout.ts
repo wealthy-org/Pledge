@@ -182,14 +182,32 @@ export class BlockscoutClient {
 
     const items: SanitizedNFTItem[] = (raw.items || []).map((item) => {
       const metadata = sanitizeMetadata(item.metadata);
+      const collectionAddress =
+        item.token?.address_hash ||
+        item.token?.address ||
+        (item as any).address_hash ||
+        (item as any).address ||
+        '';
+      const collectionName = item.token?.name || 'Unknown Collection';
+      const tokenId = item.token_id || item.id || '';
+      const name =
+        metadata.name && metadata.name !== 'Unnamed Asset'
+          ? metadata.name
+          : `${collectionName} #${tokenId}`;
+      const imageUrl =
+        metadata.imageUrl ||
+        (item as any).image_url ||
+        (item as any).media_url ||
+        '';
+
       return {
-        tokenId: item.token_id || item.id,
-        collectionAddress: item.token?.address || '',
-        collectionName: item.token?.name || 'Unknown Collection',
-        name: metadata.name,
-        description: metadata.description,
-        imageUrl: metadata.imageUrl,
-        attributes: metadata.attributes,
+        tokenId,
+        collectionAddress,
+        collectionName,
+        name,
+        description: metadata.description || '',
+        imageUrl,
+        attributes: metadata.attributes || [],
       };
     });
 
@@ -215,14 +233,28 @@ export class BlockscoutClient {
     );
 
     const metadata = sanitizeMetadata(item.metadata);
+    const resolvedAddress =
+      item.token?.address_hash || item.token?.address || collectionAddress;
+    const collectionName = item.token?.name || 'Unknown Collection';
+    const tokenIdVal = item.token_id || item.id || tokenId;
+    const name =
+      metadata.name && metadata.name !== 'Unnamed Asset'
+        ? metadata.name
+        : `${collectionName} #${tokenIdVal}`;
+    const imageUrl =
+      metadata.imageUrl ||
+      (item as any).image_url ||
+      (item as any).media_url ||
+      '';
+
     return {
-      tokenId: item.token_id || item.id || tokenId,
-      collectionAddress: item.token?.address || collectionAddress,
-      collectionName: item.token?.name || 'Unknown Collection',
-      name: metadata.name,
-      description: metadata.description,
-      imageUrl: metadata.imageUrl,
-      attributes: metadata.attributes,
+      tokenId: tokenIdVal,
+      collectionAddress: resolvedAddress,
+      collectionName,
+      name,
+      description: metadata.description || '',
+      imageUrl,
+      attributes: metadata.attributes || [],
     };
   }
 }
