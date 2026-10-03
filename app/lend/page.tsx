@@ -11,6 +11,7 @@ import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
+import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useCreateOffer } from '@/hooks/transactions/useCreateOffer';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { useOffers } from '@/hooks/api/useOffers';
@@ -23,7 +24,8 @@ import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID } from '@/config/chains';
 
 export default function LendPage() {
   const chainId = useSafeChainId();
-  const { address } = useConnection();
+  const { address, isConnected } = useConnection();
+  const { openConnectModal } = useConnectModal();
   const { data: apiOffers, refetch: refetchOffers } = useOffers({ lender: address });
   const {
     data: collectionsData,
@@ -258,6 +260,8 @@ export default function LendPage() {
         <MyOpenOffersList
           offers={displayOffers}
           onCancelOffer={handleOpenCancelModal}
+          isConnected={isConnected}
+          onConnect={openConnectModal}
         />
       </div>
 
@@ -268,6 +272,8 @@ export default function LendPage() {
           initialCollectionId={selectedCollectionId}
           onClose={() => setIsDrawerOpen(false)}
           onSubmit={handleDrawerSubmit}
+          isConnected={isConnected}
+          onConnect={openConnectModal}
         />
       )}
 

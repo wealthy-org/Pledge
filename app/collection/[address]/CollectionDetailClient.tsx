@@ -11,6 +11,7 @@ import { Tabs, type TabItem } from '@/components/ui/Tabs';
 import { Button } from '@/components/ui/Button';
 import { Toast } from '@/components/ui/Toast';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
+import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
@@ -23,7 +24,8 @@ export interface CollectionDetailClientProps {
 }
 
 export function CollectionDetailClient({ collection }: CollectionDetailClientProps) {
-  const { address } = useConnection();
+  const { address, isConnected } = useConnection();
+  const { openConnectModal } = useConnectModal();
   const [activeTab, setActiveTab] = useState<string>('offers');
   const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
@@ -110,6 +112,10 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
   }, [collection, targetAddress, userNfts, stats]);
 
   const handleBorrow = (offer: OfferItem) => {
+    if (!isConnected) {
+      openConnectModal();
+      return;
+    }
     setSelectedOffer(offer);
     setIsDrawerOpen(true);
   };
@@ -144,11 +150,17 @@ export function CollectionDetailClient({ collection }: CollectionDetailClientPro
             onChange={(tabId) => setActiveTab(tabId)}
           />
 
-          <Link href="/lend">
-            <Button variant="secondary" size="sm">
+          {!isConnected ? (
+            <Button variant="secondary" size="sm" onClick={openConnectModal}>
               + Make an Offer
             </Button>
-          </Link>
+          ) : (
+            <Link href="/lend">
+              <Button variant="secondary" size="sm">
+                + Make an Offer
+              </Button>
+            </Link>
+          )}
         </div>
 
         {activeTab === 'offers' && (

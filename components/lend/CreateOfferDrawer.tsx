@@ -23,6 +23,8 @@ export interface CreateOfferDrawerProps {
   onClose: () => void;
   onSubmit: (data: CreateOfferFormData) => void;
   isLoading?: boolean;
+  isConnected?: boolean;
+  onConnect?: () => void;
 }
 
 const DURATION_OPTIONS = [
@@ -44,6 +46,8 @@ export function CreateOfferDrawer({
   onClose,
   onSubmit,
   isLoading = false,
+  isConnected = true,
+  onConnect,
 }: CreateOfferDrawerProps) {
   const [selectedCollectionId, setSelectedCollectionId] = useState<string | null>(null);
   const [principalInput, setPrincipalInput] = useState('1.0');
@@ -293,15 +297,26 @@ export function CreateOfferDrawer({
             Cancel
           </Button>
 
-          <Button
-            type="submit"
-            variant="primary"
-            loading={isLoading}
-            disabled={!preview.isValid}
-            className="flex-2"
-          >
-            Deposit & Publish Offer
-          </Button>
+          {!isConnected ? (
+            <Button
+              type="button"
+              variant="primary"
+              onClick={onConnect}
+              className="flex-2"
+            >
+              Connect Wallet to Publish
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              variant="primary"
+              loading={isLoading}
+              disabled={!preview.isValid}
+              className="flex-2"
+            >
+              Deposit & Publish Offer
+            </Button>
+          )}
         </div>
       </form>
     </Drawer>

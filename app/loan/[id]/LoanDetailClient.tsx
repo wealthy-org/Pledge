@@ -12,6 +12,7 @@ import { RepayConfirmationModal } from '@/components/loan/RepayConfirmationModal
 import { ForecloseConfirmationModal } from '@/components/loan/ForecloseConfirmationModal';
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
+import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useRepayLoan } from '@/hooks/transactions/useRepayLoan';
 import { useForecloseLoan } from '@/hooks/transactions/useForecloseLoan';
 import type { LoanItem } from '@/types/api';
@@ -29,6 +30,7 @@ export function LoanDetailClient({
 }: LoanDetailClientProps) {
   const chainId = useSafeChainId();
   const { address: connectedAddress } = useConnection();
+  const { openConnectModal } = useConnectModal();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isRepayModalOpen, setIsRepayModalOpen] = useState(false);
   const [isForecloseModalOpen, setIsForecloseModalOpen] = useState(false);
@@ -172,6 +174,7 @@ export function LoanDetailClient({
               onRepay={handleOpenRepay}
               onForeclose={handleOpenForeclose}
               isProcessing={isTxProcessing}
+              onConnect={openConnectModal}
             />
           </div>
         </div>

@@ -11,6 +11,7 @@ export interface LoanActionButtonsProps {
   onRepay: () => void;
   onForeclose: () => void;
   isProcessing?: boolean;
+  onConnect?: () => void;
 }
 
 export function LoanActionButtons({
@@ -20,6 +21,7 @@ export function LoanActionButtons({
   onRepay,
   onForeclose,
   isProcessing = false,
+  onConnect,
 }: LoanActionButtonsProps) {
   if (loan.status === 'repaid') {
     return (
@@ -129,13 +131,25 @@ export function LoanActionButtons({
   }
 
   return (
-    <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--panel)] text-center space-y-1">
-      <div className="text-xs font-mono font-semibold text-[var(--text)]">
-        Observer Mode
+    <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--panel)] text-center space-y-3">
+      <div className="space-y-1">
+        <div className="text-xs font-mono font-semibold text-[var(--text)]">
+          Observer Mode
+        </div>
+        <p className="text-[11px] text-[var(--muted)]">
+          Connect with borrower address to repay, or lender address to foreclose after deadline.
+        </p>
       </div>
-      <p className="text-[11px] text-[var(--muted)]">
-        Connect with borrower address to repay, or lender address to foreclose after deadline.
-      </p>
+      {!userAddress && onConnect && (
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={onConnect}
+          className="w-full"
+        >
+          Connect Wallet
+        </Button>
+      )}
     </div>
   );
 }

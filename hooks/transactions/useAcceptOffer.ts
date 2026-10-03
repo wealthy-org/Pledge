@@ -5,6 +5,7 @@ import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI, ERC721_ABI } from '@/config/contracts';
+import { getEffectiveWalletClient } from '@/lib/web3/getEffectiveWalletClient';
 
 export interface CheckApprovalParams {
   collectionAddress: `0x${string}` | string;
@@ -71,6 +72,7 @@ export function useAcceptOffer() {
   const approveNFT = useCallback(
     async ({ collectionAddress, collectionName }: ApproveNFTParams): Promise<`0x${string}` | null> => {
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
+      let activeWalletClient: any = walletClient;
 
       return executeTransaction({
         title: 'Approve NFT Collateral',
@@ -86,15 +88,17 @@ export function useAcceptOffer() {
           if (!publicClient) {
             throw new Error('RPC client unavailable.');
           }
-          if (!walletClient) {
+          activeWalletClient = await getEffectiveWalletClient(walletClient, chainId, address);
+          if (!activeWalletClient) {
             throw new Error('Wallet client unavailable. Please unlock your wallet.');
           }
         },
         write: async () => {
-          if (!walletClient || !address) {
+          const client = activeWalletClient || (await getEffectiveWalletClient(walletClient, chainId, address));
+          if (!client || !address) {
             throw new Error('Wallet client unavailable.');
           }
-          return await walletClient.writeContract({
+          return await client.writeContract({
             address: collectionAddress as `0x${string}`,
             abi: ERC721_ABI,
             functionName: 'setApprovalForAll',
@@ -114,6 +118,7 @@ export function useAcceptOffer() {
   const acceptOffer = useCallback(
     async ({ offerId, tokenId, collectionAddress, collectionName, principalEth }: AcceptOfferParams): Promise<`0x${string}` | null> => {
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
+      let activeWalletClient: any = walletClient;
 
       return executeTransaction({
         title: 'Accept Loan Offer',
@@ -130,7 +135,8 @@ export function useAcceptOffer() {
           if (!publicClient) {
             throw new Error('RPC client unavailable.');
           }
-          if (!walletClient) {
+          activeWalletClient = await getEffectiveWalletClient(walletClient, chainId, address);
+          if (!activeWalletClient) {
             throw new Error('Wallet client unavailable. Please unlock your wallet.');
           }
 
@@ -152,10 +158,11 @@ export function useAcceptOffer() {
           });
         },
         write: async () => {
-          if (!walletClient || !address) {
+          const client = activeWalletClient || (await getEffectiveWalletClient(walletClient, chainId, address));
+          if (!client || !address) {
             throw new Error('Wallet client unavailable.');
           }
-          return await walletClient.writeContract({
+          return await client.writeContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
             functionName: 'acceptOffer',

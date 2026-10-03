@@ -14,6 +14,8 @@ export interface MyOpenOffersListProps {
   onCancelOffer: (offerId: number) => void;
   isLoading?: boolean;
   chainId?: number;
+  isConnected?: boolean;
+  onConnect?: () => void;
 }
 
 export function MyOpenOffersList({
@@ -21,6 +23,8 @@ export function MyOpenOffersList({
   onCancelOffer,
   isLoading = false,
   chainId: propChainId,
+  isConnected = true,
+  onConnect,
 }: MyOpenOffersListProps) {
   const hookChainId = useSafeChainId();
   const chainId = propChainId || hookChainId;
@@ -33,6 +37,28 @@ export function MyOpenOffersList({
             className="h-20 rounded-xl bg-[var(--surface)] border border-[var(--line)] animate-pulse"
           />
         ))}
+      </div>
+    );
+  }
+
+  if (isConnected === false) {
+    return (
+      <div className="p-8 rounded-2xl border border-[var(--line)] bg-[var(--surface)] text-center space-y-4">
+        <div className="max-w-md mx-auto space-y-2">
+          <h4 className="text-sm font-bold text-[var(--text)]">Connect wallet to view your offers</h4>
+          <p className="text-xs text-[var(--muted)] leading-relaxed">
+            Your committed lending capital in escrow and active borrower offers are tied to your Web3 wallet address.
+          </p>
+        </div>
+        {onConnect && (
+          <button
+            type="button"
+            onClick={onConnect}
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+          >
+            Connect Wallet
+          </button>
+        )}
       </div>
     );
   }

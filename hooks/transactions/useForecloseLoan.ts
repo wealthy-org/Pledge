@@ -6,6 +6,7 @@ import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI } from '@/config/contracts';
+import { getEffectiveWalletClient } from '@/lib/web3/getEffectiveWalletClient';
 
 export interface ForecloseLoanParams {
   loanId: number | string;
@@ -29,6 +30,8 @@ export function useForecloseLoan() {
       const targetDestination = params.destination || address;
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
 
+      let activeWalletClient: any = walletClient;
+
       return executeTransaction({
         title: `Foreclose Collateral #${params.loanId}`,
         description: `Transferring collateral for Loan #${params.loanId} to destination`,
@@ -44,7 +47,8 @@ export function useForecloseLoan() {
           if (!publicClient) {
             throw new Error('RPC client unavailable.');
           }
-          if (!walletClient) {
+          activeWalletClient = await getEffectiveWalletClient(walletClient, chainId, address);
+          if (!activeWalletClient) {
             throw new Error('Wallet client unavailable. Please unlock your wallet.');
           }
 
@@ -84,10 +88,11 @@ export function useForecloseLoan() {
           });
         },
         write: async () => {
-          if (!walletClient || !address) {
+          const client = activeWalletClient || (await getEffectiveWalletClient(walletClient, chainId, address));
+          if (!client || !address) {
             throw new Error('Wallet client unavailable.');
           }
-          return await walletClient.writeContract({
+          return await client.writeContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
             functionName: 'foreclose',

@@ -9,9 +9,11 @@ import { BorrowingTab } from '@/components/portfolio/BorrowingTab';
 import { OffersTab } from '@/components/portfolio/OffersTab';
 import { LendingTab } from '@/components/portfolio/LendingTab';
 import { HistoryTab } from '@/components/portfolio/HistoryTab';
+import { PortfolioDisconnectedState } from '@/components/portfolio/PortfolioDisconnectedState';
 import { CancelOfferModal } from '@/components/lend/CancelOfferModal';
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
+import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useWithdrawProceeds } from '@/hooks/transactions/useWithdrawProceeds';
 import { useCancelOffer } from '@/hooks/transactions/useCancelOffer';
 import { usePortfolio } from '@/hooks/api/usePortfolio';
@@ -21,7 +23,8 @@ import type { OfferItem, LoanItem } from '@/types/api';
 
 export default function PortfolioPage() {
   const chainId = useSafeChainId();
-  const { address: userAddress } = useConnection();
+  const { address: userAddress, isConnected } = useConnection();
+  const { openConnectModal } = useConnectModal();
   const effectiveAddress = userAddress || '';
 
   const { data: apiPortfolio, refetch: refetchPortfolio } = usePortfolio(effectiveAddress);
@@ -123,6 +126,29 @@ export default function PortfolioPage() {
     withdrawTxState.stage === 'PROMPTING' ||
     withdrawTxState.stage === 'PENDING' ||
     withdrawTxState.stage === 'CONFIRMING';
+
+  if (!isConnected || !userAddress) {
+    return (
+      <div className="space-y-8">
+        <div className="space-y-2 border-b border-[var(--line)] pb-4">
+          <div className="text-[10px] uppercase font-semibold tracking-wider text-[var(--accent-primary)] flex items-center gap-2">
+            <span className="w-5 h-[1px] bg-[var(--accent-primary)] inline-block" />
+            <span>Portfolio Overview</span>
+          </div>
+
+          <h1 className="text-3xl font-semibold tracking-tight text-[var(--text)]">
+            Your positions
+          </h1>
+
+          <p className="text-xs text-[var(--muted)]">
+            Manage borrowed ETH, lending offers, and upcoming repayments.
+          </p>
+        </div>
+
+        <PortfolioDisconnectedState onConnect={openConnectModal} />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

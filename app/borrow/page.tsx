@@ -3,11 +3,13 @@
 import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { NFTGrid, type BorrowableNft } from '@/components/borrow/NFTGrid';
+import { BorrowDisconnectedHero } from '@/components/borrow/BorrowDisconnectedHero';
 import { OfferComparisonList } from '@/components/borrow/OfferComparisonList';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
 import { BorrowConfirmationModal } from '@/components/borrow/BorrowConfirmationModal';
 import { TransactionModal } from '@/components/tx/TransactionModal';
 import { Toast } from '@/components/ui/Toast';
+import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useAcceptOffer } from '@/hooks/transactions/useAcceptOffer';
 import { useMintNft } from '@/hooks/transactions/useMintNft';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
@@ -136,7 +138,13 @@ function BorrowContent() {
     }
   };
 
+  const { openConnectModal } = useConnectModal();
+
   const handleMintTestnetNft = async () => {
+    if (!isConnected) {
+      openConnectModal();
+      return;
+    }
     const fallbackAddress = collectionsData?.collections?.[0]?.address as `0x${string}` | undefined;
     const targetAddress = (collectionParam || fallbackAddress) as `0x${string}` | undefined;
     if (!targetAddress) return;
@@ -180,16 +188,18 @@ function BorrowContent() {
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Your eligible NFTs</h2>
             <span className="text-xs text-[var(--muted)]">
-              {filteredNfts.length} eligible NFT{filteredNfts.length === 1 ? '' : 's'}
+              {isConnected
+                ? `${filteredNfts.length} eligible NFT${filteredNfts.length === 1 ? '' : 's'}`
+                : '(Connect wallet to scan)'}
             </span>
           </div>
 
           <button
             type="button"
-            onClick={handleMintTestnetNft}
+            onClick={isConnected ? handleMintTestnetNft : openConnectModal}
             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-white dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-colors cursor-pointer shadow-xs self-start sm:self-auto"
           >
-            <span>Mint Testnet NFT ⚡</span>
+            <span>{isConnected ? 'Mint Testnet NFT ⚡' : 'Connect Wallet to Mint ⚡'}</span>
           </button>
         </div>
 
@@ -211,23 +221,27 @@ function BorrowContent() {
           </div>
         )}
 
-        <NFTGrid
-          nfts={filteredNfts}
-          selectedNft={selectedNft}
-          onMintTestnet={handleMintTestnetNft}
-          onSelectNft={(nft) => {
-            setSelectedNft(nft);
-            const offers = activeCollectionOffers.filter(
-              (o) =>
-                o.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
-                o.status === 'open'
-            );
-            if (offers.length > 0) {
-              setSelectedOffer(offers[0]);
-              setIsDrawerOpen(true);
-            }
-          }}
-        />
+        {!isConnected ? (
+          <BorrowDisconnectedHero onConnect={openConnectModal} />
+        ) : (
+          <NFTGrid
+            nfts={filteredNfts}
+            selectedNft={selectedNft}
+            onMintTestnet={handleMintTestnetNft}
+            onSelectNft={(nft) => {
+              setSelectedNft(nft);
+              const offers = activeCollectionOffers.filter(
+                (o) =>
+                  o.collection.toLowerCase() === nft.contractAddress.toLowerCase() &&
+                  o.status === 'open'
+              );
+              if (offers.length > 0) {
+                setSelectedOffer(offers[0]);
+                setIsDrawerOpen(true);
+              }
+            }}
+          />
+        )}
       </div>
 
       {selectedNft && (

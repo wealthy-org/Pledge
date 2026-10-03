@@ -6,6 +6,7 @@ import { useConnection, usePublicClient, useWalletClient } from 'wagmi';
 import { useTransactionFlow } from '@/hooks/useTransactionFlow';
 import { useInvalidateProtocolQueries } from '@/hooks/api/useInvalidateQueries';
 import { getPledgeLoansAddress, PLEDGE_LOANS_ABI } from '@/config/contracts';
+import { getEffectiveWalletClient } from '@/lib/web3/getEffectiveWalletClient';
 
 export interface RepayLoanParams {
   loanId: number | string;
@@ -28,6 +29,8 @@ export function useRepayLoan() {
       const pledgeContractAddress = getPledgeLoansAddress(chainId);
       const repaymentAmount = `${Number(formatUnits(params.totalDueWei, 18)).toFixed(4)} ETH`;
 
+      let activeWalletClient: any = walletClient;
+
       return executeTransaction({
         title: `Repay Loan #${params.loanId}`,
         description: `Settling ${params.collectionName ? `${params.collectionName} #${params.tokenId || ''}` : `Loan #${params.loanId}`}`,
@@ -43,7 +46,8 @@ export function useRepayLoan() {
           if (!publicClient) {
             throw new Error('RPC client unavailable.');
           }
-          if (!walletClient) {
+          activeWalletClient = await getEffectiveWalletClient(walletClient, chainId, address);
+          if (!activeWalletClient) {
             throw new Error('Wallet client unavailable. Please unlock your wallet.');
           }
 
@@ -77,10 +81,11 @@ export function useRepayLoan() {
           });
         },
         write: async () => {
-          if (!walletClient || !address) {
+          const client = activeWalletClient || (await getEffectiveWalletClient(walletClient, chainId, address));
+          if (!client || !address) {
             throw new Error('Wallet client unavailable.');
           }
-          return await walletClient.writeContract({
+          return await client.writeContract({
             address: pledgeContractAddress,
             abi: PLEDGE_LOANS_ABI,
             functionName: 'repay',
