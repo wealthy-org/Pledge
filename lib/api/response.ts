@@ -2,8 +2,29 @@ import { NextResponse } from 'next/server';
 import { isAddress } from 'viem';
 import { ApiErrorResponse } from '@/types/api';
 
+export function serializeBigInts(value: unknown): unknown {
+  if (value === null || value === undefined) {
+    return value;
+  }
+  if (typeof value === 'bigint') {
+    return value.toString();
+  }
+  if (Array.isArray(value)) {
+    return value.map(serializeBigInts);
+  }
+  if (typeof value === 'object') {
+    const serializedObj: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value)) {
+      serializedObj[k] = serializeBigInts(v);
+    }
+    return serializedObj;
+  }
+  return value;
+}
+
 export function jsonResponse<T>(data: T, status = 200, indexedBlock = 120): NextResponse<T> {
-  return NextResponse.json(data, {
+  const safeData = serializeBigInts(data) as T;
+  return NextResponse.json(safeData, {
     status,
     headers: {
       'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=59',

@@ -40,9 +40,12 @@ export async function syncOnChainLogs(chainId?: number): Promise<number> {
       return 0;
     }
 
+    const MAX_BLOCK_RANGE = 5000n;
+    const effectiveFromBlock = currentBlock - fromBlock > MAX_BLOCK_RANGE ? currentBlock - MAX_BLOCK_RANGE : fromBlock;
+
     const logs = await client.getLogs({
       address: contractAddress,
-      fromBlock,
+      fromBlock: effectiveFromBlock,
       toBlock: currentBlock,
     });
 

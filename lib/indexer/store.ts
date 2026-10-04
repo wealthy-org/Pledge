@@ -20,6 +20,12 @@ class IndexerMemoryStore {
     }
 
     this.eventIds.add(key);
+    const sanitizedData: Record<string, unknown> = {};
+    if (log.args && typeof log.args === 'object') {
+      for (const [k, v] of Object.entries(log.args)) {
+        sanitizedData[k] = typeof v === 'bigint' ? v.toString() : v;
+      }
+    }
     const row: EventRow = {
       id: this.events.length + 1,
       chain_id: log.chainId,
@@ -29,7 +35,7 @@ class IndexerMemoryStore {
       block_hash: log.blockHash,
       tx_hash: log.txHash,
       log_index: log.logIndex,
-      data: log.args as unknown as Json,
+      data: sanitizedData as unknown as Json,
       indexed_at: log.timestamp || new Date().toISOString(),
     };
     this.events.push(row);
