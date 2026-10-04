@@ -21,27 +21,34 @@ export function SparklineChart({
   const range = max - min || 1;
 
   const strokeColor = isPositive ? '#10b981' : '#f43f5e';
-  const fillColor = isPositive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(244, 63, 94, 0.12)';
+  const gradId = React.useId().replace(/:/g, '');
 
-  const stepX = (width - 4) / (points.length - 1);
+  const stepX = (width - 6) / (points.length - 1);
   const coords = points.map((val, idx) => {
     const x = 2 + idx * stepX;
-    const y = height - 2 - ((val - min) / range) * (height - 6);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
+    const y = height - 3 - ((val - min) / range) * (height - 6);
+    return { x, y, str: `${x.toFixed(1)},${y.toFixed(1)}` };
   });
 
-  const pathD = `M ${coords.join(' L ')}`;
-  const areaD = `${pathD} L ${width - 2},${height} L 2,${height} Z`;
+  const pathD = `M ${coords.map((c) => c.str).join(' L ')}`;
+  const areaD = `${pathD} L ${coords[coords.length - 1].x.toFixed(1)},${height} L ${coords[0].x.toFixed(1)},${height} Z`;
+  const lastPoint = coords[coords.length - 1];
 
   return (
     <svg
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      className="overflow-visible inline-block"
+      className="overflow-visible inline-block select-none"
       aria-hidden="true"
     >
-      <path d={areaD} fill={fillColor} />
+      <defs>
+        <linearGradient id={`sparkGrad-${gradId}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={strokeColor} stopOpacity="0.28" />
+          <stop offset="100%" stopColor={strokeColor} stopOpacity="0.0" />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#sparkGrad-${gradId})`} />
       <path
         d={pathD}
         fill="none"
@@ -49,6 +56,12 @@ export function SparklineChart({
         strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+      <circle
+        cx={lastPoint.x}
+        cy={lastPoint.y}
+        r="2"
+        fill={strokeColor}
       />
     </svg>
   );

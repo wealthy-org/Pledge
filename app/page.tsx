@@ -7,6 +7,7 @@ import { useCollections } from '@/hooks/api/useCollections';
 import { useMarketStats } from '@/hooks/api/useMarketStats';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
+import { FeaturedListingsCarousel } from '@/components/home/FeaturedListingsCarousel';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function HomePage() {
@@ -142,6 +143,11 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      <FeaturedListingsCarousel
+        collections={filteredCollections}
+        isLoading={isLoadingCollections}
+      />
 
       <div className="space-y-4 pt-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -82,7 +82,7 @@ export function Toast({
   return (
     <div
       role="alert"
-      className={`fixed top-20 right-4 sm:right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} ${config.text} animate-in slide-in-from-top-5 duration-200`}
+      className={`fixed top-20 right-4 sm:right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-xl ${config.bg} ${config.border} ${config.text} animate-in slide-in-from-top-5 duration-200 overflow-hidden`}
     >
       {config.icon}
       <span className="text-xs font-medium leading-tight max-w-sm">{message}</span>
@@ -96,6 +96,23 @@ export function Toast({
           <path d="M18 6 6 18M6 6l12 12" />
         </svg>
       </button>
+
+      {duration > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-black/5 dark:bg-white/10">
+          <div
+            className={`h-full animate-progress-countdown ${
+              type === 'success'
+                ? 'bg-emerald-500'
+                : type === 'error'
+                ? 'bg-rose-500'
+                : type === 'warning'
+                ? 'bg-amber-500'
+                : 'bg-sky-500'
+            }`}
+            style={{ animationDuration: `${duration}ms` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

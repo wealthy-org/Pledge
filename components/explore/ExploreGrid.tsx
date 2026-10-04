@@ -30,6 +30,7 @@ export function ExploreGrid({
               <tr className="border-b border-[var(--line)] text-[11px] font-medium text-[var(--muted)]">
                 <th className="py-3 px-3">#</th>
                 <th className="py-3 px-3">Collection</th>
+                <th className="py-3 px-3">Floor</th>
                 <th className="py-3 px-3">Best Offer</th>
                 <th className="py-3 px-3">Pool Liquidity</th>
                 <th className="py-3 px-3">Offers</th>
@@ -49,6 +50,7 @@ export function ExploreGrid({
                       </div>
                     </div>
                   </td>
+                  <td className="py-3 px-3"><Skeleton width="60px" height="14px" /></td>
                   <td className="py-3 px-3"><Skeleton width="70px" height="14px" /></td>
                   <td className="py-3 px-3"><Skeleton width="70px" height="14px" /></td>
                   <td className="py-3 px-3"><Skeleton width="35px" height="14px" /></td>
@@ -113,12 +115,13 @@ export function ExploreGrid({
 
   if (viewMode === 'table') {
     return (
-      <div className="w-full overflow-x-auto rounded-xl border border-[var(--line)] bg-[var(--surface)]">
+      <div className="w-full overflow-x-auto rounded-xl border border-[var(--line)] bg-[var(--surface)] shadow-2xs">
         <table className="w-full text-left border-collapse whitespace-nowrap">
           <thead>
-            <tr className="border-b border-[var(--line)] text-[11px] font-medium text-[var(--muted)]">
+            <tr className="border-b border-[var(--line)] text-[11px] font-medium text-[var(--muted)] select-none">
               <th scope="col" className="py-3 px-3">#</th>
               <th scope="col" className="py-3 px-3">Collection</th>
+              <th scope="col" className="py-3 px-3">Floor</th>
               <th scope="col" className="py-3 px-3">Best Offer</th>
               <th scope="col" className="py-3 px-3">Pool Liquidity</th>
               <th scope="col" className="py-3 px-3">Offers</th>
@@ -167,6 +170,9 @@ export function ExploreGrid({
                         </span>
                       </div>
                     </div>
+                  </td>
+                  <td className="py-3 px-3 font-mono text-xs font-semibold text-[var(--text)]">
+                    {c.floorPriceEth ? `${c.floorPriceEth} ETH` : '—'}
                   </td>
                   <td className="py-3 px-3 font-mono text-xs font-semibold text-sky-600 dark:text-sky-400">
                     {bestEth}

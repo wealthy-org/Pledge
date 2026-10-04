@@ -41,7 +41,7 @@ export function ExploreCard({ collection }: ExploreCardProps) {
   return (
     <div
       data-testid="explore-card"
-      className="group relative flex flex-col justify-between rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] hover:shadow-md transition-all duration-200 overflow-hidden"
+      className="group relative flex flex-col justify-between rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] card-hover-lift shadow-2xs overflow-hidden"
     >
       <div className="p-4 space-y-3.5">
         <div className="flex items-start justify-between gap-3">
