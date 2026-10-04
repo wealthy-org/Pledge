@@ -79,7 +79,7 @@ export function NFTGrid({
       <div className="p-8 border border-dashed border-[#e1e8e9] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17] flex flex-col items-center justify-center">
         <EmptyState
           title="No Eligible Collectibles Found"
-          description="Your connected wallet does not hold any verified NFTs from our curated collections, or all eligible collectibles are currently collateralized."
+          description="Your connected wallet does not hold any verified NFTs from indexed collections, or all eligible collectibles are currently collateralized."
         />
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
           {onMintTestnet && (
@@ -92,10 +92,10 @@ export function NFTGrid({
             </button>
           )}
           <Link
-            href="/collections"
+            href="/explore"
             className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--panel)] hover:bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] transition-colors shadow-xs"
           >
-            Explore Whitelisted Collections ↗
+            Explore Collections ↗
           </Link>
         </div>
       </div>

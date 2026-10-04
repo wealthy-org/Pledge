@@ -49,7 +49,7 @@ export function PortfolioDisconnectedState({ onConnect }: PortfolioDisconnectedS
             </button>
 
             <Link
-              href="/collections"
+              href="/explore"
               className="px-5 py-2.5 rounded-xl bg-[var(--panel)] hover:bg-[var(--raised)] border border-[var(--line)] text-xs font-semibold text-[var(--text)] transition-all shadow-xs"
             >
               Explore Markets ↗
@@ -75,7 +75,7 @@ export function PortfolioDisconnectedState({ onConnect }: PortfolioDisconnectedS
             <span>Lending & Offers</span>
           </div>
           <p className="text-xs text-[var(--muted)] leading-relaxed">
-            Manage your committed liquidity pools across curated collections and cancel unaccepted offers at any time.
+            Manage your committed liquidity pools across indexed collections and cancel unaccepted offers at any time.
           </p>
         </div>
 

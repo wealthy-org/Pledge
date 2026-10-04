@@ -50,6 +50,15 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/collections',
+        destination: '/explore',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
