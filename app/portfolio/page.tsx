@@ -39,8 +39,8 @@ export default function PortfolioPage() {
   const { nfts: userNfts, isLoading: isLoadingNfts } = useEligibleNfts(userAddress, chainId);
 
   const { data: apiPortfolio, refetch: refetchPortfolio } = usePortfolio(effectiveAddress);
-  const { data: allUserLoans } = useLoans({ borrower: effectiveAddress });
-  const { data: allUserOffers } = useOffers({ lender: effectiveAddress });
+  const { data: allUserLoans } = useLoans({ borrower: userAddress, enabled: Boolean(userAddress && isConnected) });
+  const { data: allUserOffers } = useOffers({ lender: userAddress, enabled: Boolean(userAddress && isConnected) });
 
   const { state: withdrawTxState, withdrawProceeds, reset: resetWithdrawTx } = useWithdrawProceeds();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();
@@ -51,6 +51,17 @@ export default function PortfolioPage() {
 
   const [cancellingOffer, setCancellingOffer] = useState<OfferItem | null>(null);
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+  React.useEffect(() => {
+    if (!isConnected || !userAddress) {
+      setClaimableWei('0');
+      setCancellingOffer(null);
+      setIsCancelModalOpen(false);
+      setToastMessage(null);
+      resetWithdrawTx();
+      resetCancelTx();
+    }
+  }, [isConnected, userAddress, resetWithdrawTx, resetCancelTx]);
 
   const effectiveClaimableWei = apiPortfolio?.claimableProceedsWei || claimableWei;
   const userBorrowingLoans = apiPortfolio?.borrowedLoans || [];

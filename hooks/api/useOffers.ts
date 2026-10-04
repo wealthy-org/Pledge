@@ -10,6 +10,7 @@ export interface UseOffersParams {
   status?: string;
   chainId?: number;
   sort?: string;
+  enabled?: boolean;
 }
 
 export function useOffers(params?: UseOffersParams) {
@@ -40,6 +41,7 @@ export function useOffers(params?: UseOffersParams) {
 
         return res.json();
       },
+      enabled: params?.enabled ?? true,
       staleTime: 5000,
       refetchInterval: 10000,
     },

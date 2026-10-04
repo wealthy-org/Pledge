@@ -10,6 +10,7 @@ export interface UseLoansParams {
   lender?: string;
   status?: string;
   chainId?: number;
+  enabled?: boolean;
 }
 
 export function useLoans(params?: UseLoansParams) {
@@ -40,6 +41,7 @@ export function useLoans(params?: UseLoansParams) {
 
         return res.json();
       },
+      enabled: params?.enabled ?? true,
       staleTime: 10000,
       refetchInterval: 20000,
     },

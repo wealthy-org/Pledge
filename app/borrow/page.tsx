@@ -85,7 +85,7 @@ function BorrowContent() {
 
   const { nfts: rawWalletNfts, isLoading: isLoadingNfts } = useEligibleNfts(address, chainId);
   const { data: collectionsData } = useCollections(chainId);
-  const { data: userLoansData } = useLoans({ borrower: address, status: 'active' });
+  const { data: userLoansData } = useLoans({ borrower: address, status: 'active', enabled: Boolean(address && isConnected) });
 
   const [selectedNft, setSelectedNft] = useState<BorrowableNft | null>(null);
   const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
@@ -101,8 +101,12 @@ function BorrowContent() {
       setSelectedOffer(null);
       setIsDrawerOpen(false);
       setIsConfirmModalOpen(false);
+      setIsTxModalOpen(false);
+      setToastMessage(null);
+      resetTx();
+      resetMintTx();
     }
-  }, [isConnected, mounted]);
+  }, [isConnected, mounted, resetTx, resetMintTx]);
 
   const { data: offersData } = useOffers({
     collection: selectedNft?.contractAddress,

@@ -32,6 +32,7 @@ export default function LendPage() {
     lender: address,
     chainId,
     status: 'open',
+    enabled: Boolean(isConnected && address),
   });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,15 +65,31 @@ export default function LendPage() {
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (!isConnected || !address) {
+      setIsDrawerOpen(false);
+      setIsConfirmModalOpen(false);
+      setIsTxModalOpen(false);
+      setIsCancelModalOpen(false);
+      setPendingFormData(null);
+      setCancellingOffer(null);
+      setToastMessage(null);
+      resetTx();
+      resetCancelTx();
+    }
+  }, [isConnected, address, resetTx, resetCancelTx]);
+
   const displayOffers = useMemo(() => {
+    if (!isConnected || !address) return [];
     const fromApi = apiOffers?.offers || [];
     const seen = new Set<number>();
+    const normalizedAddress = address.toLowerCase();
     return fromApi.filter((o) => {
       if (seen.has(o.offerId)) return false;
       seen.add(o.offerId);
-      return o.status === 'open';
+      return o.status === 'open' && (!o.lender || o.lender.toLowerCase() === normalizedAddress);
     });
-  }, [apiOffers]);
+  }, [apiOffers, isConnected, address]);
 
   const collectionsList: CreateOfferCollectionOption[] = useMemo(() => {
     return unifiedCollections.map((item) => ({
@@ -234,7 +251,7 @@ export default function LendPage() {
             <h2 className="text-sm sm:text-base font-semibold text-[#142d2b] dark:text-[#f0fdf4]">
               Your Open Offers
             </h2>
-            {displayOffers.length > 0 && (
+            {isConnected && address && displayOffers.length > 0 && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
                 {displayOffers.length} Active
               </span>
@@ -244,7 +261,7 @@ export default function LendPage() {
 
         <MyOpenOffersList
           offers={displayOffers}
-          isLoading={isLoadingOffers}
+          isLoading={isLoadingOffers && Boolean(isConnected && address)}
           onCancelOffer={handleOpenCancelModal}
           isConnected={isConnected}
           onConnect={openConnectModal}

@@ -52,15 +52,23 @@ const mockOpenOffers: OfferItem[] = [
   },
 ];
 
+let mockIsConnected = true;
+let mockAddress: string | undefined = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
+const mockUseOffers = vi.fn((params?: any) => ({
+  data: { offers: mockOpenOffers },
+  isLoading: false,
+  error: null,
+}));
+
 vi.mock('wagmi', () => ({
   useConnection: () => ({
-    address: '0x02070747E2436d46f56A691F605A7c03332DFe8d',
-    isConnected: true,
+    address: mockAddress,
+    isConnected: mockIsConnected,
     chainId: 46630,
   }),
   useAccount: () => ({
-    address: '0x02070747E2436d46f56A691F605A7c03332DFe8d',
-    isConnected: true,
+    address: mockAddress,
+    isConnected: mockIsConnected,
     chainId: 46630,
   }),
   usePublicClient: () => ({
@@ -80,11 +88,7 @@ vi.mock('wagmi', () => ({
 }));
 
 vi.mock('@/hooks/api/useOffers', () => ({
-  useOffers: () => ({
-    data: { offers: mockOpenOffers },
-    isLoading: false,
-    error: null,
-  }),
+  useOffers: (params?: any) => mockUseOffers(params),
 }));
 
 vi.mock('@/hooks/api/useInvalidateQueries', () => ({
@@ -233,5 +237,60 @@ describe('TICKET-37: Lend Page & Create Offer Drawer Test Suite', () => {
     fireEvent.click(keepOfferBtn);
 
     expect(screen.queryByRole('dialog', { name: /cancel offer #1/i })).toBeNull();
+  });
+
+  it('TS-09: Disconnected wallet never renders open offers, never shows active badge, and disables useOffers query', () => {
+    mockIsConnected = false;
+    mockAddress = undefined;
+
+    render(<LendPage />);
+
+    expect(mockUseOffers).toHaveBeenCalledWith(
+      expect.objectContaining({
+        enabled: false,
+      })
+    );
+
+    expect(screen.queryByText(/\d+\s*Active/i)).toBeNull();
+    expect(screen.getByText(/connect your wallet to view and manage your active lending offers/i)).toBeDefined();
+    expect(screen.queryByRole('button', { name: /cancel offer/i })).toBeNull();
+
+    mockIsConnected = true;
+    mockAddress = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
+  });
+
+  it('TS-10: Foreign wallet offers are filtered out from displayOffers defense-in-depth', () => {
+    mockIsConnected = true;
+    mockAddress = '0x02070747E2436d46f56A691F605A7c03332DFe8d';
+
+    mockUseOffers.mockReturnValueOnce({
+      data: {
+        offers: [
+          ...mockOpenOffers,
+          {
+            offerId: 99,
+            chainId: 46630,
+            lender: '0x9999999999999999999999999999999999999999',
+            collection: '0x1111111111111111111111111111111111111111',
+            principalWei: '5000000000000000000',
+            termInterestBps: 300,
+            feeBpsSnapshot: 200,
+            durationSeconds: 604800,
+            expiresAt: '2026-10-15T00:00:00Z',
+            status: 'open',
+            blockNumber: 100,
+            txHash: '0xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+            createdAt: '2026-10-01T12:00:00Z',
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
+    });
+
+    render(<LendPage />);
+
+    expect(screen.getByText('2 Active')).toBeDefined();
+    expect(screen.queryByText('#99')).toBeNull();
   });
 });
