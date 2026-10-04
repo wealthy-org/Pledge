@@ -9,6 +9,7 @@ import { Table } from '@/components/ui/Table';
 import { AppShell } from '@/components/layout/AppShell';
 
 vi.mock('next/navigation', () => ({
+  usePathname: () => '/',
   useRouter: () => ({
     push: vi.fn(),
   }),

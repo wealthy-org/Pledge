@@ -5,79 +5,66 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 py-12 text-center">
-      <div className="relative max-w-xl w-full p-8 sm:p-10 rounded-2xl bg-[var(--surface)] border border-[var(--line)] shadow-xl overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen w-full bg-[var(--bg)] text-[var(--text)] flex flex-col items-center justify-between p-6 sm:p-12 select-none">
+      <div className="w-full max-w-4xl flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-lg bg-[var(--lime)] flex items-center justify-center text-white font-bold text-base shadow-sm group-hover:scale-105 transition-transform">
+            P
+          </div>
+          <span className="font-bold text-base tracking-tight text-[var(--text)]">
+            Pledge
+          </span>
+        </Link>
+        <Link
+          href="/"
+          className="text-xs font-medium text-[var(--muted)] hover:text-[var(--text)] transition-colors"
+        >
+          ← Return to App
+        </Link>
+      </div>
 
-        <div className="relative space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--panel)] border border-[var(--line)] text-[10px] font-mono font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+      <div className="relative max-w-lg w-full my-auto py-8 text-center space-y-6">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-emerald-500/10 dark:bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--panel)] border border-[var(--line)] text-[11px] font-mono font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             <span>404 · Page Not Found</span>
           </div>
 
+          <div className="text-7xl sm:text-8xl font-black tracking-tighter text-[var(--text)] select-none">
+            404
+          </div>
+
           <div className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-[var(--text)]">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text)]">
               Lost in the liquidity matrix.
             </h1>
             <p className="text-xs sm:text-sm text-[var(--muted)] max-w-md mx-auto leading-relaxed">
-              The page, collection address, or loan contract you are trying to reach does not exist or has been relocated.
+              The page, collection address, or loan contract you are trying to reach does not exist or has been relocated on Robinhood Chain.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--lime)] hover:bg-[#076b4d] text-white text-xs font-semibold transition-all duration-150 shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--lime)] hover:bg-[#076b4d] text-white text-xs font-semibold transition-all duration-150 shadow-md hover:shadow-lg"
             >
               <span>Back to Markets</span>
               <span>→</span>
             </Link>
             <Link
               href="/explore"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--panel)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--text)] text-xs font-semibold transition-all duration-150"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--panel)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--text)] text-xs font-semibold transition-all duration-150"
             >
               <span>Explore Collections</span>
             </Link>
           </div>
-
-          <div className="pt-6 border-t border-[var(--line)]">
-            <div className="text-[11px] font-medium text-[var(--muted)] mb-3">
-              Popular Destinations
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-left">
-              <Link
-                href="/lend"
-                className="p-2.5 rounded-lg bg-[var(--panel)] hover:border-[var(--line)] border border-transparent transition-all group card-hover-lift"
-              >
-                <div className="text-xs font-semibold text-[var(--text)] group-hover:text-emerald-500 transition-colors">
-                  Lend ETH
-                </div>
-                <div className="text-[10px] text-[var(--muted)]">Earn fixed APR</div>
-              </Link>
-
-              <Link
-                href="/borrow"
-                className="p-2.5 rounded-lg bg-[var(--panel)] hover:border-[var(--line)] border border-transparent transition-all group card-hover-lift"
-              >
-                <div className="text-xs font-semibold text-[var(--text)] group-hover:text-emerald-500 transition-colors">
-                  Borrow
-                </div>
-                <div className="text-[10px] text-[var(--muted)]">Pledge your NFTs</div>
-              </Link>
-
-              <Link
-                href="/portfolio"
-                className="col-span-2 sm:col-span-1 p-2.5 rounded-lg bg-[var(--panel)] hover:border-[var(--line)] border border-transparent transition-all group card-hover-lift"
-              >
-                <div className="text-xs font-semibold text-[var(--text)] group-hover:text-emerald-500 transition-colors">
-                  Portfolio
-                </div>
-                <div className="text-[10px] text-[var(--muted)]">Active loans & yield</div>
-              </Link>
-            </div>
-          </div>
         </div>
+      </div>
+
+      <div className="w-full max-w-4xl text-center text-[11px] text-[var(--muted)] pt-6 border-t border-[var(--line)]">
+        Pledge Protocol · Fixed-Rate Peer-to-Peer NFT Lending Marketplace
       </div>
     </div>
   );

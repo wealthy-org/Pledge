@@ -13,7 +13,7 @@ describe('NotFound Page Component', () => {
     ).toBeDefined();
   });
 
-  it('renders primary navigation links to markets, explore, lend, borrow, and portfolio', () => {
+  it('renders primary navigation links to markets and explore', () => {
     render(<NotFound />);
 
     const marketsLink = screen.getByRole('link', { name: /Back to Markets/i });
@@ -22,13 +22,14 @@ describe('NotFound Page Component', () => {
     const exploreLink = screen.getByRole('link', { name: /Explore Collections/i });
     expect(exploreLink.getAttribute('href')).toBe('/explore');
 
-    const lendLink = screen.getByRole('link', { name: /Lend ETH/i });
-    expect(lendLink.getAttribute('href')).toBe('/lend');
+    const returnLink = screen.getByRole('link', { name: /Return to App/i });
+    expect(returnLink.getAttribute('href')).toBe('/');
+  });
 
-    const borrowLink = screen.getByRole('link', { name: /Borrow/i });
-    expect(borrowLink.getAttribute('href')).toBe('/borrow');
-
-    const portfolioLink = screen.getByRole('link', { name: /Portfolio/i });
-    expect(portfolioLink.getAttribute('href')).toBe('/portfolio');
+  it('renders clean minimal full-width container', () => {
+    const { container } = render(<NotFound />);
+    const rootDiv = container.firstChild as HTMLElement;
+    expect(rootDiv.className).toContain('min-h-screen');
+    expect(rootDiv.className).toContain('w-full');
   });
 });
