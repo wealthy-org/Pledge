@@ -42,6 +42,7 @@ interface IPledgeLoans {
 
     error Unauthorized();
     error CollectionNotAllowed(address collection);
+    error CollectionNotEnabled(address collection);
     error CollectionBlocked(address collection);
     error InvalidERC721Contract(address collection);
     error InvalidDuration(uint32 durationSeconds);

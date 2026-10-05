@@ -84,6 +84,10 @@ class IndexerMemoryStore {
     this.checkpoints.clear();
     this.collections.clear();
   }
+
+  public clear(): void {
+    this.reset();
+  }
 }
 
 export const indexerStore = new IndexerMemoryStore();

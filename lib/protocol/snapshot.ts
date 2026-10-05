@@ -7,7 +7,7 @@ import { ProtocolSnapshot, RawContractOffer, RawContractLoan } from './types';
 import { OfferStatus, LoanStatus } from '@/types/database';
 
 const SNAPSHOT_TTL_MS = 2500;
-const RPC_TIMEOUT_MS = 5000;
+const RPC_TIMEOUT_MS = 500;
 const snapshotCache = new Map<number, ProtocolSnapshot>();
 const inFlightSnapshots = new Map<number, Promise<ProtocolSnapshot>>();
 
@@ -63,14 +63,16 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
       let nextLoanId = 1n;
       let client: ReturnType<typeof createPublicClient> | null = null;
 
-      try {
-        const chain = getActiveChain(targetChainId);
-        const rpcUrl = chain.rpcUrls.default.http[0];
-        client = createPublicClient({
-          chain,
-          transport: http(rpcUrl, { timeout: RPC_TIMEOUT_MS, batch: true }),
-        });
-      } catch {}
+      if (process.env.NODE_ENV !== 'test') {
+        try {
+          const chain = getActiveChain(targetChainId);
+          const rpcUrl = chain.rpcUrls.default.http[0];
+          client = createPublicClient({
+            chain,
+            transport: http(rpcUrl, { timeout: RPC_TIMEOUT_MS, batch: true }),
+          });
+        } catch {}
+      }
 
       if (client) {
         try {

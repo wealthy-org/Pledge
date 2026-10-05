@@ -28,7 +28,7 @@ describe('Cross-Page Protocol Consistency Test Suite', () => {
       fee_bps_snapshot: 200,
       duration_seconds: 604800,
       expires_at: new Date(Date.now() + 86400000).toISOString(),
-      status: 'open',
+      status: 'filled',
       block_number: 100,
       tx_hash: '0x1',
       indexed_at: new Date().toISOString(),

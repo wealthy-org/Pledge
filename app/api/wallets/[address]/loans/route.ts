@@ -22,13 +22,20 @@ export async function GET(
   const roleParam = searchParams.get('role') || undefined;
   const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
   const cursor = searchParams.get('cursor') || undefined;
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
+
+  if (chainIdParam !== null && (isNaN(chainId!) || chainId! <= 0)) {
+    return errorResponse('Invalid chainId parameter', 'INVALID_CHAIN_ID', 400);
+  }
 
   const response = await fetchWalletLoans(
     address,
     statusParam || undefined,
     roleParam,
     limit,
-    cursor
+    cursor,
+    chainId
   );
 
   return jsonResponse(response);

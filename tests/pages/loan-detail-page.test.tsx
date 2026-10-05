@@ -18,7 +18,7 @@ const mockActiveLoan: LoanItem = {
   chainId: TESTNET_CHAIN_ID,
   lender: mockLender,
   borrower: mockBorrower,
-  collection: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D',
+  collection: '0x90193C961A926261B756D1E5bb255e67ff9498A1',
   tokenId: '42',
   principalWei: '1000000000000000000',
   interestWei: '40000000000000000',

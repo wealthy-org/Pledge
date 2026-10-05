@@ -7,6 +7,7 @@ export type PledgeEventType =
   | 'LoanForeclosed'
   | 'ProceedsWithdrawn'
   | 'CollectionStatusChanged'
+  | 'CollectionBlockStatusChanged'
   | 'CollectionEnabled'
   | 'CollectionDisabled'
   | 'FeeParametersUpdated'

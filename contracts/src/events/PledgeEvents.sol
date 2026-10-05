@@ -3,6 +3,7 @@ pragma solidity 0.8.24;
 
 interface PledgeEvents {
     event CollectionStatusChanged(address indexed collection, bool enabled);
+    event CollectionBlockStatusChanged(address indexed collection, bool blocked);
     event OfferCreated(
         uint256 indexed offerId,
         address indexed lender,

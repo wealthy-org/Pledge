@@ -22,6 +22,21 @@ contract CreateCancelOfferTest is Test, IPledgeLoans {
 
         vm.deal(lender, 100 ether);
         vm.deal(otherUser, 100 ether);
+
+        vm.prank(admin);
+        pledgeLoans.setCollectionEnabled(collection, true);
+    }
+
+    function test_CreateOfferRevertsOnNonEnabledCollection() public {
+        MockERC721 unapprovedNft = new MockERC721("Unapproved", "UNAPP", "ipfs://unapp/");
+        vm.prank(lender);
+        vm.expectRevert(abi.encodeWithSelector(CollectionNotEnabled.selector, address(unapprovedNft)));
+        pledgeLoans.createOffer{value: 1 ether}(
+            address(unapprovedNft),
+            500,
+            14 days,
+            uint64(block.timestamp + 1 days)
+        );
     }
 
     function test_CreateOfferHappyPath() public {

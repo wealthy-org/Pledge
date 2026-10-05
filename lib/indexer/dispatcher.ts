@@ -29,6 +29,23 @@ export async function dispatchLog(log: RawPledgeLog): Promise<boolean> {
       break;
     }
 
+    case 'CollectionBlockStatusChanged': {
+      const collectionAddress = String(args.collection || '').toLowerCase();
+      const blocked = Boolean(args.blocked);
+      if (collectionAddress) {
+        indexerStore.collections.set(`${chainId}:${collectionAddress}`, {
+          chain_id: chainId,
+          address: collectionAddress,
+          name: '',
+          symbol: null,
+          image_url: null,
+          is_enabled: !blocked,
+          added_at: now,
+        });
+      }
+      break;
+    }
+
     case 'CollectionEnabled': {
       const collectionAddress = String(args.collection || '').toLowerCase();
       if (collectionAddress) {

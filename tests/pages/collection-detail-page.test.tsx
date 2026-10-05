@@ -19,13 +19,13 @@ vi.mock('next/navigation', () => ({
 }));
 
 const mockCollection = {
-  id: '0x75599f7385dcdbe2ab3b3b0b8d4a3e2c8f02494d',
+  id: '0x90193c961a926261b756d1e5bb255e67ff9498a1',
   name: 'Nottingham Guild Pledges',
   symbol: 'NGP',
-  contractAddress: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D' as `0x${string}`,
+  contractAddress: '0x90193C961A926261B756D1E5bb255e67ff9498A1' as `0x${string}`,
   defaultDurations: [7, 14, 30] as [7, 14, 30],
   addresses: {
-    [TESTNET_CHAIN_ID]: '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D' as `0x${string}`,
+    [TESTNET_CHAIN_ID]: '0x90193C961A926261B756D1E5bb255e67ff9498A1' as `0x${string}`,
   },
 };
 

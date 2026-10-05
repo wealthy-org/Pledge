@@ -8,11 +8,12 @@ process.env.MAINNET_RPC_URL = 'https://rpc.mainnet.chain.robinhood.com';
 process.env.MAINNET_PLEDGE_CONTRACT = '0x4444444444444444444444444444444444444444';
 process.env.MAINNET_START_BLOCK = '1';
 process.env.TESTNET_START_BLOCK = '1';
-process.env.NEXT_PUBLIC_BLOCKSCOUT_API_URL = 'https://explorer.testnet.chain.robinhood.com/api/v2';
+process.env.GONDI_API_URL = 'https://api2.gondi.xyz/graphql';
+process.env.GONDI_CDN_URL = 'https://cdn.gondi.xyz';
 process.env.NEXT_PUBLIC_DB_SCHEMA = 'pledge';
-process.env.NEXT_PUBLIC_RHG_COLLECTION = '0xE80385Cf259C82359CF5eA4eA98cD6514d9257a9';
-process.env.NEXT_PUBLIC_SFR_COLLECTION = '0x146BefC6C8656Df737255d08fa1281319Fc1A4c3';
-process.env.NEXT_PUBLIC_NGP_COLLECTION = '0x75599F7385dCdbE2aB3b3b0B8d4A3E2C8f02494D';
+process.env.NEXT_PUBLIC_RHG_COLLECTION = '0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496';
+process.env.NEXT_PUBLIC_SFR_COLLECTION = '0x34A1D3fff3958843C43aD80F30b94c510645C316';
+process.env.NEXT_PUBLIC_NGP_COLLECTION = '0x90193C961A926261B756D1E5bb255e67ff9498A1';
 process.env.NEXT_PUBLIC_RHG_COLLECTION_MAINNET = '0x4444444444444444444444444444444444444444';
 process.env.NEXT_PUBLIC_SFR_COLLECTION_MAINNET = '0x5555555555555555555555555555555555555555';
 process.env.NEXT_PUBLIC_NGP_COLLECTION_MAINNET = '0x6666666666666666666666666666666666666666';
@@ -66,3 +67,25 @@ vi.mock('next/font/google', () => ({
   }),
 }));
 
+vi.mock('@/lib/indexer/sync', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>().catch(() => ({}));
+  return {
+    ...actual,
+    syncOnChainLogs: vi.fn().mockResolvedValue(0),
+    resetSyncCooldown: vi.fn(),
+  };
+});
+
+vi.mock('viem', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>().catch(() => ({}));
+  return {
+    ...actual,
+    createPublicClient: vi.fn().mockImplementation(() => ({
+      getBlockNumber: vi.fn().mockResolvedValue(127812000n),
+      getLogs: vi.fn().mockResolvedValue([]),
+      getBlock: vi.fn().mockResolvedValue({ hash: '0xmockhash' }),
+      readContract: vi.fn().mockResolvedValue(null),
+      getBytecode: vi.fn().mockResolvedValue(null),
+    })),
+  };
+});

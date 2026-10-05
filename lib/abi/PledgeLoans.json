@@ -1054,6 +1054,17 @@
   },
   {
     "type": "error",
+    "name": "CollectionNotEnabled",
+    "inputs": [
+      {
+        "name": "collection",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "ExactRepaymentRequired",
     "inputs": [
       {

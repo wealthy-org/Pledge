@@ -31,7 +31,7 @@ describe('TICKET-21: Live API Route Handlers Test Suite', () => {
       offer_id: 1,
       chain_id: TESTNET_CHAIN_ID,
       lender: WALLET_A,
-      collection: RHG_ADDRESS,
+      collection: '0x3333333333333333333333333333333333333333',
       principal_wei: '1500000000000000000',
       term_interest_bps: 400,
       fee_bps_snapshot: 200,

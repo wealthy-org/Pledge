@@ -25,6 +25,10 @@ contract DeployTestnet is Script {
 
         PledgeLoans pledge = new PledgeLoans(deployer, feeRecipient, initialFeeBps);
 
+        pledge.setCollectionEnabled(address(rhg), true);
+        pledge.setCollectionEnabled(address(sfr), true);
+        pledge.setCollectionEnabled(address(ngp), true);
+
         vm.stopBroadcast();
 
         pledgeLoansAddress = address(pledge);

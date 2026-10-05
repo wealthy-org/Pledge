@@ -57,6 +57,9 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
         if (disabledCollections[collection]) {
             revert CollectionBlocked(collection);
         }
+        if (!enabledCollections[collection]) {
+            revert CollectionNotEnabled(collection);
+        }
         try IERC165(collection).supportsInterface(ERC721_INTERFACE_ID) returns (bool supported) {
             if (!supported) {
                 revert InvalidERC721Contract(collection);

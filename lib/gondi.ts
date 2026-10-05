@@ -11,7 +11,7 @@ import type {
 } from '@/types/gondi';
 import { resolveMediaUrlSafe } from '@/lib/nft-image/uri';
 
-export const GONDI_GRAPHQL_ENDPOINT = 'https://api2.gondi.xyz/graphql';
+export const GONDI_GRAPHQL_ENDPOINT = process.env.GONDI_API_URL || 'https://api2.gondi.xyz/graphql';
 const DEFAULT_TIMEOUT_MS = 8000;
 const CACHE_TTL_MS = 60000;
 
