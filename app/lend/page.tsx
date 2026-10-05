@@ -385,6 +385,7 @@ export default function LendPage() {
                   collection={col}
                   poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
                   activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
+                  imageUrl={(col as any).imageUrl}
                   onMakeOffer={handleOpenDrawer}
                 />
               ))}

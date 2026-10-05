@@ -8,8 +8,22 @@ const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const inMemoryMetadataCache = new Map<string, CachedNftRecord>();
 const inMemoryCollectionCache = new Map<string, { name: string; symbol: string; expiresAt: number }>();
+const inMemoryCollectionImageCache = new Map<string, string>();
 
-export function resolveCollectionImageUrl(nameOrAddress: string, symbol?: string): string {
+export function setCollectionImageCache(key: string, url: string): void {
+  if (key && url) {
+    inMemoryCollectionImageCache.set(key.toLowerCase(), url);
+  }
+}
+
+export function resolveCollectionImageUrl(nameOrAddress: string, symbol?: string, preferredUrl?: string): string {
+  if (preferredUrl && preferredUrl.trim() !== '') {
+    return preferredUrl;
+  }
+  const key = (nameOrAddress || '').toLowerCase();
+  if (inMemoryCollectionImageCache.has(key)) {
+    return inMemoryCollectionImageCache.get(key)!;
+  }
   return generateSvgArtwork(nameOrAddress, '', symbol || nameOrAddress);
 }
 
@@ -20,6 +34,7 @@ function getCacheKey(contractAddress: string, tokenId: string): string {
 export function clearMetadataCache(): void {
   inMemoryMetadataCache.clear();
   inMemoryCollectionCache.clear();
+  inMemoryCollectionImageCache.clear();
 }
 
 export function getMetadataCacheSize(): number {

@@ -1,6 +1,11 @@
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
-import { fetchOnChainCollectionInfo, resolveCollectionImageUrl } from '@/lib/services/metadata';
+import {
+  fetchOnChainCollectionInfo,
+  resolveCollectionImageUrl,
+  setCollectionImageCache,
+} from '@/lib/services/metadata';
+import { gondiClient } from '@/lib/gondi';
 import { getProtocolSnapshot } from '@/lib/protocol/snapshot';
 import {
   computeCollectionStats,
@@ -79,12 +84,19 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
   const snapshot = await getProtocolSnapshot(targetChain);
   const distinctAddresses = getDistinctCollectionsFromSnapshot(snapshot);
 
-  const results: CollectionItemResponse[] = [];
+  const [overview, gondiList] = await Promise.all([
+    gondiClient.getMarketOverviewData('DAY').catch(() => ({ top: [], volume: [], movers: [] })),
+    gondiClient.listCollections(50).catch(() => []),
+  ]);
+
+  const map = new Map<string, CollectionItemResponse>();
+
   for (const addr of distinctAddresses) {
     const onChain = await fetchOnChainCollectionInfo(addr, targetChain);
     const stats = computeCollectionStats(snapshot, addr);
+    const normalized = addr.toLowerCase();
 
-    results.push({
+    map.set(normalized, {
       address: onChain.address,
       name: onChain.name,
       symbol: onChain.symbol,
@@ -97,7 +109,52 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
     });
   }
 
-  return results;
+  const allGondiCollections = [
+    ...(overview.top || []).map((t) => t.collection),
+    ...(overview.volume || []).map((v) => v.collection),
+    ...(overview.movers || []).map((m) => m.collection),
+    ...gondiList,
+  ];
+
+  for (const gc of allGondiCollections) {
+    if (!gc) continue;
+    const addr = (gc.contractData?.contractAddress || gc.id || '').toLowerCase();
+    if (!addr) continue;
+
+    if (gc.image?.cacheUrl) {
+      setCollectionImageCache(addr, gc.image.cacheUrl);
+    }
+
+    const existing = map.get(addr);
+    const imgUrl = gc.image?.cacheUrl || resolveCollectionImageUrl(addr, gc.slug || gc.name);
+
+    if (existing) {
+      if (gc.image?.cacheUrl) {
+        existing.imageUrl = gc.image.cacheUrl;
+      }
+      if (existing.name === 'ERC721 Collection' && gc.name) {
+        existing.name = gc.name;
+      }
+      if (existing.symbol === 'NFT' && gc.slug) {
+        existing.symbol = gc.slug.toUpperCase();
+      }
+    } else {
+      const stats = computeCollectionStats(snapshot, addr);
+      map.set(addr, {
+        address: (gc.contractData?.contractAddress || gc.id) as `0x${string}`,
+        name: gc.name || 'Gondi Collection',
+        symbol: gc.slug?.toUpperCase() || 'NFT',
+        imageUrl: imgUrl,
+        description: `${gc.name || 'NFT Collection'} on Robinhood Chain`,
+        bestOfferWei: stats.bestOfferWei,
+        poolSizeWei: stats.poolSizeWei,
+        offerCount: stats.offerCount,
+        activeLoansCount: stats.activeLoansCount,
+      });
+    }
+  }
+
+  return Array.from(map.values());
 }
 
 export async function fetchCollectionDetail(
