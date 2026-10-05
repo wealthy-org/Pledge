@@ -7,6 +7,7 @@ import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { useCollections } from '@/hooks/api/useCollections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Pagination } from '@/components/ui/Pagination';
 import type { LoanItem } from '@/types/api';
 
@@ -17,6 +18,7 @@ export interface LendingTabProps {
   userAddress?: string;
   onForeclose?: (loan: LoanItem) => void;
   chainId?: number;
+  isLoading?: boolean;
 }
 
 export function LendingTab({
@@ -24,6 +26,7 @@ export function LendingTab({
   userAddress,
   onForeclose,
   chainId: propChainId,
+  isLoading = false,
 }: LendingTabProps) {
   const hookChainId = useSafeChainId();
   const chainId = propChainId || hookChainId;
@@ -55,6 +58,43 @@ export function LendingTab({
       return isoString;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3.5">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            data-testid="lending-skeleton-card"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl"
+          >
+            <div className="flex items-center gap-3.5">
+              <Skeleton width="56px" height="56px" borderRadius="8px" />
+              <div className="space-y-2">
+                <Skeleton width="140px" height="16px" />
+                <Skeleton width="80px" height="12px" />
+              </div>
+            </div>
+            <div className="flex items-center gap-6 sm:gap-8">
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <Skeleton width="70px" height="32px" borderRadius="8px" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (userLendingLoans.length === 0) {
     return (

@@ -166,9 +166,9 @@ export function Sidebar() {
         <ThemeToggle variant="sidebar" />
 
         <Link
-          href="/activity"
-          title="About & Help"
-          aria-label="How it works"
+          href="/support"
+          title="Help & Support"
+          aria-label="Help and Support"
           className="flex items-center justify-center w-11 h-11 rounded-lg text-[var(--muted)] hover:bg-[var(--panel)] hover:text-[var(--text)] transition-colors cursor-pointer"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="w-[20px] h-[20px]">

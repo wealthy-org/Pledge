@@ -57,3 +57,12 @@ vi.mock('wagmi', async (importOriginal) => {
     }),
   };
 });
+
+vi.mock('next/font/google', () => ({
+  Inter: () => ({
+    variable: '--font-inter',
+    className: 'font-inter',
+    style: { fontFamily: 'Inter, sans-serif' },
+  }),
+}));
+

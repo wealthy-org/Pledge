@@ -7,6 +7,7 @@ import { formatUnits } from 'viem';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { getCollectionByAddress } from '@/config/collections';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Pagination } from '@/components/ui/Pagination';
 import type { OfferItem } from '@/types/api';
 
@@ -15,8 +16,9 @@ const OFFERS_PAGE_SIZE = 5;
 export interface OffersTabProps {
   offers: OfferItem[];
   userAddress?: string;
-  onCancelOffer: (offer: OfferItem) => void;
+  onCancelOffer?: (offer: OfferItem) => void;
   chainId?: number;
+  isLoading?: boolean;
 }
 
 export function OffersTab({
@@ -24,6 +26,7 @@ export function OffersTab({
   userAddress,
   onCancelOffer,
   chainId: propChainId,
+  isLoading = false,
 }: OffersTabProps) {
   const hookChainId = useSafeChainId();
   const chainId = propChainId || hookChainId;
@@ -42,6 +45,43 @@ export function OffersTab({
   const paginatedOffers = useMemo(() => {
     return userOpenOffers.slice((page - 1) * OFFERS_PAGE_SIZE, page * OFFERS_PAGE_SIZE);
   }, [userOpenOffers, page]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-3.5">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            data-testid="offers-skeleton-card"
+            className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 bg-white dark:bg-[#111a17] border border-[#dee7e3] dark:border-[#1e332c] rounded-xl"
+          >
+            <div className="flex items-center gap-3.5">
+              <Skeleton width="56px" height="56px" borderRadius="8px" />
+              <div className="space-y-2">
+                <Skeleton width="140px" height="16px" />
+                <Skeleton width="80px" height="12px" />
+              </div>
+            </div>
+            <div className="flex items-center gap-6 sm:gap-8">
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <div className="space-y-1">
+                <Skeleton width="50px" height="10px" />
+                <Skeleton width="60px" height="14px" />
+              </div>
+              <Skeleton width="70px" height="32px" borderRadius="8px" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (userOpenOffers.length === 0) {
     return (
@@ -128,12 +168,14 @@ export function OffersTab({
                   </strong>
                 </div>
 
-                <button
-                  onClick={() => onCancelOffer(offer)}
-                  className="px-4 py-2 rounded-lg bg-white dark:bg-[#14221e] hover:bg-[#fff9eb] dark:hover:bg-[#2d2618] border border-[#e1e8e9] dark:border-[#4d3d1e] text-[#775d26] dark:text-[#e0b86a] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
-                >
-                  Cancel offer
-                </button>
+                {onCancelOffer && (
+                  <button
+                    onClick={() => onCancelOffer(offer)}
+                    className="px-4 py-2 rounded-lg bg-white dark:bg-[#14221e] hover:bg-[#fff9eb] dark:hover:bg-[#2d2618] border border-[#e1e8e9] dark:border-[#4d3d1e] text-[#775d26] dark:text-[#e0b86a] text-xs font-semibold transition-colors cursor-pointer shadow-xs"
+                  >
+                    Cancel offer
+                  </button>
+                )}
               </div>
             </article>
           );

@@ -24,6 +24,7 @@ const KNOWN_ROUTES = new Set([
   '/explore',
   '/lend',
   '/portfolio',
+  '/support',
 ]);
 
 function isKnownRoute(pathname: string | null): boolean {
@@ -31,6 +32,8 @@ function isKnownRoute(pathname: string | null): boolean {
   if (KNOWN_ROUTES.has(pathname)) return true;
   if (pathname.startsWith('/collection/') && pathname.length > '/collection/'.length) return true;
   if (pathname.startsWith('/loan/') && pathname.length > '/loan/'.length) return true;
+  if (pathname.startsWith('/item/') && pathname.length > '/item/'.length) return true;
+  if (pathname.startsWith('/profile/') && pathname.length > '/profile/'.length) return true;
   return false;
 }
 

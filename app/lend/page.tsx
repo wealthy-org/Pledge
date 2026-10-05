@@ -4,6 +4,8 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { LendCollectionCard, type GenericCollectionItem } from '@/components/lend/LendCollectionCard';
 import { MyOpenOffersList } from '@/components/lend/MyOpenOffersList';
+import { AllLoansTable } from '@/components/lend/AllLoansTable';
+import { AllOffersTable } from '@/components/lend/AllOffersTable';
 import { CreateOfferDrawer, type CreateOfferFormData, type CreateOfferCollectionOption } from '@/components/lend/CreateOfferDrawer';
 import { CreateOfferConfirmationModal } from '@/components/lend/CreateOfferConfirmationModal';
 import { CancelOfferModal } from '@/components/lend/CancelOfferModal';
@@ -35,6 +37,7 @@ export default function LendPage() {
     enabled: Boolean(isConnected && address),
   });
 
+  const [activeTab, setActiveTab] = useState<'collections' | 'offers' | 'loans'>('collections');
   const [searchQuery, setSearchQuery] = useState('');
   const [collectionPage, setCollectionPage] = useState(1);
   const {
@@ -269,35 +272,78 @@ export default function LendPage() {
       </div>
 
       <div className="space-y-4 pt-4 border-t border-[var(--line)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-medium text-[#142d2b] dark:text-[#f0fdf4]">Choose a collection market</h2>
-            <span className="text-xs text-[var(--muted)]">
-              {collectionsList.length} indexed collections
-            </span>
+            <h2 className="text-sm sm:text-base font-semibold text-[#142d2b] dark:text-[#f0fdf4]">
+              Choose a collection market
+            </h2>
+            <p className="text-xs text-[var(--muted)]">
+              Select an ERC-721 collection to provide liquidity or browse market terms.
+            </p>
+          </div>
+          <div className="flex items-center gap-1.5 p-1 bg-[var(--surface)] rounded-xl border border-[var(--line)] w-fit">
+            <button
+              type="button"
+              onClick={() => setActiveTab('collections')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'collections'
+                  ? 'bg-[var(--panel)] text-[var(--text)] shadow-xs border border-[var(--line)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              Market Collections
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('offers')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'offers'
+                  ? 'bg-[var(--panel)] text-[var(--text)] shadow-xs border border-[var(--line)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              All Open Offers
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('loans')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                activeTab === 'loans'
+                  ? 'bg-[var(--panel)] text-[var(--text)] shadow-xs border border-[var(--line)]'
+                  : 'text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              Protocol Loans
+            </button>
           </div>
 
-          <div className="relative w-full sm:w-72">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              placeholder="Search collections or address..."
-              className="w-full pl-9 pr-4 py-2 text-xs bg-[var(--surface)] border border-[var(--line)] rounded-lg text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--lime)] transition-colors"
-            />
-            <svg
-              className="w-4 h-4 absolute left-3 top-2.5 text-[var(--muted)]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <circle cx="11" cy="11" r="8" strokeWidth="2" />
-              <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </div>
+          {activeTab === 'collections' && (
+            <div className="relative w-full sm:w-72">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                placeholder="Search collections or address..."
+                className="w-full pl-9 pr-4 py-2 text-xs bg-[var(--surface)] border border-[var(--line)] rounded-lg text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:border-[var(--lime)] transition-colors"
+              />
+              <svg
+                className="w-4 h-4 absolute left-3 top-2.5 text-[var(--muted)]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <circle cx="11" cy="11" r="8" strokeWidth="2" />
+                <path d="m21 21-4.35-4.35" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+          )}
         </div>
 
-        {isErrorCollections ? (
+        {activeTab === 'offers' ? (
+          <AllOffersTable />
+        ) : activeTab === 'loans' ? (
+          <AllLoansTable />
+        ) : isErrorCollections ? (
           <div className="p-8 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl text-center bg-red-50/50 dark:bg-red-950/10">
             <div className="max-w-md mx-auto space-y-3">
               <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 flex items-center justify-center mx-auto">
