@@ -12,6 +12,10 @@ export interface UnifiedCollectionItem {
   symbol: string;
   imageUrl?: string;
   floorPriceEth?: string;
+  priceChange24hPct?: number;
+  salesVolumeEth?: string;
+  activeWalletsCount?: number;
+  sparklineData?: number[];
   totalSupply?: string;
   holdersCount?: number;
   bestOfferWei: string | null;
@@ -59,6 +63,11 @@ export function useUnifiedCollectionSearch({
           name: item.name,
           symbol: item.symbol,
           imageUrl: item.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
+          floorPriceEth: item.floorPriceEth,
+          priceChange24hPct: item.priceChange24hPct,
+          salesVolumeEth: item.salesVolumeEth,
+          activeWalletsCount: item.activeWalletsCount,
+          sparklineData: item.sparklineData,
           bestOfferWei: item.bestOfferWei ?? null,
           poolSizeWei: item.poolSizeWei || '0',
           offerCount: item.offerCount ?? 0,
@@ -74,6 +83,11 @@ export function useUnifiedCollectionSearch({
       protocolCollectionsData?.collections && protocolCollectionsData.collections.length > 0
         ? protocolCollectionsData.collections.map((item) => ({
             ...item,
+            floorPriceEth: item.floorPriceEth,
+            priceChange24hPct: item.priceChange24hPct,
+            salesVolumeEth: item.salesVolumeEth,
+            activeWalletsCount: item.activeWalletsCount,
+            sparklineData: item.sparklineData,
             bestOfferWei: item.bestOfferWei ?? null,
             poolSizeWei: item.poolSizeWei || '0',
             offerCount: item.offerCount || 0,
@@ -86,6 +100,11 @@ export function useUnifiedCollectionSearch({
       const key = item.address.toLowerCase();
       const existing = map.get(key);
       if (existing) {
+        existing.floorPriceEth = item.floorPriceEth ?? existing.floorPriceEth;
+        existing.priceChange24hPct = item.priceChange24hPct ?? existing.priceChange24hPct;
+        existing.salesVolumeEth = item.salesVolumeEth ?? existing.salesVolumeEth;
+        existing.activeWalletsCount = item.activeWalletsCount ?? existing.activeWalletsCount;
+        existing.sparklineData = item.sparklineData ?? existing.sparklineData;
         existing.bestOfferWei = item.bestOfferWei ?? existing.bestOfferWei ?? null;
         existing.poolSizeWei = item.poolSizeWei || existing.poolSizeWei || '0';
         existing.offerCount = Math.max(item.offerCount || 0, existing.offerCount || 0);
@@ -96,6 +115,11 @@ export function useUnifiedCollectionSearch({
           name: item.name,
           symbol: item.symbol,
           imageUrl: item.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
+          floorPriceEth: item.floorPriceEth,
+          priceChange24hPct: item.priceChange24hPct,
+          salesVolumeEth: item.salesVolumeEth,
+          activeWalletsCount: item.activeWalletsCount,
+          sparklineData: item.sparklineData,
           bestOfferWei: item.bestOfferWei ?? null,
           poolSizeWei: item.poolSizeWei || '0',
           offerCount: item.offerCount || 0,

@@ -27,6 +27,9 @@ export interface MarketCollectionItem {
   activeLoansCount?: number;
   maxLtvBps?: number;
   priceChange24hPct?: number;
+  salesVolumeEth?: string;
+  activeWalletsCount?: number;
+  holdersCount?: number;
   sparklineData?: number[];
   isVerified?: boolean;
 }
@@ -387,17 +390,17 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                     </td>
 
                     <td className="py-3.5 px-3 font-mono text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-                      {formatEthValue(c.poolSizeWei)}
+                      {c.salesVolumeEth ? `${parseFloat(c.salesVolumeEth).toFixed(2)} ETH` : (c.poolSizeWei && c.poolSizeWei !== '0' ? formatEthValue(c.poolSizeWei) : '—')}
                     </td>
 
                     <td className="py-3.5 px-3 font-mono text-xs text-[var(--muted)]">
-                      {c.activeLoansCount || c.offerCount || 0}
+                      {c.activeWalletsCount ?? (c.holdersCount || c.activeLoansCount || c.offerCount || '—')}
                     </td>
 
                     <td className="py-3.5 px-3">
                       <SparklineChart
                         isPositive={isPositive}
-                        data={c.sparklineData || [1.0 + (index * 0.1), 1.05 + (index * 0.1), 1.1 + (index * 0.1), 1.08 + (index * 0.1), 1.15 + (index * 0.1)]}
+                        data={c.sparklineData}
                       />
                     </td>
 

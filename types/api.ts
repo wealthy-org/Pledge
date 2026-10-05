@@ -14,6 +14,9 @@ export interface CollectionItemResponse {
   description: string;
   floorPriceEth?: string;
   priceChange24hPct?: number;
+  salesVolumeEth?: string;
+  activeWalletsCount?: number;
+  sparklineData?: number[];
   bestOfferWei: string | null;
   poolSizeWei: string;
   offerCount: number;
@@ -34,6 +37,10 @@ export interface ExploreCollectionItem {
   totalSupply?: string;
   holdersCount?: number;
   floorPriceEth?: string;
+  priceChange24hPct?: number;
+  salesVolumeEth?: string;
+  activeWalletsCount?: number;
+  sparklineData?: number[];
   bestOfferWei: string | null;
   poolSizeWei: string;
   offerCount: number;
