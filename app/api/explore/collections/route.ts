@@ -9,7 +9,7 @@ import type { ExploreCollectionItem, ExploreCollectionsResponse } from '@/types/
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const search = (searchParams.get('search') || '').trim().toLowerCase();
+  const search = (searchParams.get('search') || searchParams.get('q') || '').trim().toLowerCase();
   const hasOffersOnly = searchParams.get('hasOffers') === 'true';
   const limit = Math.min(parseInt(searchParams.get('limit') || '30', 10), 100);
   const chainIdParam = searchParams.get('chainId');

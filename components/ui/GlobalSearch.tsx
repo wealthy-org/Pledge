@@ -83,7 +83,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
         const [searchRes, exploreRes] = await Promise.allSettled([
           fetch(`/api/search?${params.toString()}`),
-          fetch(`/api/explore/collections?q=${encodeURIComponent(trimmed)}`),
+          fetch(`/api/explore/collections?search=${encodeURIComponent(trimmed)}&q=${encodeURIComponent(trimmed)}`),
         ]);
 
         if (!active) return;
@@ -132,7 +132,8 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   }, [localCollectionsData, query]);
 
   const mergedCollections = useMemo(() => {
-    const map = new Map<string, { id: string; title: string; subtitle: string; url: string; badge?: string; offerCount?: number; poolSizeWei?: string }>();
+    const q = query.toLowerCase().trim();
+    const map = new Map<string, { id: string; title: string; subtitle: string; url: string; badge?: string; offerCount?: number; poolSizeWei?: string; image?: string }>();
 
     for (const c of localCollections) {
       if (!c || !c.address) continue;
@@ -144,39 +145,46 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         badge: 'Curated',
         offerCount: c.offerCount,
         poolSizeWei: c.poolSizeWei,
+        image: c.imageUrl,
       });
     }
 
-    for (const c of dynamicExploreCollections) {
-      if (!c || !c.address) continue;
-      const existing = map.get(c.address.toLowerCase());
-      map.set(c.address.toLowerCase(), {
-        id: c.address.toLowerCase(),
-        title: c.name,
-        subtitle: `${c.symbol || 'NFT'} · ${c.address.slice(0, 6)}...${c.address.slice(-4)}`,
-        url: `/collection/${c.address}`,
-        badge: existing?.badge || 'Explore',
-        offerCount: c.offerCount !== undefined ? c.offerCount : existing?.offerCount,
-        poolSizeWei: c.poolSizeWei || existing?.poolSizeWei,
-      });
-    }
-
-    for (const c of apiResults.collections) {
-      if (!c || (!c.id && !c.url)) continue;
-      const key = (c.id || c.url).toLowerCase();
-      if (!map.has(key)) {
-        map.set(key, {
-          id: key,
-          title: c.title,
-          subtitle: c.subtitle,
-          url: c.url,
-          badge: c.badge || 'Verified',
+    if (q) {
+      for (const c of dynamicExploreCollections) {
+        if (!c || !c.address) continue;
+        const match = (c.name && c.name.toLowerCase().includes(q)) || (c.symbol && c.symbol.toLowerCase().includes(q)) || c.address.toLowerCase().includes(q);
+        if (!match) continue;
+        const existing = map.get(c.address.toLowerCase());
+        map.set(c.address.toLowerCase(), {
+          id: c.address.toLowerCase(),
+          title: c.name,
+          subtitle: `${c.symbol || 'NFT'} · ${c.address.slice(0, 6)}...${c.address.slice(-4)}`,
+          url: `/collection/${c.address}`,
+          badge: existing?.badge || 'Explore',
+          offerCount: c.offerCount !== undefined ? c.offerCount : existing?.offerCount,
+          poolSizeWei: c.poolSizeWei || existing?.poolSizeWei,
+          image: c.imageUrl || existing?.image,
         });
+      }
+
+      for (const c of apiResults.collections) {
+        if (!c || (!c.id && !c.url)) continue;
+        const key = (c.id || c.url).toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, {
+            id: key,
+            title: c.title,
+            subtitle: c.subtitle,
+            url: c.url,
+            badge: c.badge || 'Verified',
+            image: c.image,
+          });
+        }
       }
     }
 
     return Array.from(map.values());
-  }, [localCollections, dynamicExploreCollections, apiResults.collections]);
+  }, [query, localCollections, dynamicExploreCollections, apiResults.collections]);
 
   const allDisplayItems = useMemo(() => {
     return [
@@ -189,6 +197,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         badge: c.badge,
         offerCount: c.offerCount,
         poolSizeWei: c.poolSizeWei,
+        image: c.image,
       })),
       ...apiResults.wallets,
       ...apiResults.items,
@@ -267,51 +276,48 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         </div>
 
         <div id="search-results-list" role="listbox" className="overflow-y-auto p-2 space-y-4 max-h-[60vh]">
-          {query.trim() === '' && mergedCollections.length === 0 ? (
-            <div className="p-3 space-y-3">
-              {recentSearches.length > 0 && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--muted)] px-2">
-                    <span>Recent Searches</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRecentSearches([]);
-                        localStorage.removeItem('pledge:recent-searches');
-                      }}
-                      className="text-[10px] text-[var(--muted)] hover:text-[var(--text)] transition-colors"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 px-2">
-                    {recentSearches.map((term, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setQuery(term)}
-                        className="px-2.5 py-1 rounded-md text-xs bg-[var(--panel)] hover:bg-[var(--line)] text-[var(--text)] transition-colors border border-[var(--line)]"
-                      >
-                        {term}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              <div className="text-center py-6 text-xs text-[var(--muted)]">
-                Type a collection name, 0x wallet address, or token ID to search across the protocol.
+          {query.trim() === '' && recentSearches.length > 0 && (
+            <div className="space-y-1.5 px-2 pt-1 pb-2">
+              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-[var(--muted)]">
+                <span>Recent Searches</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecentSearches([]);
+                    localStorage.removeItem('pledge:recent-searches');
+                  }}
+                  className="text-[10px] text-[var(--muted)] hover:text-[var(--text)] transition-colors"
+                >
+                  Clear
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {recentSearches.map((term, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setQuery(term)}
+                    className="px-2.5 py-1 rounded-md text-xs bg-[var(--panel)] hover:bg-[var(--line)] text-[var(--text)] transition-colors border border-[var(--line)]"
+                  >
+                    {term}
+                  </button>
+                ))}
               </div>
             </div>
-          ) : allDisplayItems.length === 0 && !isLoading ? (
+          )}
+
+          {allDisplayItems.length === 0 && !isLoading ? (
             <div className="p-8 text-center text-xs text-[var(--muted)]">
-              No matching collections, wallets, or tokens found for &quot;{query}&quot;.
+              {query.trim() === ''
+                ? 'Type a collection name, 0x wallet address, or token ID to search across the protocol.'
+                : `No matching collections, wallets, or tokens found for "${query}".`}
             </div>
           ) : (
             <div className="space-y-3">
               {mergedCollections.length > 0 && (
                 <div className="space-y-1">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] px-3 py-1">
-                    Collections ({mergedCollections.length})
+                    {query.trim() === '' ? 'Curated Collections' : `Collections (${mergedCollections.length})`}
                   </div>
                   {mergedCollections.map((item) => {
                     const itemIndex = currentFlatCounter++;
@@ -327,8 +333,12 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                         }`}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-8 h-8 rounded-lg bg-[var(--panel)] border border-[var(--line)] flex items-center justify-center shrink-0 text-xs font-bold text-[var(--accent-primary)]">
-                            {item.title.slice(0, 2).toUpperCase()}
+                          <div className="w-8 h-8 rounded-lg bg-[var(--panel)] border border-[var(--line)] flex items-center justify-center shrink-0 text-xs font-bold text-[var(--accent-primary)] overflow-hidden">
+                            {item.image ? (
+                              <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                            ) : (
+                              item.title.slice(0, 2).toUpperCase()
+                            )}
                           </div>
                           <div className="min-w-0">
                             <div className="text-xs font-bold truncate">{item.title}</div>
@@ -342,7 +352,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                             </span>
                           ) : (
                             <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-[var(--panel)] border border-[var(--line)] text-[var(--muted)]">
-                              {item.badge || 'Explore'}
+                              {item.badge || 'Curated'}
                             </span>
                           )}
                         </div>

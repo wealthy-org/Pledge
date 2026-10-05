@@ -3,6 +3,7 @@ import { isAddress } from 'viem';
 import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse } from '@/lib/api/response';
 import { getCuratedCollections } from '@/config/collections';
+import { gondiClient } from '@/lib/gondi';
 
 export interface SearchResultItem {
   type: 'collection' | 'wallet' | 'item';
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   const wallets: SearchResultItem[] = [];
   const items: SearchResultItem[] = [];
 
-  const defaultCurated: Array<{ address: string; name: string; symbol: string }> = [];
+  const defaultCurated: Array<{ address: string; name: string; symbol: string; image?: string }> = [];
   if (process.env.NEXT_PUBLIC_RHG_COLLECTION) {
     defaultCurated.push({
       address: process.env.NEXT_PUBLIC_RHG_COLLECTION,
@@ -69,6 +70,32 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  const [gondiOverview, gondiList] = await Promise.all([
+    gondiClient.getMarketOverviewData('DAY').catch(() => ({ top: [], volume: [], movers: [] })),
+    gondiClient.listCollections(50).catch(() => []),
+  ]);
+
+  const allGondiCollections = [
+    ...(gondiOverview.top || []).map((t) => t.collection),
+    ...(gondiOverview.volume || []).map((v) => v.collection),
+    ...(gondiOverview.movers || []).map((m) => m.collection),
+    ...gondiList,
+  ];
+
+  for (const gc of allGondiCollections) {
+    if (!gc) continue;
+    const addr = gc.contractData?.contractAddress || gc.id;
+    if (!addr) continue;
+    if (!known.some((k) => k.address.toLowerCase() === addr.toLowerCase())) {
+      known.push({
+        address: addr,
+        name: gc.name || 'Gondi Collection',
+        symbol: gc.slug?.toUpperCase() || 'NFT',
+        image: gc.image?.cacheUrl || undefined,
+      });
+    }
+  }
+
   const matchedAddresses = new Set<string>();
 
   for (const c of known) {
@@ -84,7 +111,8 @@ export async function GET(request: NextRequest) {
         title: c.name,
         subtitle: `${c.symbol} · ${c.address.slice(0, 6)}...${c.address.slice(-4)}`,
         url: `/collection/${c.address}`,
-        badge: 'Curated',
+        badge: c.image ? 'Verified' : 'Curated',
+        image: c.image,
       });
     }
   }
