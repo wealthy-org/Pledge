@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import HomePage from '@/app/page';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 
@@ -43,11 +43,9 @@ const mockCollections: MarketCollectionItem[] = [
   },
 ];
 
-vi.mock('@/hooks/api/useCollections', () => ({
-  useCollections: () => ({
-    data: {
-      collections: mockCollections,
-    },
+vi.mock('@/hooks/useUnifiedCollectionSearch', () => ({
+  useUnifiedCollectionSearch: () => ({
+    collections: mockCollections,
     isLoading: false,
     isError: false,
     error: null,
@@ -67,19 +65,18 @@ describe('TICKET-80: Markets Page Active Offers Filter & Explore Link', () => {
 
   it('filters table to only show collections with active offers by default', () => {
     render(<HomePage />);
-    const alphaElements = screen.getAllByText('Active Collection Alpha');
-    expect(alphaElements.length).toBeGreaterThan(0);
-    expect(screen.queryByText('Zero Offers Collection Beta')).toBeNull();
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Active Collection Alpha')).toBeDefined();
+    expect(within(table).queryByText('Zero Offers Collection Beta')).toBeNull();
   });
 
   it('allows toggling to view all markets', () => {
     render(<HomePage />);
     const allButton = screen.getByRole('button', { name: /All Markets \(/i });
     fireEvent.click(allButton);
-    const alphaElements = screen.getAllByText('Active Collection Alpha');
-    expect(alphaElements.length).toBeGreaterThan(0);
-    const betaElements = screen.getAllByText('Zero Offers Collection Beta');
-    expect(betaElements.length).toBeGreaterThan(0);
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Active Collection Alpha')).toBeDefined();
+    expect(within(table).getByText('Zero Offers Collection Beta')).toBeDefined();
   });
 
   it('renders MarketsTable with empty state when no collections match', () => {

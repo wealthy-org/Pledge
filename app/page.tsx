@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { useCollections } from '@/hooks/api/useCollections';
+import { useUnifiedCollectionSearch } from '@/hooks/useUnifiedCollectionSearch';
 import { useMarketStats } from '@/hooks/api/useMarketStats';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
 import { MarketStatCards } from '@/components/markets/MarketStatCards';
@@ -12,14 +12,13 @@ import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function HomePage() {
   const chainId = useSafeChainId();
-  const { data: apiData, isLoading: isLoadingCollections } = useCollections(chainId);
+  const { collections: rawCollections, isLoading: isLoadingCollections } = useUnifiedCollectionSearch({ chainId });
   const { data: liveMarketStats, isLoading: isLoadingStats } = useMarketStats(chainId);
 
   const [selectedFilter, setSelectedFilter] = useState<'has_offers' | 'all'>('has_offers');
 
   const collections: MarketCollectionItem[] = useMemo(() => {
-    if (!apiData?.collections) return [];
-    return apiData.collections.map((item) => ({
+    return rawCollections.map((item) => ({
       address: item.address,
       name: item.name,
       symbol: item.symbol,
@@ -29,10 +28,9 @@ export default function HomePage() {
       poolSizeWei: item.poolSizeWei || '0',
       offerCount: item.offerCount || 0,
       activeLoansCount: item.activeLoansCount || 0,
-      priceChange24hPct: item.priceChange24hPct || undefined,
       isVerified: true,
     }));
-  }, [apiData]);
+  }, [rawCollections]);
 
   const activeOfferCollections = useMemo(() => {
     return collections.filter((c) => c.offerCount > 0);
@@ -145,7 +143,7 @@ export default function HomePage() {
       </div>
 
       <FeaturedListingsCarousel
-        collections={filteredCollections}
+        collections={collections}
         isLoading={isLoadingCollections}
       />
 
