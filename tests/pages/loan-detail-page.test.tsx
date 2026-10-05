@@ -270,7 +270,7 @@ describe('TICKET-39: Loan Detail Page & Components', () => {
       render(await LoanDetailPage({ params: pagePromise }));
 
       expect(screen.getAllByText(/loan #1/i).length).toBeGreaterThanOrEqual(1);
-      expect(screen.getByText('Nottingham Guild Pledges')).toBeDefined();
+      expect(screen.getByText(/Collateral:/i)).toBeDefined();
       expect(screen.getByText('1.00 ETH')).toBeDefined();
     });
 

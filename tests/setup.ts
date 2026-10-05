@@ -8,8 +8,6 @@ process.env.MAINNET_RPC_URL = 'https://rpc.mainnet.chain.robinhood.com';
 process.env.MAINNET_PLEDGE_CONTRACT = '0x4444444444444444444444444444444444444444';
 process.env.MAINNET_START_BLOCK = '1';
 process.env.TESTNET_START_BLOCK = '1';
-process.env.GONDI_API_URL = 'https://api2.gondi.xyz/graphql';
-process.env.GONDI_CDN_URL = 'https://cdn.gondi.xyz';
 process.env.NEXT_PUBLIC_DB_SCHEMA = 'pledge';
 process.env.NEXT_PUBLIC_RHG_COLLECTION = '0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496';
 process.env.NEXT_PUBLIC_SFR_COLLECTION = '0x34A1D3fff3958843C43aD80F30b94c510645C316';
@@ -84,8 +82,26 @@ vi.mock('viem', async (importOriginal) => {
       getBlockNumber: vi.fn().mockResolvedValue(127812000n),
       getLogs: vi.fn().mockResolvedValue([]),
       getBlock: vi.fn().mockResolvedValue({ hash: '0xmockhash' }),
-      readContract: vi.fn().mockResolvedValue(null),
-      getBytecode: vi.fn().mockResolvedValue(null),
+      readContract: vi.fn().mockImplementation(({ functionName, address }) => {
+        const addr = String(address || '').toLowerCase();
+        if (addr.includes('dead') || addr.includes('invalid') || addr === '0x0000000000000000000000000000000000000000') {
+          return Promise.resolve(null);
+        }
+        if (functionName === 'name') {
+          return Promise.resolve(`Mock Collection ${addr.slice(0, 6)}`);
+        }
+        if (functionName === 'symbol') {
+          return Promise.resolve('MOCK');
+        }
+        return Promise.resolve(null);
+      }),
+      getBytecode: vi.fn().mockImplementation(({ address }) => {
+        const addr = String(address || '').toLowerCase();
+        if (addr.includes('dead') || addr.includes('invalid') || addr === '0x0000000000000000000000000000000000000000') {
+          return Promise.resolve(null);
+        }
+        return Promise.resolve('0x1234');
+      }),
     })),
   };
 });

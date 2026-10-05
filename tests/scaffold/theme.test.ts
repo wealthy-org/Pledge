@@ -65,8 +65,6 @@ describe('TICKET-01: Theme & Scaffolding Test Suite', () => {
       'NEXT_PUBLIC_CHAIN_ID',
       'NEXT_PUBLIC_RPC_URL',
       'NEXT_PUBLIC_PLEDGE_CONTRACT',
-      'GONDI_API_URL',
-      'GONDI_CDN_URL',
       'NEXT_PUBLIC_SUPABASE_URL',
       'NEXT_PUBLIC_SUPABASE_ANON_KEY',
       'SUPABASE_SERVICE_ROLE_KEY',

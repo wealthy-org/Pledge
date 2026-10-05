@@ -21,23 +21,8 @@ export async function fetchOnChainCollection(
   chainId?: number
 ): Promise<DiscoveredCollection | null> {
   const lowerAddr = (address || '').toLowerCase();
-  const known: Record<string, { name: string; symbol: string }> = {
-    [(process.env.NEXT_PUBLIC_RHG_COLLECTION || '0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496').toLowerCase()]: {
-      name: 'Robinhood Genesis Pass',
-      symbol: 'RHG',
-    },
-    [(process.env.NEXT_PUBLIC_SFR_COLLECTION || '0x34A1D3fff3958843C43aD80F30b94c510645C316').toLowerCase()]: {
-      name: 'Sherwood Forest Rangers',
-      symbol: 'SFR',
-    },
-    [(process.env.NEXT_PUBLIC_NGP_COLLECTION || '0x90193C961A926261B756D1E5bb255e67ff9498A1').toLowerCase()]: {
-      name: 'Nottingham Guild Pledges',
-      symbol: 'NGP',
-    },
-  };
-
-  if (lowerAddr in known) {
-    const meta = known[lowerAddr];
+  if (collectionMetadataCache.has(lowerAddr)) {
+    const meta = collectionMetadataCache.get(lowerAddr)!;
     const targetChain = chainId || TESTNET_CHAIN_ID;
     return {
       id: meta.symbol.toLowerCase(),
@@ -56,7 +41,7 @@ export async function fetchOnChainCollection(
   const chain = getActiveChain(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(chain.rpcUrls.default.http[0], { timeout: 500 }),
+    transport: http(chain.rpcUrls.default.http[0], { timeout: 2000 }),
   });
 
   try {

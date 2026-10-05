@@ -46,74 +46,59 @@ export async function fetchOnChainCollectionInfo(
   chainId?: number
 ): Promise<{ name: string; symbol: string; address: `0x${string}` }> {
   const normalized = (collectionAddress || '').toLowerCase();
-  const known = {
-    [(process.env.NEXT_PUBLIC_RHG_COLLECTION || '0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496').toLowerCase()]: {
-      name: 'Robinhood Genesis Pass',
-      symbol: 'RHG',
-    },
-    [(process.env.NEXT_PUBLIC_SFR_COLLECTION || '0x34A1D3fff3958843C43aD80F30b94c510645C316').toLowerCase()]: {
-      name: 'Sherwood Forest Rangers',
-      symbol: 'SFR',
-    },
-    [(process.env.NEXT_PUBLIC_NGP_COLLECTION || '0x90193C961A926261B756D1E5bb255e67ff9498A1').toLowerCase()]: {
-      name: 'Nottingham Guild Pledges',
-      symbol: 'NGP',
-    },
-  };
-
-  if (normalized in known) {
-    const info = known[normalized as keyof typeof known];
-    return {
-      address: collectionAddress as `0x${string}`,
-      name: info.name,
-      symbol: info.symbol,
-    };
-  }
-
-  if (process.env.NODE_ENV !== 'test') {
-    try {
-      const chain = getActiveChain(chainId);
-      const rpcUrl = chain.rpcUrls.default.http[0];
-      const client = createPublicClient({
-        chain,
-        transport: http(rpcUrl, { timeout: 500 }),
-      });
-
-      const [nameResult, symbolResult] = await Promise.all([
-        client.readContract({
-          address: collectionAddress as `0x${string}`,
-          abi: ERC721_ABI,
-          functionName: 'name' as any,
-        }).catch(() => null),
-        client.readContract({
-          address: collectionAddress as `0x${string}`,
-          abi: ERC721_ABI,
-          functionName: 'symbol' as any,
-        }).catch(() => null),
-      ]);
-
-      const name = nameResult ? String(nameResult) : 'ERC721 Collection';
-      const symbol = symbolResult ? String(symbolResult) : 'NFT';
-
-      inMemoryCollectionCache.set(normalized, {
-        name,
-        symbol,
-        expiresAt: Date.now() + DEFAULT_TTL_MS,
-      });
-
+  if (inMemoryCollectionCache.has(normalized)) {
+    const cached = inMemoryCollectionCache.get(normalized)!;
+    if (Date.now() < cached.expiresAt) {
       return {
         address: collectionAddress as `0x${string}`,
-        name,
-        symbol,
+        name: cached.name,
+        symbol: cached.symbol,
       };
-    } catch {}
+    }
   }
 
-  return {
-    address: collectionAddress as `0x${string}`,
-    name: 'ERC721 Collection',
-    symbol: 'NFT',
-  };
+  try {
+    const chain = getActiveChain(chainId);
+    const rpcUrl = chain.rpcUrls.default.http[0];
+    const client = createPublicClient({
+      chain,
+      transport: http(rpcUrl, { timeout: 2000 }),
+    });
+
+    const [nameResult, symbolResult] = await Promise.all([
+      client.readContract({
+        address: collectionAddress as `0x${string}`,
+        abi: ERC721_ABI,
+        functionName: 'name' as any,
+      }).catch(() => null),
+      client.readContract({
+        address: collectionAddress as `0x${string}`,
+        abi: ERC721_ABI,
+        functionName: 'symbol' as any,
+      }).catch(() => null),
+    ]);
+
+    const name = nameResult ? String(nameResult) : 'ERC721 Collection';
+    const symbol = symbolResult ? String(symbolResult) : 'NFT';
+
+    inMemoryCollectionCache.set(normalized, {
+      name,
+      symbol,
+      expiresAt: Date.now() + DEFAULT_TTL_MS,
+    });
+
+    return {
+      address: collectionAddress as `0x${string}`,
+      name,
+      symbol,
+    };
+  } catch {
+    return {
+      address: collectionAddress as `0x${string}`,
+      name: 'ERC721 Collection',
+      symbol: 'NFT',
+    };
+  }
 }
 
 export async function fetchNftMetadata(
