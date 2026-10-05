@@ -91,11 +91,56 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
 
   const map = new Map<string, CollectionItemResponse>();
 
+  const allGondiCollections = [
+    ...(overview.top || []).map((t) => t.collection),
+    ...(overview.volume || []).map((v) => v.collection),
+    ...(overview.movers || []).map((m) => m.collection),
+    ...gondiList,
+  ];
+
+  const seenGondiAddrs = new Set<string>();
+  const uniqueGondi: typeof allGondiCollections = [];
+  for (const gc of allGondiCollections) {
+    if (!gc) continue;
+    const addr = (gc.contractData?.contractAddress || gc.id || '').toLowerCase();
+    if (!addr || seenGondiAddrs.has(addr)) continue;
+    seenGondiAddrs.add(addr);
+    uniqueGondi.push(gc);
+  }
+
+  for (let i = uniqueGondi.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = uniqueGondi[i];
+    uniqueGondi[i] = uniqueGondi[j];
+    uniqueGondi[j] = temp;
+  }
+
+  for (const gc of uniqueGondi) {
+    const addr = (gc.contractData?.contractAddress || gc.id || '').toLowerCase();
+    const validImg = extractGondiImageUrl(gc.image);
+    if (validImg) {
+      setCollectionImageCache(addr, validImg);
+    }
+    const imgUrl = validImg || resolveCollectionImageUrl(addr, gc.slug || gc.name);
+    const stats = computeCollectionStats(snapshot, addr);
+    map.set(addr, {
+      address: (gc.contractData?.contractAddress || gc.id) as `0x${string}`,
+      name: gc.name || 'Gondi Collection',
+      symbol: gc.slug?.toUpperCase() || 'NFT',
+      imageUrl: imgUrl,
+      description: `${gc.name || 'NFT Collection'} on Robinhood Chain`,
+      bestOfferWei: stats.bestOfferWei,
+      poolSizeWei: stats.poolSizeWei,
+      offerCount: stats.offerCount,
+      activeLoansCount: stats.activeLoansCount,
+    });
+  }
+
   for (const addr of distinctAddresses) {
+    const normalized = addr.toLowerCase();
+    if (map.has(normalized)) continue;
     const onChain = await fetchOnChainCollectionInfo(addr, targetChain);
     const stats = computeCollectionStats(snapshot, addr);
-    const normalized = addr.toLowerCase();
-
     map.set(normalized, {
       address: onChain.address,
       name: onChain.name,
@@ -107,52 +152,6 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       offerCount: stats.offerCount,
       activeLoansCount: stats.activeLoansCount,
     });
-  }
-
-  const allGondiCollections = [
-    ...(overview.top || []).map((t) => t.collection),
-    ...(overview.volume || []).map((v) => v.collection),
-    ...(overview.movers || []).map((m) => m.collection),
-    ...gondiList,
-  ];
-
-  for (const gc of allGondiCollections) {
-    if (!gc) continue;
-    const addr = (gc.contractData?.contractAddress || gc.id || '').toLowerCase();
-    if (!addr) continue;
-
-    const validImg = extractGondiImageUrl(gc.image);
-    if (validImg) {
-      setCollectionImageCache(addr, validImg);
-    }
-
-    const existing = map.get(addr);
-    const imgUrl = validImg || resolveCollectionImageUrl(addr, gc.slug || gc.name);
-
-    if (existing) {
-      if (validImg) {
-        existing.imageUrl = validImg;
-      }
-      if (existing.name === 'ERC721 Collection' && gc.name) {
-        existing.name = gc.name;
-      }
-      if (existing.symbol === 'NFT' && gc.slug) {
-        existing.symbol = gc.slug.toUpperCase();
-      }
-    } else {
-      const stats = computeCollectionStats(snapshot, addr);
-      map.set(addr, {
-        address: (gc.contractData?.contractAddress || gc.id) as `0x${string}`,
-        name: gc.name || 'Gondi Collection',
-        symbol: gc.slug?.toUpperCase() || 'NFT',
-        imageUrl: imgUrl,
-        description: `${gc.name || 'NFT Collection'} on Robinhood Chain`,
-        bestOfferWei: stats.bestOfferWei,
-        poolSizeWei: stats.poolSizeWei,
-        offerCount: stats.offerCount,
-        activeLoansCount: stats.activeLoansCount,
-      });
-    }
   }
 
   return Array.from(map.values());
@@ -169,8 +168,9 @@ export async function fetchCollectionDetail(
   const isEnabled = snapshot.enabledCollections.some((a) => a.toLowerCase() === target);
   const hasOffers = snapshot.offers.some((o) => o.collection.toLowerCase() === target);
   const hasLoans = snapshot.loans.some((l) => l.collection.toLowerCase() === target);
+  const isGondi = Boolean(await gondiClient.getCollectionByAddress(address).catch(() => null));
 
-  if (!isEnabled && !hasOffers && !hasLoans) {
+  if (!isEnabled && !hasOffers && !hasLoans && !isGondi) {
     return null;
   }
 

@@ -46,7 +46,7 @@ export default function LendPage() {
     isError: isErrorCollections,
     error: errorCollections,
     refetch: refetchCollections,
-  } = useUnifiedCollectionSearch({ chainId, query: searchQuery });
+  } = useUnifiedCollectionSearch({ chainId, query: searchQuery, randomize: true });
 
   const { state: txState, createOffer, reset: resetTx } = useCreateOffer();
   const { state: cancelTxState, cancelOffer, reset: resetCancelTx } = useCancelOffer();

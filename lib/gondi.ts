@@ -244,13 +244,52 @@ export class GondiClient {
     }
   }
 
+  public async getCollectionByAddress(contractAddress: string): Promise<GondiCollectionNode | null> {
+    if (!contractAddress) return null;
+    const normalized = contractAddress.toLowerCase();
+    const query = `
+      query GetCollectionByAddress($contractAddress: Address!) {
+        getCollectionsByContractAddress(contractAddress: $contractAddress) {
+          id
+          name
+          slug
+          description
+          supply
+          contractData {
+            contractAddress
+          }
+          image {
+            id
+            data
+            accessTypeName
+            contentTypeMime
+            cacheUrl
+          }
+        }
+      }
+    `;
+
+    try {
+      const data = await executeGondiQuery<{
+        getCollectionsByContractAddress: GondiCollectionNode[];
+      }>(query, { contractAddress: normalized }, `collection:${normalized}`);
+      const list = data?.getCollectionsByContractAddress || [];
+      if (list.length > 0) {
+        return list[0];
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
   public async getNftMetadata(
     contractAddress: string,
     tokenId: string
   ): Promise<GondiNftNode | null> {
     if (!contractAddress || !tokenId) return null;
     const query = `
-      query GetNftByContractAndToken($contractAddress: Address!, $tokenId: String!) {
+      query GetNftByContractAndToken($contractAddress: Address!, $tokenId: BigInt!) {
         getNftByContractAddressAndTokenId(contractAddress: $contractAddress, tokenId: $tokenId) {
           id
           tokenId

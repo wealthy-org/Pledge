@@ -3,6 +3,7 @@ import { NftMetadata, CachedNftRecord, MetadataFetchOptions } from '@/types/nft'
 import { TESTNET_CHAIN_ID, getActiveChain } from '@/config/chains';
 import { ERC721_ABI } from '@/config/contracts';
 import { resolveNftImage, generateSvgArtwork } from '@/lib/nft-image';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -78,6 +79,28 @@ export async function fetchOnChainCollectionInfo(
       }).catch(() => null),
     ]);
 
+    if (!nameResult && !symbolResult) {
+      const gondiCol = await gondiClient.getCollectionByAddress(collectionAddress);
+      if (gondiCol) {
+        const name = gondiCol.name || 'Gondi Collection';
+        const symbol = (gondiCol.slug || 'NFT').toUpperCase();
+        const validImg = extractGondiImageUrl(gondiCol.image);
+        if (validImg) {
+          setCollectionImageCache(normalized, validImg);
+        }
+        inMemoryCollectionCache.set(normalized, {
+          name,
+          symbol,
+          expiresAt: Date.now() + DEFAULT_TTL_MS,
+        });
+        return {
+          address: collectionAddress as `0x${string}`,
+          name,
+          symbol,
+        };
+      }
+    }
+
     const name = nameResult ? String(nameResult) : 'ERC721 Collection';
     const symbol = symbolResult ? String(symbolResult) : 'NFT';
 
@@ -93,6 +116,27 @@ export async function fetchOnChainCollectionInfo(
       symbol,
     };
   } catch {
+    try {
+      const gondiCol = await gondiClient.getCollectionByAddress(collectionAddress);
+      if (gondiCol) {
+        const name = gondiCol.name || 'Gondi Collection';
+        const symbol = (gondiCol.slug || 'NFT').toUpperCase();
+        const validImg = extractGondiImageUrl(gondiCol.image);
+        if (validImg) {
+          setCollectionImageCache(normalized, validImg);
+        }
+        inMemoryCollectionCache.set(normalized, {
+          name,
+          symbol,
+          expiresAt: Date.now() + DEFAULT_TTL_MS,
+        });
+        return {
+          address: collectionAddress as `0x${string}`,
+          name,
+          symbol,
+        };
+      }
+    } catch {}
     return {
       address: collectionAddress as `0x${string}`,
       name: 'ERC721 Collection',

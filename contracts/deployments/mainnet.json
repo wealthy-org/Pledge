@@ -4,6 +4,7 @@
   "deployedAt": "2026-10-01T23:59:00Z",
   "contracts": {
     "PledgeLoans": "0x4444444444444444444444444444444444444444"
+  },
   "governance": {
     "protocolFeeBps": 500,
     "feeRecipient": "0x4444444444444444444444444444444444444444"

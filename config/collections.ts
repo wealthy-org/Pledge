@@ -1,6 +1,8 @@
 import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID, getActiveChain } from './chains';
 import { createPublicClient, http } from 'viem';
 import { ERC721_ABI, getPledgeLoansAddress, PLEDGE_LOANS_ABI } from './contracts';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
+import { setCollectionImageCache } from '@/lib/services/metadata';
 
 export interface DiscoveredCollection {
   id: string;
@@ -52,6 +54,29 @@ export async function fetchOnChainCollection(
     ]);
 
     if (!nameResult && !symbolResult && (!bytecode || bytecode === '0x')) {
+      const gondiCol = await gondiClient.getCollectionByAddress(address);
+      if (gondiCol) {
+        const name = gondiCol.name || 'Gondi Collection';
+        const symbol = (gondiCol.slug || 'NFT').toUpperCase();
+        const validImg = extractGondiImageUrl(gondiCol.image);
+        if (validImg) {
+          setCollectionImageCache(lowerAddr, validImg);
+        }
+        collectionMetadataCache.set(lowerAddr, { name, symbol });
+        const targetChain = chainId || TESTNET_CHAIN_ID;
+        return {
+          id: (gondiCol.slug || symbol).toLowerCase(),
+          name,
+          symbol,
+          defaultDurations: [7, 14, 30],
+          addresses: {
+            [TESTNET_CHAIN_ID]: address,
+            [MAINNET_CHAIN_ID]: address,
+            [targetChain]: address,
+          },
+          contractAddress: address,
+        };
+      }
       return null;
     }
 
@@ -59,7 +84,7 @@ export async function fetchOnChainCollection(
     const symbol = symbolResult ? String(symbolResult) : 'NFT';
     const targetChain = chainId || TESTNET_CHAIN_ID;
 
-    collectionMetadataCache.set(address.toLowerCase(), { name, symbol });
+    collectionMetadataCache.set(lowerAddr, { name, symbol });
 
     return {
       id: symbol.toLowerCase(),
@@ -74,6 +99,31 @@ export async function fetchOnChainCollection(
       contractAddress: address,
     };
   } catch {
+    try {
+      const gondiCol = await gondiClient.getCollectionByAddress(address);
+      if (gondiCol) {
+        const name = gondiCol.name || 'Gondi Collection';
+        const symbol = (gondiCol.slug || 'NFT').toUpperCase();
+        const validImg = extractGondiImageUrl(gondiCol.image);
+        if (validImg) {
+          setCollectionImageCache(lowerAddr, validImg);
+        }
+        collectionMetadataCache.set(lowerAddr, { name, symbol });
+        const targetChain = chainId || TESTNET_CHAIN_ID;
+        return {
+          id: (gondiCol.slug || symbol).toLowerCase(),
+          name,
+          symbol,
+          defaultDurations: [7, 14, 30],
+          addresses: {
+            [TESTNET_CHAIN_ID]: address,
+            [MAINNET_CHAIN_ID]: address,
+            [targetChain]: address,
+          },
+          contractAddress: address,
+        };
+      }
+    } catch {}
     return null;
   }
 }

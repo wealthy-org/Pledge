@@ -26,11 +26,13 @@ export function useUnifiedCollectionSearch({
   chainId,
   hasOffersOnly = false,
   limit = 50,
+  randomize = false,
 }: {
   query?: string;
   chainId?: number;
   hasOffersOnly?: boolean;
   limit?: number;
+  randomize?: boolean;
 }) {
   const { data: protocolCollectionsData, isLoading: isLoadingProtocol } = useCollections(chainId);
   const {
@@ -49,6 +51,25 @@ export function useUnifiedCollectionSearch({
   const collections = useMemo(() => {
     const map = new Map<string, UnifiedCollectionItem>();
 
+    if (exploreData?.collections) {
+      for (const item of exploreData.collections) {
+        const key = item.address.toLowerCase();
+        map.set(key, {
+          address: item.address,
+          name: item.name,
+          symbol: item.symbol,
+          imageUrl: item.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
+          bestOfferWei: item.bestOfferWei ?? null,
+          poolSizeWei: item.poolSizeWei || '0',
+          offerCount: item.offerCount ?? 0,
+          activeLoansCount: item.activeLoansCount ?? 0,
+          isVerifiedErc721: true,
+          totalSupply: item.totalSupply,
+          holdersCount: item.holdersCount,
+        });
+      }
+    }
+
     const baseList: UnifiedCollectionItem[] =
       protocolCollectionsData?.collections && protocolCollectionsData.collections.length > 0
         ? protocolCollectionsData.collections.map((item) => ({
@@ -62,35 +83,24 @@ export function useUnifiedCollectionSearch({
         : [];
 
     for (const item of baseList) {
-      map.set(item.address.toLowerCase(), {
-        address: item.address,
-        name: item.name,
-        symbol: item.symbol,
-        imageUrl: item.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
-        bestOfferWei: item.bestOfferWei ?? null,
-        poolSizeWei: item.poolSizeWei || '0',
-        offerCount: item.offerCount || 0,
-        activeLoansCount: item.activeLoansCount || 0,
-        isVerifiedErc721: true,
-      });
-    }
-
-    if (exploreData?.collections) {
-      for (const item of exploreData.collections) {
-        const key = item.address.toLowerCase();
-        const existing = map.get(key);
+      const key = item.address.toLowerCase();
+      const existing = map.get(key);
+      if (existing) {
+        existing.bestOfferWei = item.bestOfferWei ?? existing.bestOfferWei ?? null;
+        existing.poolSizeWei = item.poolSizeWei || existing.poolSizeWei || '0';
+        existing.offerCount = Math.max(item.offerCount || 0, existing.offerCount || 0);
+        existing.activeLoansCount = Math.max(item.activeLoansCount || 0, existing.activeLoansCount || 0);
+      } else {
         map.set(key, {
           address: item.address,
-          name: (existing && existing.name) || item.name,
-          symbol: existing?.symbol || item.symbol,
-          imageUrl: item.imageUrl || existing?.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
-          bestOfferWei: item.bestOfferWei ?? existing?.bestOfferWei ?? null,
-          poolSizeWei: item.poolSizeWei || existing?.poolSizeWei || '0',
-          offerCount: item.offerCount ?? existing?.offerCount ?? 0,
-          activeLoansCount: item.activeLoansCount ?? existing?.activeLoansCount ?? 0,
+          name: item.name,
+          symbol: item.symbol,
+          imageUrl: item.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
+          bestOfferWei: item.bestOfferWei ?? null,
+          poolSizeWei: item.poolSizeWei || '0',
+          offerCount: item.offerCount || 0,
+          activeLoansCount: item.activeLoansCount || 0,
           isVerifiedErc721: true,
-          totalSupply: item.totalSupply,
-          holdersCount: item.holdersCount,
         });
       }
     }
@@ -105,6 +115,15 @@ export function useUnifiedCollectionSearch({
           c.symbol.toLowerCase().includes(q) ||
           c.address.toLowerCase().includes(q)
       );
+    } else if (randomize) {
+      const shuffled = [...result];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = shuffled[i];
+        shuffled[i] = shuffled[j];
+        shuffled[j] = temp;
+      }
+      result = shuffled;
     }
 
     if (hasOffersOnly) {
@@ -112,7 +131,7 @@ export function useUnifiedCollectionSearch({
     }
 
     return result;
-  }, [protocolCollectionsData, exploreData, query, hasOffersOnly]);
+  }, [protocolCollectionsData, exploreData, query, hasOffersOnly, randomize]);
 
   return {
     collections,
