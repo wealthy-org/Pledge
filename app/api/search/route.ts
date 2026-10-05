@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { isAddress } from 'viem';
 import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse } from '@/lib/api/response';
-import { getCuratedCollections } from '@/config/collections';
+import { fetchCuratedCollections, getCuratedCollections } from '@/config/collections';
 import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 
 export interface SearchResultItem {
@@ -35,32 +35,22 @@ export async function GET(request: NextRequest) {
   const wallets: SearchResultItem[] = [];
   const items: SearchResultItem[] = [];
 
-  const defaultCurated: Array<{ address: string; name: string; symbol: string; image?: string }> = [];
-  if (process.env.NEXT_PUBLIC_RHG_COLLECTION) {
-    defaultCurated.push({
-      address: process.env.NEXT_PUBLIC_RHG_COLLECTION,
-      name: 'Raka Honcho Genesis',
-      symbol: 'RHG',
-    });
-  }
-  if (process.env.NEXT_PUBLIC_SFR_COLLECTION) {
-    defaultCurated.push({
-      address: process.env.NEXT_PUBLIC_SFR_COLLECTION,
-      name: 'Special Forces Raka',
-      symbol: 'SFR',
-    });
-  }
-  if (process.env.NEXT_PUBLIC_NGP_COLLECTION) {
-    defaultCurated.push({
-      address: process.env.NEXT_PUBLIC_NGP_COLLECTION,
-      name: 'Next Gen Pass',
-      symbol: 'NGP',
+  const [onChainCurated, gondiOverview, gondiList] = await Promise.all([
+    fetchCuratedCollections(chainId).catch(() => []),
+    gondiClient.getMarketOverviewData('DAY').catch(() => ({ top: [], volume: [], movers: [] })),
+    gondiClient.listCollections(50).catch(() => []),
+  ]);
+
+  const known: Array<{ address: string; name: string; symbol: string; image?: string }> = [];
+  for (const c of onChainCurated) {
+    known.push({
+      address: c.contractAddress,
+      name: c.name,
+      symbol: c.symbol,
     });
   }
 
-  const cachedCurated = getCuratedCollections(chainId);
-  const known = [...defaultCurated];
-  for (const c of cachedCurated) {
+  for (const c of getCuratedCollections(chainId)) {
     if (!known.some((k) => k.address.toLowerCase() === c.contractAddress.toLowerCase())) {
       known.push({
         address: c.contractAddress,
@@ -69,11 +59,6 @@ export async function GET(request: NextRequest) {
       });
     }
   }
-
-  const [gondiOverview, gondiList] = await Promise.all([
-    gondiClient.getMarketOverviewData('DAY').catch(() => ({ top: [], volume: [], movers: [] })),
-    gondiClient.listCollections(50).catch(() => []),
-  ]);
 
   const allGondiCollections = [
     ...(gondiOverview.top || []).map((t) => t.collection),
@@ -118,6 +103,7 @@ export async function GET(request: NextRequest) {
   }
 
   for (const row of indexerStore.collections.values()) {
+    if (!row.is_enabled) continue;
     if (matchedAddresses.has(row.address.toLowerCase())) continue;
     if (
       (row.name && row.name.toLowerCase().includes(queryLower)) ||

@@ -5,10 +5,11 @@ import {Test} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {PledgeLoans} from "../../src/PledgeLoans.sol";
 import {IPledgeLoans} from "../../src/interfaces/IPledgeLoans.sol";
+import {PledgeLoansTestBase} from "../PledgeLoansTestBase.sol";
 import {MockERC721} from "../mocks/MockERC721.sol";
 import {PledgeLoansHandler} from "./PledgeLoansHandler.sol";
 
-contract PledgeLoansInvariantsTest is StdInvariant, Test, IPledgeLoans {
+contract PledgeLoansInvariantsTest is StdInvariant, PledgeLoansTestBase {
     PledgeLoans public pledge;
     MockERC721 public nft;
     PledgeLoansHandler public handler;

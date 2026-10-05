@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import { indexerStore } from '@/lib/indexer/store';
 
 process.env.NEXT_PUBLIC_CHAIN_ID = '46630';
 process.env.NEXT_PUBLIC_RPC_URL = 'https://rpc.testnet.chain.robinhood.com';
@@ -9,12 +10,6 @@ process.env.MAINNET_PLEDGE_CONTRACT = '0x444444444444444444444444444444444444444
 process.env.MAINNET_START_BLOCK = '1';
 process.env.TESTNET_START_BLOCK = '1';
 process.env.NEXT_PUBLIC_DB_SCHEMA = 'pledge';
-process.env.NEXT_PUBLIC_RHG_COLLECTION = '0x7FA9385bE102ac3EAc297483Dd6233D62b3e1496';
-process.env.NEXT_PUBLIC_SFR_COLLECTION = '0x34A1D3fff3958843C43aD80F30b94c510645C316';
-process.env.NEXT_PUBLIC_NGP_COLLECTION = '0x90193C961A926261B756D1E5bb255e67ff9498A1';
-process.env.NEXT_PUBLIC_RHG_COLLECTION_MAINNET = '0x4444444444444444444444444444444444444444';
-process.env.NEXT_PUBLIC_SFR_COLLECTION_MAINNET = '0x5555555555555555555555555555555555555555';
-process.env.NEXT_PUBLIC_NGP_COLLECTION_MAINNET = '0x6666666666666666666666666666666666666666';
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -74,6 +69,9 @@ vi.mock('@/lib/indexer/sync', async (importOriginal) => {
   };
 });
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const DEAD_ADDRESS = '0x000000000000000000000000000000000000dead';
+
 vi.mock('viem', async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>().catch(() => ({}));
   return {
@@ -84,20 +82,38 @@ vi.mock('viem', async (importOriginal) => {
       getBlock: vi.fn().mockResolvedValue({ hash: '0xmockhash' }),
       readContract: vi.fn().mockImplementation(({ functionName, address }) => {
         const addr = String(address || '').toLowerCase();
-        if (addr.includes('dead') || addr.includes('invalid') || addr === '0x0000000000000000000000000000000000000000') {
+        if (addr === ZERO_ADDRESS || addr === DEAD_ADDRESS) {
           return Promise.resolve(null);
         }
+        if (functionName === 'getCuratedCollections') {
+          const curated = Array.from(indexerStore.collections.values())
+            .filter((c) => c.is_enabled)
+            .map((c) => c.address as `0x${string}`);
+          return Promise.resolve(curated);
+        }
+        if (functionName === 'isCollectionCurated') {
+          const col = Array.from(indexerStore.collections.values()).find(
+            (c) => c.address.toLowerCase() === addr && c.is_enabled
+          );
+          return Promise.resolve(Boolean(col));
+        }
         if (functionName === 'name') {
-          return Promise.resolve(`Mock Collection ${addr.slice(0, 6)}`);
+          const col = Array.from(indexerStore.collections.values()).find(
+            (c) => c.address.toLowerCase() === addr
+          );
+          return Promise.resolve(col?.name || `Mock Collection ${addr.slice(0, 6)}`);
         }
         if (functionName === 'symbol') {
-          return Promise.resolve('MOCK');
+          const col = Array.from(indexerStore.collections.values()).find(
+            (c) => c.address.toLowerCase() === addr
+          );
+          return Promise.resolve(col?.symbol || 'MOCK');
         }
         return Promise.resolve(null);
       }),
       getBytecode: vi.fn().mockImplementation(({ address }) => {
         const addr = String(address || '').toLowerCase();
-        if (addr.includes('dead') || addr.includes('invalid') || addr === '0x0000000000000000000000000000000000000000') {
+        if (addr === ZERO_ADDRESS || addr === DEAD_ADDRESS) {
           return Promise.resolve(null);
         }
         return Promise.resolve('0x1234');

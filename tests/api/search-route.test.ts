@@ -7,6 +7,15 @@ describe('GET /api/search', () => {
   beforeEach(() => {
     indexerStore.collections.clear();
     indexerStore.loans.clear();
+    indexerStore.collections.set('46630:0x7fa9385be102ac3eac297483dd6233d62b3e1496', {
+      chain_id: 46630,
+      address: '0x7fa9385be102ac3eac297483dd6233d62b3e1496',
+      name: 'Robinhood Genesis Pass',
+      symbol: 'RHG',
+      image_url: null,
+      is_enabled: true,
+      added_at: new Date().toISOString(),
+    });
   });
 
   it('returns empty result set for empty query', async () => {

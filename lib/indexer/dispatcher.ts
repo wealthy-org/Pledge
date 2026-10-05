@@ -46,52 +46,9 @@ export async function dispatchLog(log: RawPledgeLog): Promise<boolean> {
       break;
     }
 
-    case 'CollectionEnabled': {
-      const collectionAddress = String(args.collection || '').toLowerCase();
-      if (collectionAddress) {
-        indexerStore.collections.set(`${chainId}:${collectionAddress}`, {
-          chain_id: chainId,
-          address: collectionAddress,
-          name: '',
-          symbol: null,
-          image_url: null,
-          is_enabled: true,
-          added_at: now,
-        });
-      }
-      break;
-    }
-
-    case 'CollectionDisabled': {
-      const collectionAddress = String(args.collection || '').toLowerCase();
-      if (collectionAddress) {
-        indexerStore.collections.set(`${chainId}:${collectionAddress}`, {
-          chain_id: chainId,
-          address: collectionAddress,
-          name: '',
-          symbol: null,
-          image_url: null,
-          is_enabled: false,
-          added_at: now,
-        });
-      }
-      break;
-    }
-
     case 'OfferCreated': {
       const offerId = Number(args.offerId);
       const collectionAddress = String(args.collection || '').toLowerCase();
-      if (collectionAddress) {
-        indexerStore.collections.set(`${chainId}:${collectionAddress}`, {
-          chain_id: chainId,
-          address: collectionAddress,
-          name: '',
-          symbol: null,
-          image_url: null,
-          is_enabled: true,
-          added_at: now,
-        });
-      }
       const offer: OfferRow = {
         offer_id: offerId,
         chain_id: chainId,
@@ -134,17 +91,6 @@ export async function dispatchLog(log: RawPledgeLog): Promise<boolean> {
     case 'LoanStarted': {
       const loanId = Number(args.loanId);
       const collectionAddress = String(args.collection || '').toLowerCase();
-      if (collectionAddress) {
-        indexerStore.collections.set(`${chainId}:${collectionAddress}`, {
-          chain_id: chainId,
-          address: collectionAddress,
-          name: '',
-          symbol: null,
-          image_url: null,
-          is_enabled: true,
-          added_at: now,
-        });
-      }
       const loan: LoanRow = {
         loan_id: loanId,
         chain_id: chainId,

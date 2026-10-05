@@ -170,12 +170,11 @@ export async function fetchCollectionDetail(
   const hasOffers = snapshot.offers.some((o) => o.collection.toLowerCase() === target);
   const hasLoans = snapshot.loans.some((l) => l.collection.toLowerCase() === target);
 
-  const onChain = await fetchOnChainCollectionInfo(address, targetChain);
-  const isValidOnChain = Boolean(onChain.name && onChain.name !== 'ERC721 Collection');
-
-  if (!isEnabled && !hasOffers && !hasLoans && !isValidOnChain) {
+  if (!isEnabled && !hasOffers && !hasLoans) {
     return null;
   }
+
+  const onChain = await fetchOnChainCollectionInfo(address, targetChain);
 
   const stats = computeCollectionStats(snapshot, address);
   const lastBlock = await getLastIndexedBlock(targetChain);

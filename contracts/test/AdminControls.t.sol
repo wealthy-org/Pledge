@@ -4,10 +4,11 @@ pragma solidity 0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {PledgeLoans} from "../src/PledgeLoans.sol";
 import {IPledgeLoans} from "../src/interfaces/IPledgeLoans.sol";
+import {PledgeLoansTestBase} from "./PledgeLoansTestBase.sol";
 import {MockERC721} from "./mocks/MockERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AdminControlsTest is Test, IPledgeLoans {
+contract AdminControlsTest is PledgeLoansTestBase {
     PledgeLoans public pledge;
     MockERC721 public nft;
 
@@ -81,6 +82,62 @@ contract AdminControlsTest is Test, IPledgeLoans {
         (,,,,,,,,,, LoanStatus updatedStatus) = pledge.loans(loanId);
         assertEq(uint8(updatedStatus), uint8(LoanStatus.Repaid));
         assertEq(nft.ownerOf(1), borrower);
+    }
+
+    function test_CuratedCollectionsEnumerableLifecycle() public {
+        address[] memory initialCurated = pledge.getCuratedCollections();
+        assertEq(initialCurated.length, 1);
+        assertEq(initialCurated[0], address(nft));
+        assertTrue(pledge.isCollectionCurated(address(nft)));
+
+        MockERC721 nft2 = new MockERC721("Sherwood Forest Rangers", "SFR", "ipfs://sfr/");
+        MockERC721 nft3 = new MockERC721("Nottingham Guild Pledges", "NGP", "ipfs://ngp/");
+
+        vm.startPrank(owner);
+        pledge.setCollectionEnabled(address(nft2), true);
+        pledge.setCollectionEnabled(address(nft3), true);
+        vm.stopPrank();
+
+        address[] memory threeList = pledge.getCuratedCollections();
+        assertEq(threeList.length, 3);
+        assertEq(threeList[0], address(nft));
+        assertEq(threeList[1], address(nft2));
+        assertEq(threeList[2], address(nft3));
+        assertTrue(pledge.isCollectionCurated(address(nft2)));
+        assertTrue(pledge.isCollectionCurated(address(nft3)));
+
+        vm.prank(owner);
+        pledge.setCollectionEnabled(address(nft2), true);
+        assertEq(pledge.getCuratedCollections().length, 3);
+
+        vm.prank(owner);
+        pledge.setCollectionEnabled(address(nft2), false);
+        assertFalse(pledge.isCollectionCurated(address(nft2)));
+
+        address[] memory twoList = pledge.getCuratedCollections();
+        assertEq(twoList.length, 2);
+        assertEq(twoList[0], address(nft));
+        assertEq(twoList[1], address(nft3));
+
+        vm.prank(owner);
+        pledge.setCollectionBlocked(address(nft3), true);
+        assertFalse(pledge.isCollectionCurated(address(nft3)));
+
+        address[] memory oneList = pledge.getCuratedCollections();
+        assertEq(oneList.length, 1);
+        assertEq(oneList[0], address(nft));
+
+        vm.prank(owner);
+        pledge.setCollectionBlocked(address(nft), true);
+        assertFalse(pledge.isCollectionCurated(address(nft)));
+        assertEq(pledge.getCuratedCollections().length, 0);
+
+        vm.prank(owner);
+        pledge.setCollectionBlocked(address(nft3), false);
+        assertTrue(pledge.isCollectionCurated(address(nft3)));
+        address[] memory restored = pledge.getCuratedCollections();
+        assertEq(restored.length, 1);
+        assertEq(restored[0], address(nft3));
     }
 
     function test_FeeUpdateSnapshotIsolation() public {

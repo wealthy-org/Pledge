@@ -27,6 +27,25 @@ describe('TICKET-21: Live API Route Handlers Test Suite', () => {
   beforeEach(() => {
     indexerStore.reset();
 
+    indexerStore.collections.set(`${TESTNET_CHAIN_ID}:${RHG_ADDRESS.toLowerCase()}`, {
+      chain_id: TESTNET_CHAIN_ID,
+      address: RHG_ADDRESS.toLowerCase(),
+      name: 'Robinhood Genesis Pass',
+      symbol: 'RHG',
+      image_url: null,
+      is_enabled: true,
+      added_at: '2026-10-01T12:00:00Z',
+    });
+    indexerStore.collections.set(`${TESTNET_CHAIN_ID}:0x3333333333333333333333333333333333333333`, {
+      chain_id: TESTNET_CHAIN_ID,
+      address: '0x3333333333333333333333333333333333333333',
+      name: 'Mock Collection 0x3333',
+      symbol: 'MOCK',
+      image_url: null,
+      is_enabled: true,
+      added_at: '2026-10-01T12:00:00Z',
+    });
+
     indexerStore.upsertOffer({
       offer_id: 1,
       chain_id: TESTNET_CHAIN_ID,
@@ -140,8 +159,8 @@ describe('TICKET-21: Live API Route Handlers Test Suite', () => {
     vi.spyOn(gondiClient, 'listNfts').mockResolvedValue([
       {
         id: '1',
-        tokenId: '42',
-        name: 'RHG #42',
+        tokenId: '101',
+        name: 'RHG #101',
         collection: {
           id: RHG_ADDRESS,
           name: 'Robinhood Genesis Pass',

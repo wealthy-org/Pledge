@@ -81,7 +81,7 @@ export function useUnifiedCollectionSearch({
         const existing = map.get(key);
         map.set(key, {
           address: item.address,
-          name: (existing && existing.name !== 'Robinhood NFT' && existing.name !== 'ERC721 Collection') ? existing.name : item.name,
+          name: (existing && existing.name) || item.name,
           symbol: existing?.symbol || item.symbol,
           imageUrl: item.imageUrl || existing?.imageUrl || resolveCollectionImageUrl(item.address, item.symbol || item.name),
           bestOfferWei: item.bestOfferWei ?? existing?.bestOfferWei ?? null,

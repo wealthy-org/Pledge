@@ -62,6 +62,7 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
       let nextOfferId = 1n;
       let nextLoanId = 1n;
       let client: ReturnType<typeof createPublicClient> | null = null;
+      const enabledCollectionsSet = new Set<string>();
 
       if (process.env.NODE_ENV !== 'test') {
         try {
@@ -76,7 +77,7 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
 
       if (client) {
         try {
-          const [block, fee, paused, nextOffer, nextLoan] = await Promise.all([
+          const [block, fee, paused, nextOffer, nextLoan, curatedList] = await Promise.all([
             client.getBlockNumber(),
             client.readContract({
               address: contractAddress,
@@ -98,6 +99,11 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
               abi: PLEDGE_LOANS_ABI,
               functionName: 'nextLoanId',
             }).catch(() => 1n),
+            client.readContract({
+              address: contractAddress,
+              abi: PLEDGE_LOANS_ABI,
+              functionName: 'getCuratedCollections',
+            }).catch(() => [] as `0x${string}`[]),
           ]);
 
           blockNumber = Number(block);
@@ -105,12 +111,19 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
           newActivityPaused = Boolean(paused);
           nextOfferId = BigInt(nextOffer as bigint);
           nextLoanId = BigInt(nextLoan as bigint);
+
+          if (Array.isArray(curatedList)) {
+            for (const col of curatedList) {
+              if (col && typeof col === 'string') {
+                enabledCollectionsSet.add(col.toLowerCase());
+              }
+            }
+          }
         } catch {}
       }
 
       const offersMap = new Map<number, RawContractOffer>();
       const loansMap = new Map<number, RawContractLoan>();
-      const enabledCollectionsSet = new Set<string>();
 
       const nowSeconds = Math.floor(now / 1000);
 
@@ -146,10 +159,6 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
               const feeBpsSnapshot = Number(tuple[6] || 0);
               const statusNum = Number(tuple[7] || 0);
               const isExpired = expiresAtSeconds > 0 && expiresAtSeconds < nowSeconds;
-
-              if (collection) {
-                enabledCollectionsSet.add(collection);
-              }
 
               offersMap.set(id, {
                 offerId: id,
@@ -207,10 +216,6 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
               const statusNum = Number(tuple[10] || 0);
               const isOverdue = dueAtSeconds > 0 && dueAtSeconds < nowSeconds;
 
-              if (collection) {
-                enabledCollectionsSet.add(collection);
-              }
-
               loansMap.set(id, {
                 loanId: id,
                 offerId,
@@ -249,7 +254,6 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
             status: row.status,
             isExpired: expSeconds < nowSeconds,
           });
-          enabledCollectionsSet.add(row.collection.toLowerCase());
         }
       }
 
@@ -271,13 +275,16 @@ export async function getProtocolSnapshot(chainId?: number): Promise<ProtocolSna
             status: row.status,
             isOverdue: dueSeconds < nowSeconds,
           });
-          enabledCollectionsSet.add(row.collection.toLowerCase());
         }
       }
 
       for (const col of indexerStore.collections.values()) {
-        if (col.chain_id === targetChainId && col.is_enabled) {
-          enabledCollectionsSet.add(col.address.toLowerCase());
+        if (col.chain_id === targetChainId) {
+          if (col.is_enabled) {
+            enabledCollectionsSet.add(col.address.toLowerCase());
+          } else {
+            enabledCollectionsSet.delete(col.address.toLowerCase());
+          }
         }
       }
 

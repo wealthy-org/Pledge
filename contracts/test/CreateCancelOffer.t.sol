@@ -3,9 +3,10 @@ pragma solidity 0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {PledgeLoans} from "../src/PledgeLoans.sol";
 import {IPledgeLoans} from "../src/interfaces/IPledgeLoans.sol";
+import {PledgeLoansTestBase} from "./PledgeLoansTestBase.sol";
 import {MockERC721} from "./mocks/MockERC721.sol";
 
-contract CreateCancelOfferTest is Test, IPledgeLoans {
+contract CreateCancelOfferTest is PledgeLoansTestBase {
     PledgeLoans public pledgeLoans;
     MockERC721 public nft;
 

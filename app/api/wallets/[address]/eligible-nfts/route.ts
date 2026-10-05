@@ -22,16 +22,36 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
   const cursor = searchParams.get('cursor');
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
 
   let nfts: WalletNftItem[] = [];
 
   try {
+    const { getProtocolSnapshot } = await import('@/lib/protocol/snapshot');
+    const snapshot = await getProtocolSnapshot(chainId);
+    const allowedCollections = new Set(snapshot.enabledCollections.map((c) => c.toLowerCase()));
+
     const list = await gondiClient.listNfts(limit);
     for (const node of list) {
-      const contractAddress = node.collection?.contractData?.contractAddress || node.collection?.id || '';
-      const collectionName = node.collection?.name || (contractAddress ? formatShortAddress(contractAddress) : 'Verified NFT');
+      const contractAddress = (node.collection?.contractData?.contractAddress || node.collection?.id || '').toLowerCase();
+      if (!contractAddress || !allowedCollections.has(contractAddress)) {
+        continue;
+      }
+
+      const isCollateral = snapshot.loans.some(
+        (l) =>
+          l.status === 'active' &&
+          l.collection.toLowerCase() === contractAddress &&
+          String(l.tokenId) === String(node.tokenId)
+      );
+      if (isCollateral) {
+        continue;
+      }
+
+      const collectionName = node.collection?.name || formatShortAddress(contractAddress);
       const name = node.name || `${collectionName} #${node.tokenId}`;
-      const imageUrl = extractGondiImageUrl(node.image) || resolveCollectionImageUrl(collectionName);
+      const imageUrl = extractGondiImageUrl(node.image) || resolveCollectionImageUrl(contractAddress, collectionName);
 
       nfts.push({
         contractAddress,

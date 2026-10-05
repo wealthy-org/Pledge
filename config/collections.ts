@@ -1,6 +1,6 @@
 import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID, getActiveChain } from './chains';
 import { createPublicClient, http } from 'viem';
-import { ERC721_ABI } from './contracts';
+import { ERC721_ABI, getPledgeLoansAddress, PLEDGE_LOANS_ABI } from './contracts';
 
 export interface DiscoveredCollection {
   id: string;
@@ -81,7 +81,33 @@ export async function fetchOnChainCollection(
 export async function fetchCuratedCollections(
   chainId?: number
 ): Promise<DiscoveredCollection[]> {
-  return [];
+  const targetChain = chainId || TESTNET_CHAIN_ID;
+  const chain = getActiveChain(targetChain);
+  const client = createPublicClient({
+    chain,
+    transport: http(chain.rpcUrls.default.http[0], { timeout: 2000 }),
+  });
+
+  let curatedAddrs: `0x${string}`[] = [];
+  try {
+    const pledgeAddress = getPledgeLoansAddress(targetChain) as `0x${string}`;
+    const raw = await client.readContract({
+      address: pledgeAddress,
+      abi: PLEDGE_LOANS_ABI,
+      functionName: 'getCuratedCollections',
+    });
+    if (Array.isArray(raw)) {
+      curatedAddrs = raw as `0x${string}`[];
+    }
+  } catch {
+    curatedAddrs = [];
+  }
+
+  const results = await Promise.all(
+    curatedAddrs.map((addr) => fetchOnChainCollection(addr, targetChain))
+  );
+
+  return results.filter((c): c is DiscoveredCollection => c !== null);
 }
 
 export function getCuratedCollections(chainId?: number): DiscoveredCollection[] {

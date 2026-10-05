@@ -114,4 +114,7 @@ interface IPledgeLoans {
     event FeeUpdated(uint16 oldFeeBps, uint16 newFeeBps);
     event FeeRecipientUpdated(address indexed oldRecipient, address indexed newRecipient);
     event NewActivityPaused(bool isPaused);
+
+    function getCuratedCollections() external view returns (address[] memory);
+    function isCollectionCurated(address collection) external view returns (bool);
 }

@@ -31,6 +31,8 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
     mapping(address => bool) public disabledCollections;
     mapping(address => uint256) public claimableProceeds;
     mapping(address => mapping(uint256 => bool)) public isTokenInCollateral;
+    address[] private _curatedCollectionsList;
+    mapping(address => uint256) private _curatedCollectionIndex;
 
     constructor(
         address initialOwner,
@@ -48,6 +50,28 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
         protocolFeeBps = initialFeeBps;
         nextOfferId = 1;
         nextLoanId = 1;
+    }
+
+    function _addCuratedCollection(address collection) internal {
+        if (_curatedCollectionIndex[collection] == 0) {
+            _curatedCollectionsList.push(collection);
+            _curatedCollectionIndex[collection] = _curatedCollectionsList.length;
+        }
+    }
+
+    function _removeCuratedCollection(address collection) internal {
+        uint256 index1 = _curatedCollectionIndex[collection];
+        if (index1 > 0) {
+            uint256 lastIdx = _curatedCollectionsList.length - 1;
+            uint256 targetIdx = index1 - 1;
+            if (targetIdx != lastIdx) {
+                address lastCol = _curatedCollectionsList[lastIdx];
+                _curatedCollectionsList[targetIdx] = lastCol;
+                _curatedCollectionIndex[lastCol] = index1;
+            }
+            _curatedCollectionsList.pop();
+            delete _curatedCollectionIndex[collection];
+        }
     }
 
     function _validateERC721Collection(address collection) internal view {
@@ -72,13 +96,31 @@ contract PledgeLoans is IPledgeLoans, Ownable2Step, ReentrancyGuard, IERC721Rece
     function setCollectionBlocked(address collection, bool blocked) external onlyOwner {
         disabledCollections[collection] = blocked;
         enabledCollections[collection] = !blocked;
+        if (blocked) {
+            _removeCuratedCollection(collection);
+        } else {
+            _addCuratedCollection(collection);
+        }
         emit CollectionBlockStatusChanged(collection, blocked);
     }
 
     function setCollectionEnabled(address collection, bool enabled) external onlyOwner {
         disabledCollections[collection] = !enabled;
         enabledCollections[collection] = enabled;
+        if (enabled) {
+            _addCuratedCollection(collection);
+        } else {
+            _removeCuratedCollection(collection);
+        }
         emit CollectionStatusChanged(collection, enabled);
+    }
+
+    function getCuratedCollections() external view returns (address[] memory) {
+        return _curatedCollectionsList;
+    }
+
+    function isCollectionCurated(address collection) external view returns (bool) {
+        return enabledCollections[collection] && !disabledCollections[collection];
     }
 
     function setFeeBps(uint16 newFeeBps) external onlyOwner {
