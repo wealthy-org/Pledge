@@ -2,7 +2,7 @@ import { TESTNET_CHAIN_ID, MAINNET_CHAIN_ID, getActiveChain } from './chains';
 import { createPublicClient, http } from 'viem';
 import { ERC721_ABI, getPledgeLoansAddress, PLEDGE_LOANS_ABI } from './contracts';
 import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
-import { setCollectionImageCache } from '@/lib/services/metadata';
+import { setCollectionImageCache, resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export interface DiscoveredCollection {
   id: string;
@@ -11,12 +11,13 @@ export interface DiscoveredCollection {
   defaultDurations: [7, 14, 30];
   contractAddress: `0x${string}`;
   addresses: Record<number, `0x${string}`>;
+  imageUrl?: string;
 }
 
 export type ActiveCuratedCollection = DiscoveredCollection;
 export type CuratedCollectionDefinition = DiscoveredCollection;
 
-const collectionMetadataCache = new Map<string, { name: string; symbol: string }>();
+const collectionMetadataCache = new Map<string, { name: string; symbol: string; imageUrl?: string }>();
 
 export async function fetchOnChainCollection(
   address: `0x${string}`,
@@ -37,6 +38,7 @@ export async function fetchOnChainCollection(
         [targetChain]: address,
       },
       contractAddress: address,
+      imageUrl: meta.imageUrl,
     };
   }
 
@@ -61,8 +63,10 @@ export async function fetchOnChainCollection(
         const validImg = extractGondiImageUrl(gondiCol.image);
         if (validImg) {
           setCollectionImageCache(lowerAddr, validImg);
+          setCollectionImageCache(name, validImg);
+          setCollectionImageCache(symbol, validImg);
         }
-        collectionMetadataCache.set(lowerAddr, { name, symbol });
+        collectionMetadataCache.set(lowerAddr, { name, symbol, imageUrl: validImg || undefined });
         const targetChain = chainId || TESTNET_CHAIN_ID;
         return {
           id: (gondiCol.slug || symbol).toLowerCase(),
@@ -75,6 +79,7 @@ export async function fetchOnChainCollection(
             [targetChain]: address,
           },
           contractAddress: address,
+          imageUrl: validImg || undefined,
         };
       }
       return null;
@@ -83,8 +88,9 @@ export async function fetchOnChainCollection(
     const name = nameResult ? String(nameResult) : 'ERC721 Collection';
     const symbol = symbolResult ? String(symbolResult) : 'NFT';
     const targetChain = chainId || TESTNET_CHAIN_ID;
+    const resolvedImg = resolveCollectionImageUrl(address, symbol || name);
 
-    collectionMetadataCache.set(lowerAddr, { name, symbol });
+    collectionMetadataCache.set(lowerAddr, { name, symbol, imageUrl: resolvedImg });
 
     return {
       id: symbol.toLowerCase(),
@@ -97,6 +103,7 @@ export async function fetchOnChainCollection(
         [targetChain]: address,
       },
       contractAddress: address,
+      imageUrl: resolvedImg,
     };
   } catch {
     try {
@@ -107,8 +114,10 @@ export async function fetchOnChainCollection(
         const validImg = extractGondiImageUrl(gondiCol.image);
         if (validImg) {
           setCollectionImageCache(lowerAddr, validImg);
+          setCollectionImageCache(name, validImg);
+          setCollectionImageCache(symbol, validImg);
         }
-        collectionMetadataCache.set(lowerAddr, { name, symbol });
+        collectionMetadataCache.set(lowerAddr, { name, symbol, imageUrl: validImg || undefined });
         const targetChain = chainId || TESTNET_CHAIN_ID;
         return {
           id: (gondiCol.slug || symbol).toLowerCase(),
@@ -121,6 +130,7 @@ export async function fetchOnChainCollection(
             [targetChain]: address,
           },
           contractAddress: address,
+          imageUrl: validImg || undefined,
         };
       }
     } catch {}
@@ -175,6 +185,7 @@ export function getCuratedCollections(chainId?: number): DiscoveredCollection[] 
         [targetChain]: addr as `0x${string}`,
       },
       contractAddress: addr as `0x${string}`,
+      imageUrl: meta.imageUrl,
     });
   }
   return list;
@@ -202,5 +213,6 @@ export function getCollectionByAddress(
       [targetChain]: lowerTarget as `0x${string}`,
     },
     contractAddress: lowerTarget as `0x${string}`,
+    imageUrl: cached.imageUrl,
   };
 }

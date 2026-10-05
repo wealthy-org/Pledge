@@ -13,7 +13,7 @@ import { Toast } from '@/components/ui/Toast';
 import { BorrowReviewDrawer } from '@/components/borrow/BorrowReviewDrawer';
 import { useConnectModal } from '@/contexts/ConnectModalContext';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
-import { useCollections } from '@/hooks/api/useCollections';
+import { useCollections, useCollection } from '@/hooks/api/useCollections';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
@@ -30,19 +30,22 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
   const { openConnectModal } = useConnectModal();
   const chainId = useSafeChainId();
   const { data: collectionsData } = useCollections(chainId);
+  const { data: remoteCollection } = useCollection(initialCollection.contractAddress, chainId);
 
   const matchedRemote = collectionsData?.collections?.find(
     (c) => c.address.toLowerCase() === initialCollection.contractAddress.toLowerCase()
   );
 
   const collection: ActiveCuratedCollection = useMemo(() => {
-    if (!matchedRemote) return initialCollection;
+    const remote = remoteCollection || matchedRemote;
+    if (!remote) return initialCollection;
     return {
       ...initialCollection,
-      name: matchedRemote.name || initialCollection.name,
-      symbol: matchedRemote.symbol || initialCollection.symbol,
+      name: remote.name || initialCollection.name,
+      symbol: remote.symbol || initialCollection.symbol,
+      imageUrl: remote.imageUrl || initialCollection.imageUrl,
     };
-  }, [initialCollection, matchedRemote]);
+  }, [initialCollection, matchedRemote, remoteCollection]);
 
   const [activeTab, setActiveTab] = useState<string>('offers');
   const [selectedOffer, setSelectedOffer] = useState<OfferItem | null>(null);
@@ -123,7 +126,7 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
       tokenId: '1',
       collectionName: collection.name,
       name: collection.name,
-      imageUrl: resolveCollectionImageUrl(collection.name),
+      imageUrl: collection.imageUrl || resolveCollectionImageUrl(collection.contractAddress, collection.symbol || collection.name),
       bestOfferWei: stats.bestOfferWei || undefined,
       offerCount: stats.offerCount,
     };
@@ -154,6 +157,7 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
       <CollectionHeader
         collection={collection}
         stats={stats}
+        imageUrl={collection.imageUrl}
       />
 
       <CollectionRiskNotes

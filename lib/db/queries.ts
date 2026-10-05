@@ -184,7 +184,7 @@ export async function fetchCollectionDetail(
       address: onChain.address,
       name: onChain.name,
       symbol: onChain.symbol,
-      imageUrl: resolveCollectionImageUrl(onChain.address, onChain.symbol || onChain.name),
+      imageUrl: onChain.imageUrl || resolveCollectionImageUrl(onChain.address, onChain.symbol || onChain.name),
       description: `${onChain.name} on Robinhood Chain`,
       bestOfferWei: stats.bestOfferWei,
       poolSizeWei: stats.poolSizeWei,

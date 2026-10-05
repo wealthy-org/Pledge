@@ -37,7 +37,14 @@ export function CollectionHeader({
   const safeChainId = useSafeChainId();
   const activeChainId = chainId ?? safeChainId;
   const [copied, setCopied] = useState(false);
-  const displayImage = imageUrl || resolveCollectionImageUrl(collection.name || collection.symbol);
+  const [imgError, setImgError] = useState(false);
+  const rawImage =
+    imageUrl ||
+    collection.imageUrl ||
+    resolveCollectionImageUrl(collection.contractAddress, collection.symbol || collection.name);
+  const displayImage = imgError
+    ? resolveCollectionImageUrl(collection.contractAddress, collection.symbol || collection.name)
+    : rawImage;
 
   const truncatedAddress = formatShortAddress(collection.contractAddress);
   const explorerUrl = getExplorerAddressUrl(collection.contractAddress, activeChainId);
@@ -88,6 +95,7 @@ export function CollectionHeader({
                 sizes="64px"
                 className="object-cover"
                 unoptimized
+                onError={() => setImgError(true)}
               />
             ) : (
               collection.symbol.slice(0, 3)

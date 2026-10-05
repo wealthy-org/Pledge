@@ -8,7 +8,7 @@ import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 const DEFAULT_TTL_MS = 24 * 60 * 60 * 1000;
 
 const inMemoryMetadataCache = new Map<string, CachedNftRecord>();
-const inMemoryCollectionCache = new Map<string, { name: string; symbol: string; expiresAt: number }>();
+const inMemoryCollectionCache = new Map<string, { name: string; symbol: string; imageUrl?: string; expiresAt: number }>();
 const inMemoryCollectionImageCache = new Map<string, string>();
 
 export function setCollectionImageCache(key: string, url: string): void {
@@ -45,7 +45,7 @@ export function getMetadataCacheSize(): number {
 export async function fetchOnChainCollectionInfo(
   collectionAddress: string,
   chainId?: number
-): Promise<{ name: string; symbol: string; address: `0x${string}` }> {
+): Promise<{ name: string; symbol: string; address: `0x${string}`; imageUrl?: string }> {
   const normalized = (collectionAddress || '').toLowerCase();
   if (inMemoryCollectionCache.has(normalized)) {
     const cached = inMemoryCollectionCache.get(normalized)!;
@@ -54,6 +54,7 @@ export async function fetchOnChainCollectionInfo(
         address: collectionAddress as `0x${string}`,
         name: cached.name,
         symbol: cached.symbol,
+        imageUrl: cached.imageUrl,
       };
     }
   }
@@ -87,26 +88,32 @@ export async function fetchOnChainCollectionInfo(
         const validImg = extractGondiImageUrl(gondiCol.image);
         if (validImg) {
           setCollectionImageCache(normalized, validImg);
+          setCollectionImageCache(name, validImg);
+          setCollectionImageCache(symbol, validImg);
         }
         inMemoryCollectionCache.set(normalized, {
           name,
           symbol,
+          imageUrl: validImg || undefined,
           expiresAt: Date.now() + DEFAULT_TTL_MS,
         });
         return {
           address: collectionAddress as `0x${string}`,
           name,
           symbol,
+          imageUrl: validImg || undefined,
         };
       }
     }
 
     const name = nameResult ? String(nameResult) : 'ERC721 Collection';
     const symbol = symbolResult ? String(symbolResult) : 'NFT';
+    const resolvedImg = resolveCollectionImageUrl(collectionAddress, symbol || name);
 
     inMemoryCollectionCache.set(normalized, {
       name,
       symbol,
+      imageUrl: resolvedImg,
       expiresAt: Date.now() + DEFAULT_TTL_MS,
     });
 
@@ -114,6 +121,7 @@ export async function fetchOnChainCollectionInfo(
       address: collectionAddress as `0x${string}`,
       name,
       symbol,
+      imageUrl: resolvedImg,
     };
   } catch {
     try {
@@ -124,23 +132,29 @@ export async function fetchOnChainCollectionInfo(
         const validImg = extractGondiImageUrl(gondiCol.image);
         if (validImg) {
           setCollectionImageCache(normalized, validImg);
+          setCollectionImageCache(name, validImg);
+          setCollectionImageCache(symbol, validImg);
         }
         inMemoryCollectionCache.set(normalized, {
           name,
           symbol,
+          imageUrl: validImg || undefined,
           expiresAt: Date.now() + DEFAULT_TTL_MS,
         });
         return {
           address: collectionAddress as `0x${string}`,
           name,
           symbol,
+          imageUrl: validImg || undefined,
         };
       }
     } catch {}
+    const fallbackImg = resolveCollectionImageUrl(collectionAddress, 'NFT');
     return {
       address: collectionAddress as `0x${string}`,
       name: 'ERC721 Collection',
       symbol: 'NFT',
+      imageUrl: fallbackImg,
     };
   }
 }
