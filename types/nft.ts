@@ -1,4 +1,4 @@
-export type ImageSource = 'blockscout' | 'onchain-inline' | 'onchain-uri' | 'generative';
+export type ImageSource = 'gondi-cdn' | 'onchain-inline' | 'onchain-uri' | 'generative';
 
 export interface ResolvedNftImage {
   url: string;

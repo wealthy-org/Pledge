@@ -1,6 +1,6 @@
 import { isAddress } from 'viem';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
-import { resolveFromBlockscout } from './tier1-blockscout';
+import { resolveFromGondi } from './tier1-gondi';
 import { resolveFromTokenUri } from './tier2-onchain';
 import { buildGenerativeResolvedImage } from './tier3-generative';
 import type { NftImageResolutionOptions, ResolvedNftImage } from './types';
@@ -8,7 +8,7 @@ import type { NftImageResolutionOptions, ResolvedNftImage } from './types';
 export * from './types';
 export * from './uri';
 export * from './tier3-generative';
-export * from './tier1-blockscout';
+export * from './tier1-gondi';
 export * from './tier2-onchain';
 
 interface CachedImageEntry {
@@ -64,15 +64,14 @@ export async function resolveNftImage(
 
   const resolutionPromise = (async () => {
     try {
-      const tier1Result = await resolveFromBlockscout(
+      const tier1Gondi = await resolveFromGondi(
         normalizedAddr,
-        normalizedTokenId,
-        chainId
+        normalizedTokenId
       );
-      if (tier1Result && tier1Result.url) {
+      if (tier1Gondi && tier1Gondi.url) {
         const ttl = options.ttlMs ?? SUCCESS_TTL_MS;
-        imageCache.set(cacheKey, { image: tier1Result, expiresAt: Date.now() + ttl });
-        return tier1Result;
+        imageCache.set(cacheKey, { image: tier1Gondi, expiresAt: Date.now() + ttl });
+        return tier1Gondi;
       }
 
       if (isAddress(normalizedAddr, { strict: false })) {

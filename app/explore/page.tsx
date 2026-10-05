@@ -131,7 +131,7 @@ function ExploreContent() {
         <div className="p-8 border border-dashed border-red-200 dark:border-red-900/40 rounded-xl text-center bg-red-50/50 dark:bg-red-950/10 space-y-3">
           <h3 className="text-sm font-semibold text-[var(--text)]">Failed to load collections catalog</h3>
           <p className="text-xs text-[var(--muted)]">
-            {error instanceof Error ? error.message : 'Unable to connect to the Blockscout Indexer API.'}
+            {error instanceof Error ? error.message : 'Unable to connect to the Gondi Indexer API.'}
           </p>
           <Button onClick={() => refetch()} size="sm" variant="secondary">
             Retry Connection

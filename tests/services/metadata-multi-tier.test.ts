@@ -12,17 +12,17 @@ describe('TICKET-87: Multi-Tier Metadata & Image Resolution End-to-End Suite', (
     vi.restoreAllMocks();
   });
 
-  it('resolves metadata with Tier 1 Blockscout image', async () => {
+  it('resolves metadata with Tier 1 Gondi image', async () => {
     vi.spyOn(orchestratorModule, 'resolveNftImage').mockResolvedValueOnce({
       url: 'https://gateway.pinata.cloud/ipfs/bafybeiefvqwyjtabs3imzrz7fkftqe2vwrazy66mlse7ljz3bvm3vp6qqm',
-      source: 'blockscout',
+      source: 'gondi-cdn',
       isFallback: false,
       rawUri: 'ipfs://bafybeiefvqwyjtabs3imzrz7fkftqe2vwrazy66mlse7ljz3bvm3vp6qqm',
     });
 
     const metadata = await metadataService.fetchNftMetadata(contract, tokenId);
     expect(metadata.imageUrl).toBe('https://gateway.pinata.cloud/ipfs/bafybeiefvqwyjtabs3imzrz7fkftqe2vwrazy66mlse7ljz3bvm3vp6qqm');
-    expect(metadata.imageSource).toBe('blockscout');
+    expect(metadata.imageSource).toBe('gondi-cdn');
     expect(metadata.isFallback).toBe(false);
   });
 
@@ -57,7 +57,7 @@ describe('TICKET-87: Multi-Tier Metadata & Image Resolution End-to-End Suite', (
   it('serves cached metadata on subsequent calls', async () => {
     const spy = vi.spyOn(orchestratorModule, 'resolveNftImage').mockResolvedValue({
       url: 'https://example.com/cached.png',
-      source: 'blockscout',
+      source: 'gondi-cdn',
       isFallback: false,
       rawUri: 'https://example.com/cached.png',
     });

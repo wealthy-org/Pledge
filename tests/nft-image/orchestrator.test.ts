@@ -4,7 +4,7 @@ import {
   clearNftImageCache,
   getNftImageCacheSize,
 } from '@/lib/nft-image';
-import * as tier1Module from '@/lib/nft-image/tier1-blockscout';
+import * as tier1Module from '@/lib/nft-image/tier1-gondi';
 import * as tier2Module from '@/lib/nft-image/tier2-onchain';
 
 describe('NFT Image Resolution Orchestrator', () => {
@@ -16,24 +16,24 @@ describe('NFT Image Resolution Orchestrator', () => {
     vi.restoreAllMocks();
   });
 
-  it('short-circuits at Tier 1 if Blockscout returns valid image', async () => {
-    const tier1Spy = vi.spyOn(tier1Module, 'resolveFromBlockscout').mockResolvedValue({
+  it('short-circuits at Tier 1 if Gondi returns valid image', async () => {
+    const tier1Spy = vi.spyOn(tier1Module, 'resolveFromGondi').mockResolvedValue({
       url: 'https://gateway.pinata.cloud/ipfs/bafytest',
-      source: 'blockscout',
+      source: 'gondi-cdn',
       isFallback: false,
       rawUri: 'ipfs://bafytest',
     });
     const tier2Spy = vi.spyOn(tier2Module, 'resolveFromTokenUri');
 
     const result = await resolveNftImage(contract, tokenId);
-    expect(result.source).toBe('blockscout');
+    expect(result.source).toBe('gondi-cdn');
     expect(result.isFallback).toBe(false);
     expect(tier1Spy).toHaveBeenCalledTimes(1);
     expect(tier2Spy).not.toHaveBeenCalled();
   });
 
   it('falls back to Tier 2 if Tier 1 returns null', async () => {
-    vi.spyOn(tier1Module, 'resolveFromBlockscout').mockResolvedValue(null);
+    vi.spyOn(tier1Module, 'resolveFromGondi').mockResolvedValue(null);
     const tier2Spy = vi.spyOn(tier2Module, 'resolveFromTokenUri').mockResolvedValue({
       url: 'https://example.com/onchain.png',
       source: 'onchain-uri',
@@ -48,7 +48,7 @@ describe('NFT Image Resolution Orchestrator', () => {
   });
 
   it('falls back to Tier 3 generative artwork if Tier 1 and Tier 2 return null', async () => {
-    vi.spyOn(tier1Module, 'resolveFromBlockscout').mockResolvedValue(null);
+    vi.spyOn(tier1Module, 'resolveFromGondi').mockResolvedValue(null);
     vi.spyOn(tier2Module, 'resolveFromTokenUri').mockResolvedValue(null);
 
     const result = await resolveNftImage(contract, tokenId);
@@ -58,9 +58,9 @@ describe('NFT Image Resolution Orchestrator', () => {
   });
 
   it('caches successful resolutions in memory', async () => {
-    const tier1Spy = vi.spyOn(tier1Module, 'resolveFromBlockscout').mockResolvedValue({
+    const tier1Spy = vi.spyOn(tier1Module, 'resolveFromGondi').mockResolvedValue({
       url: 'https://example.com/cached.png',
-      source: 'blockscout',
+      source: 'gondi-cdn',
       isFallback: false,
       rawUri: 'https://example.com/cached.png',
     });
@@ -74,9 +74,9 @@ describe('NFT Image Resolution Orchestrator', () => {
   });
 
   it('bypasses cache when bypassCache option is true', async () => {
-    const tier1Spy = vi.spyOn(tier1Module, 'resolveFromBlockscout').mockResolvedValue({
+    const tier1Spy = vi.spyOn(tier1Module, 'resolveFromGondi').mockResolvedValue({
       url: 'https://example.com/fresh.png',
-      source: 'blockscout',
+      source: 'gondi-cdn',
       isFallback: false,
       rawUri: 'https://example.com/fresh.png',
     });
@@ -89,12 +89,12 @@ describe('NFT Image Resolution Orchestrator', () => {
 
   it('deduplicates simultaneous in-flight requests for the same NFT', async () => {
     let callCount = 0;
-    vi.spyOn(tier1Module, 'resolveFromBlockscout').mockImplementation(async () => {
+    vi.spyOn(tier1Module, 'resolveFromGondi').mockImplementation(async () => {
       callCount++;
       await new Promise((res) => setTimeout(res, 50));
       return {
         url: 'https://example.com/parallel.png',
-        source: 'blockscout',
+        source: 'gondi-cdn',
         isFallback: false,
         rawUri: 'https://example.com/parallel.png',
       };

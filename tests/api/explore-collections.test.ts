@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/explore/collections/route';
 import { indexerStore } from '@/lib/indexer/store';
-import { clearBlockscoutCache } from '@/lib/blockscout';
+import { clearGondiCache } from '@/lib/gondi';
 import { detectDuplicateNames, formatShortAddress } from '@/lib/services/collectionSafety';
 
 describe('TICKET-77: Explore Collections API Route & Safety Verification', () => {
@@ -10,7 +10,7 @@ describe('TICKET-77: Explore Collections API Route & Safety Verification', () =>
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    clearBlockscoutCache();
+    clearGondiCache();
     indexerStore.reset();
   });
 
@@ -36,23 +36,37 @@ describe('TICKET-77: Explore Collections API Route & Safety Verification', () =>
   });
 
   it('TS-03: GET /api/explore/collections returns aggregated collection list and offer stats', async () => {
-    const mockBlockscoutResponse = {
-      items: [
-        {
-          address: '0x4444444444444444444444444444444444444444',
-          name: 'Nottingham Punks',
-          symbol: 'NPK',
-          type: 'ERC-721',
-          total_supply: '1000',
+    const mockGondiResponse = {
+      data: {
+        getMarketOverview: {
+          top: [
+            {
+              salesCount: 5,
+              salesVolume: 10,
+              collection: {
+                id: '4444',
+                name: 'Nottingham Punks',
+                slug: 'nottinghampunks',
+                contractData: {
+                  contractAddress: '0x4444444444444444444444444444444444444444',
+                },
+                image: {
+                  cacheUrl: 'https://cdn.gondi.xyz/image/abc',
+                },
+              },
+            },
+          ],
         },
-      ],
-      next_page_params: null,
+        listCollections: {
+          edges: [],
+        },
+      },
     };
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => mockBlockscoutResponse,
+      json: async () => mockGondiResponse,
     });
 
     indexerStore.upsertOffer({
@@ -84,26 +98,42 @@ describe('TICKET-77: Explore Collections API Route & Safety Verification', () =>
   });
 
   it('TS-04: GET /api/explore/collections filters by search and hasOffers', async () => {
-    const mockBlockscoutResponse = {
-      items: [
-        {
-          address: '0x1111111111111111111111111111111111111111',
-          name: 'Sherwood Foresters',
-          symbol: 'SFF',
+    const mockGondiResponse = {
+      data: {
+        getMarketOverview: {
+          top: [
+            {
+              collection: {
+                id: '1111',
+                name: 'Sherwood Foresters',
+                slug: 'sherwoodforesters',
+                contractData: {
+                  contractAddress: '0x1111111111111111111111111111111111111111',
+                },
+              },
+            },
+            {
+              collection: {
+                id: '2222',
+                name: 'Robinhood Birds',
+                slug: 'robinhoodbirds',
+                contractData: {
+                  contractAddress: '0x2222222222222222222222222222222222222222',
+                },
+              },
+            },
+          ],
         },
-        {
-          address: '0x2222222222222222222222222222222222222222',
-          name: 'Robinhood Birds',
-          symbol: 'RHB',
+        listCollections: {
+          edges: [],
         },
-      ],
-      next_page_params: null,
+      },
     };
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => mockBlockscoutResponse,
+      json: async () => mockGondiResponse,
     });
 
     const searchReq = new NextRequest('http://localhost:3000/api/explore/collections?search=birds');

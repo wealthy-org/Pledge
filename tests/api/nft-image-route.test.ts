@@ -32,7 +32,7 @@ describe('GET /api/nft-image Route Handler', () => {
   it('returns 200 with resolved image data on valid request', async () => {
     vi.spyOn(orchestratorModule, 'resolveNftImage').mockResolvedValue({
       url: 'https://gateway.pinata.cloud/ipfs/bafytest',
-      source: 'blockscout',
+      source: 'gondi-cdn',
       isFallback: false,
       rawUri: 'ipfs://bafytest',
     });
@@ -44,7 +44,7 @@ describe('GET /api/nft-image Route Handler', () => {
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(data.url).toBe('https://gateway.pinata.cloud/ipfs/bafytest');
-    expect(data.source).toBe('blockscout');
+    expect(data.source).toBe('gondi-cdn');
     expect(data.isFallback).toBe(false);
   });
 

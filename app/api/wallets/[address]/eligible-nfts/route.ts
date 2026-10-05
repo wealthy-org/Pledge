@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getBlockscoutClient } from '@/lib/blockscout';
+import { gondiClient } from '@/lib/gondi';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
@@ -22,24 +22,20 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
   const cursor = searchParams.get('cursor');
-  const chainIdParam = searchParams.get('chainId');
-  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
 
   let nfts: WalletNftItem[] = [];
 
   try {
-    const client = getBlockscoutClient(chainId);
-    const queryParams: Record<string, string> = {};
-    if (cursor) queryParams.cursor = cursor;
-    const result = await client.fetchWalletNFTs(address, queryParams);
-    for (const item of result.items) {
-      const collectionName = item.collectionName || (item.collectionAddress ? formatShortAddress(item.collectionAddress) : 'Robinhood Verified NFT');
-      const name = item.name || `${collectionName} #${item.tokenId}`;
-      const imageUrl = item.imageUrl || resolveCollectionImageUrl(collectionName);
+    const list = await gondiClient.listNfts(limit);
+    for (const node of list) {
+      const contractAddress = node.collection?.contractData?.contractAddress || node.collection?.id || '';
+      const collectionName = node.collection?.name || (contractAddress ? formatShortAddress(contractAddress) : 'Verified NFT');
+      const name = node.name || `${collectionName} #${node.tokenId}`;
+      const imageUrl = node.image?.cacheUrl || resolveCollectionImageUrl(collectionName);
 
       nfts.push({
-        contractAddress: item.collectionAddress,
-        tokenId: item.tokenId,
+        contractAddress,
+        tokenId: node.tokenId,
         collectionName,
         name,
         imageUrl,

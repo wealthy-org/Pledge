@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getBlockscoutClient } from '@/lib/blockscout';
+import { gondiClient } from '@/lib/gondi';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse } from '@/lib/api/response';
@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
   const search = (searchParams.get('search') || '').trim().toLowerCase();
   const hasOffersOnly = searchParams.get('hasOffers') === 'true';
   const limit = Math.min(parseInt(searchParams.get('limit') || '30', 10), 100);
-  const cursor = searchParams.get('cursor') || undefined;
   const chainIdParam = searchParams.get('chainId');
   const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
 
@@ -22,27 +21,10 @@ export async function GET(request: NextRequest) {
     } catch {}
   }
 
-  let blockscoutItems: Array<{
-    contractAddress: string;
-    name: string;
-    symbol: string;
-    totalSupply?: string;
-    holdersCount?: number;
-    iconUrl?: string;
-  }> = [];
-
-  let nextPageParams: Record<string, unknown> | null = null;
-
-  try {
-    const client = getBlockscoutClient(chainId);
-    const queryParams: Record<string, string> = {};
-    if (cursor) queryParams.cursor = cursor;
-    const response = await client.fetchERC721Collections(queryParams);
-    blockscoutItems = response.items;
-    nextPageParams = response.nextPageParams;
-  } catch {
-    blockscoutItems = [];
-  }
+  const [overviewItems, collectionNodes] = await Promise.all([
+    gondiClient.getMarketOverview('DAY').catch(() => []),
+    gondiClient.listCollections(limit).catch(() => []),
+  ]);
 
   const activeOffers = Array.from(indexerStore.offers.values()).filter(
     (o) => o.status === 'open' && (chainId === undefined || o.chain_id === chainId)
@@ -71,8 +53,8 @@ export async function GET(request: NextRequest) {
   const seenAddresses = new Set<string>();
   const aggregated: ExploreCollectionItem[] = [];
 
-  for (const item of blockscoutItems) {
-    const addr = item.contractAddress.toLowerCase();
+  for (const item of overviewItems) {
+    const addr = (item.collection?.contractData?.contractAddress || item.collection?.id || '').toLowerCase();
     if (!addr || seenAddresses.has(addr)) continue;
     seenAddresses.add(addr);
 
@@ -89,13 +71,55 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    const name = item.collection?.name || 'Unnamed Collection';
+    const symbol = item.collection?.slug?.toUpperCase() || 'NFT';
+    const imageUrl = item.collection?.image?.cacheUrl || resolveCollectionImageUrl(addr, symbol || name);
+    const floorPriceEth = item.salesVolume ? (item.salesVolume / Math.max(1, item.salesCount || 1)).toFixed(2) : undefined;
+
     aggregated.push({
-      address: item.contractAddress,
-      name: item.name,
-      symbol: item.symbol,
-      imageUrl: item.iconUrl || resolveCollectionImageUrl(item.contractAddress, item.symbol || item.name),
-      totalSupply: item.totalSupply,
-      holdersCount: item.holdersCount,
+      address: item.collection?.contractData?.contractAddress || item.collection?.id,
+      name,
+      symbol,
+      imageUrl,
+      totalSupply: item.collection?.supply ? String(item.collection.supply) : undefined,
+      holdersCount: item.usersCount || undefined,
+      floorPriceEth,
+      bestOfferWei: bestOffer !== null ? bestOffer.toString() : null,
+      poolSizeWei: poolSize.toString(),
+      offerCount: colOffers.length || (item.loansCount ? item.loansCount : 0),
+      activeLoansCount: colLoans.length,
+      isVerifiedErc721: true,
+    });
+  }
+
+  for (const node of collectionNodes) {
+    const addr = (node.contractData?.contractAddress || node.id || '').toLowerCase();
+    if (!addr || seenAddresses.has(addr)) continue;
+    seenAddresses.add(addr);
+
+    const colOffers = offersByCol.get(addr) || [];
+    const colLoans = loansByCol.get(addr) || [];
+
+    let poolSize = 0n;
+    let bestOffer: bigint | null = null;
+    for (const o of colOffers) {
+      const val = BigInt(o.principal_wei);
+      poolSize += val;
+      if (bestOffer === null || val > bestOffer) {
+        bestOffer = val;
+      }
+    }
+
+    const name = node.name || 'Unnamed Collection';
+    const symbol = node.slug?.toUpperCase() || 'NFT';
+    const imageUrl = node.image?.cacheUrl || resolveCollectionImageUrl(addr, symbol || name);
+
+    aggregated.push({
+      address: node.contractData?.contractAddress || node.id,
+      name,
+      symbol,
+      imageUrl,
+      totalSupply: node.supply ? String(node.supply) : undefined,
       bestOfferWei: bestOffer !== null ? bestOffer.toString() : null,
       poolSizeWei: poolSize.toString(),
       offerCount: colOffers.length,
@@ -156,12 +180,7 @@ export async function GET(request: NextRequest) {
   }));
 
   const paginated = withDuplicateFlags.slice(0, limit);
-  const nextCursor =
-    nextPageParams && typeof nextPageParams === 'object'
-      ? JSON.stringify(nextPageParams)
-      : withDuplicateFlags.length > limit
-      ? limit.toString()
-      : null;
+  const nextCursor = withDuplicateFlags.length > limit ? limit.toString() : null;
 
   const result: ExploreCollectionsResponse = {
     collections: paginated,

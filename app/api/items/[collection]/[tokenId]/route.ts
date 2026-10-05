@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { isAddress } from 'viem';
-import { getBlockscoutClient } from '@/lib/blockscout';
+import { gondiClient } from '@/lib/gondi';
+import { fetchNftMetadata } from '@/lib/services/metadata';
 import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse, errorResponse } from '@/lib/api/response';
 
@@ -21,7 +22,6 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const chainId = parseInt(searchParams.get('chainId') || process.env.NEXT_PUBLIC_CHAIN_ID || '46630', 10);
 
-  const client = getBlockscoutClient();
   let metadata: {
     name: string;
     description: string;
@@ -35,14 +35,34 @@ export async function GET(
   };
 
   try {
-    const nft = await client.fetchNFTInstance(collection, tokenId);
-    metadata = {
-      name: nft.name || `Token #${tokenId}`,
-      description: nft.description || '',
-      imageUrl: nft.imageUrl || '',
-      attributes: (nft.attributes as unknown as Array<{ trait_type: string; value: string | number }>) || [],
-    };
-  } catch {}
+    const gondiNft = await gondiClient.getNftMetadata(collection, tokenId);
+    if (gondiNft) {
+      metadata = {
+        name: gondiNft.name || `Token #${tokenId}`,
+        description: gondiNft.description || '',
+        imageUrl: gondiNft.image?.cacheUrl || '',
+        attributes: [],
+      };
+    } else {
+      const onChainMeta = await fetchNftMetadata(collection, tokenId);
+      metadata = {
+        name: onChainMeta.name || `Token #${tokenId}`,
+        description: onChainMeta.description || '',
+        imageUrl: onChainMeta.imageUrl || '',
+        attributes: (onChainMeta.attributes as unknown as Array<{ trait_type: string; value: string | number }>) || [],
+      };
+    }
+  } catch {
+    try {
+      const onChainMeta = await fetchNftMetadata(collection, tokenId);
+      metadata = {
+        name: onChainMeta.name || `Token #${tokenId}`,
+        description: onChainMeta.description || '',
+        imageUrl: onChainMeta.imageUrl || '',
+        attributes: (onChainMeta.attributes as unknown as Array<{ trait_type: string; value: string | number }>) || [],
+      };
+    } catch {}
+  }
 
   let activeLoan: {
     loanId: number;

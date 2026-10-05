@@ -11,7 +11,7 @@ import { GET as getLoanDetail } from '@/app/api/loans/[id]/route';
 import { GET as getActivity } from '@/app/api/activity/route';
 import { GET as getMarketStats } from '@/app/api/stats/market/route';
 import { indexerStore } from '@/lib/indexer/store';
-import * as blockscoutModule from '@/lib/blockscout';
+import { gondiClient } from '@/lib/gondi';
 import { TESTNET_CHAIN_ID } from '@/config/chains';
 import { NextRequest } from 'next/server';
 
@@ -137,20 +137,21 @@ describe('TICKET-21: Live API Route Handlers Test Suite', () => {
       timestamp: '2026-10-01T12:00:00Z',
     });
 
-    vi.spyOn(blockscoutModule.getBlockscoutClient(), 'fetchWalletNFTs').mockResolvedValue({
-      items: [
-        {
-          tokenId: '42',
-          collectionAddress: RHG_ADDRESS,
-          collectionName: 'Robinhood Genesis Pass',
-          name: 'RHG #42',
-          description: 'A Genesis Pass NFT',
-          imageUrl: 'https://images.unsplash.com/photo-1',
-          attributes: [],
+    vi.spyOn(gondiClient, 'listNfts').mockResolvedValue([
+      {
+        id: '1',
+        tokenId: '42',
+        name: 'RHG #42',
+        collection: {
+          id: RHG_ADDRESS,
+          name: 'Robinhood Genesis Pass',
+          contractData: { contractAddress: RHG_ADDRESS },
         },
-      ],
-      nextPageParams: null,
-    });
+        image: {
+          cacheUrl: 'https://images.unsplash.com/photo-1',
+        },
+      } as any,
+    ]);
   });
 
   describe('TS-01: All 11 Endpoints Happy Path', () => {
