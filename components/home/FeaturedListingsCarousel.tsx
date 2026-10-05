@@ -162,7 +162,7 @@ export function FeaturedListingsCarousel({
                     <div className="absolute top-2 left-2 flex gap-1">
                       {item.offerCount > 0 ? (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-emerald-600/90 text-white backdrop-blur-xs shadow-xs">
-                          {item.offerCount} Offers
+                          {item.offerCount} {item.offerCount === 1 ? 'Offer' : 'Offers'}
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-medium bg-black/60 text-white/80 backdrop-blur-xs">

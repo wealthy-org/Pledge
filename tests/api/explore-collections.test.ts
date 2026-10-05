@@ -147,4 +147,51 @@ describe('TICKET-77: Explore Collections API Route & Safety Verification', () =>
     const offersData = await offersRes.json();
     expect(offersData.collections).toHaveLength(0);
   });
+
+  it('TS-05: GET /api/explore/collections does not fabricate offerCount from loansCount when no active offers exist', async () => {
+    const mockGondiResponse = {
+      data: {
+        getMarketOverview: {
+          top: [
+            {
+              salesCount: 15,
+              salesVolume: 42.5,
+              floorChangePercent: 5.2,
+              loansCount: 4,
+              usersCount: 12,
+              collection: {
+                id: '2822',
+                name: 'CryptoPunks',
+                slug: 'cryptopunks',
+                contractData: {
+                  contractAddress: '0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb',
+                },
+                image: {
+                  cacheUrl: 'https://cdn.gondi.xyz/image/txOyWVb6N3KUlg48gNKG2A==',
+                },
+              },
+            },
+          ],
+        },
+        listCollections: {
+          edges: [],
+        },
+      },
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => mockGondiResponse,
+    });
+
+    const req = new NextRequest('http://localhost:3000/api/explore/collections?chainId=46630');
+    const res = await GET(req);
+    expect(res.status).toBe(200);
+
+    const data = await res.json();
+    expect(data.collections).toHaveLength(1);
+    expect(data.collections[0].address).toBe('0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb');
+    expect(data.collections[0].offerCount).toBe(0);
+  });
 });

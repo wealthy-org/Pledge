@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       floorPriceEth,
       bestOfferWei: bestOffer !== null ? bestOffer.toString() : null,
       poolSizeWei: poolSize.toString(),
-      offerCount: colOffers.length || (item.loansCount ? item.loansCount : 0),
+      offerCount: colOffers.length,
       activeLoansCount: colLoans.length,
       isVerifiedErc721: true,
     });
