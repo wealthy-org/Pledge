@@ -41,12 +41,21 @@ export async function GET(request: NextRequest) {
     gondiClient.listCollections(50).catch(() => []),
   ]);
 
-  const known: Array<{ address: string; name: string; symbol: string; image?: string }> = [];
+  const curatedSet = new Set<string>();
+  for (const c of onChainCurated) {
+    curatedSet.add(c.contractAddress.toLowerCase());
+  }
+  for (const c of getCuratedCollections(chainId)) {
+    curatedSet.add(c.contractAddress.toLowerCase());
+  }
+
+  const known: Array<{ address: string; name: string; symbol: string; image?: string; isCurated: boolean }> = [];
   for (const c of onChainCurated) {
     known.push({
       address: c.contractAddress,
       name: c.name,
       symbol: c.symbol,
+      isCurated: true,
     });
   }
 
@@ -56,6 +65,7 @@ export async function GET(request: NextRequest) {
         address: c.contractAddress,
         name: c.name,
         symbol: c.symbol,
+        isCurated: true,
       });
     }
   }
@@ -77,6 +87,7 @@ export async function GET(request: NextRequest) {
         name: gc.name || 'Gondi Collection',
         symbol: gc.slug?.toUpperCase() || 'NFT',
         image: extractGondiImageUrl(gc.image) || undefined,
+        isCurated: curatedSet.has(addr.toLowerCase()),
       });
     }
   }
@@ -96,7 +107,7 @@ export async function GET(request: NextRequest) {
         title: c.name,
         subtitle: `${c.symbol} · ${c.address.slice(0, 6)}...${c.address.slice(-4)}`,
         url: `/collection/${c.address}`,
-        badge: c.image ? 'Verified' : 'Curated',
+        badge: c.isCurated ? 'Curated' : 'Explore',
         image: c.image,
       });
     }
@@ -177,6 +188,7 @@ export async function GET(request: NextRequest) {
           address: colPart,
           name: `Contract ${colPart.slice(0, 6)}...`,
           symbol: 'ERC721',
+          isCurated: curatedSet.has(colPart.toLowerCase()),
         };
       }
 

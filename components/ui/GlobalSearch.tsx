@@ -142,7 +142,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
         title: c.name,
         subtitle: `${c.symbol || 'NFT'} · ${c.address.slice(0, 6)}...${c.address.slice(-4)}`,
         url: `/collection/${c.address}`,
-        badge: 'Curated',
+        badge: c.isCurated ? 'Curated' : 'Explore',
         offerCount: c.offerCount,
         poolSizeWei: c.poolSizeWei,
         image: c.imageUrl,
@@ -317,7 +317,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
               {mergedCollections.length > 0 && (
                 <div className="space-y-1">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] px-3 py-1">
-                    {query.trim() === '' ? 'Curated Collections' : `Collections (${mergedCollections.length})`}
+                    {query.trim() === '' ? 'Market Collections' : `Collections (${mergedCollections.length})`}
                   </div>
                   {mergedCollections.map((item) => {
                     const itemIndex = currentFlatCounter++;
@@ -346,15 +346,20 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          {item.offerCount !== undefined && item.offerCount > 0 ? (
-                            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                              Offers Active ({item.offerCount})
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-[var(--panel)] border border-[var(--line)] text-[var(--muted)]">
-                              {item.badge || 'Curated'}
+                          {item.badge === 'Curated' && (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                              Curated
                             </span>
                           )}
+                          {item.offerCount !== undefined && item.offerCount > 0 ? (
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                              Offers Active ({item.offerCount})
+                            </span>
+                          ) : item.badge !== 'Curated' ? (
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-[var(--panel)] border border-[var(--line)] text-[var(--muted)]">
+                              {item.badge || 'Explore'}
+                            </span>
+                          ) : null}
                         </div>
                       </button>
                     );

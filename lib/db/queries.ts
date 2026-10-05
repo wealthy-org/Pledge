@@ -83,6 +83,7 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
   const targetChain = resolveChainId(chainId);
   const snapshot = await getProtocolSnapshot(targetChain);
   const distinctAddresses = getDistinctCollectionsFromSnapshot(snapshot);
+  const curatedSet = new Set((snapshot.enabledCollections || []).map((a) => a.toLowerCase()));
 
   const [overview, gondiList] = await Promise.all([
     gondiClient.getMarketOverviewData('DAY').catch(() => ({ top: [], volume: [], movers: [] })),
@@ -133,6 +134,7 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       poolSizeWei: stats.poolSizeWei,
       offerCount: stats.offerCount,
       activeLoansCount: stats.activeLoansCount,
+      isCurated: curatedSet.has(addr),
     });
   }
 
@@ -151,6 +153,7 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       poolSizeWei: stats.poolSizeWei,
       offerCount: stats.offerCount,
       activeLoansCount: stats.activeLoansCount,
+      isCurated: curatedSet.has(normalized),
     });
   }
 

@@ -18,6 +18,7 @@ export interface CollectionItemResponse {
   poolSizeWei: string;
   offerCount: number;
   activeLoansCount: number;
+  isCurated?: boolean;
 }
 
 export interface CollectionsResponse {

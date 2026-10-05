@@ -14,8 +14,8 @@
     "test:contracts": "forge test",
     "build:contracts": "forge build",
     "cli": "tsx scripts/cli.ts",
-    "cli:banner": "bash scripts/jevo-banner.sh",
-    "cli:replay": "bash scripts/jevo-deploy-replay.sh",
+    "cli:banner": "bash scripts/pledge-banner.sh",
+    "cli:replay": "bash scripts/pledge-deploy-replay.sh",
     "cli:status": "tsx scripts/cli.ts status"
   },
   "dependencies": {
