@@ -7,8 +7,8 @@ import { indexerStore } from './store';
 
 const lastSyncTimes = new Map<number, number>();
 const SYNC_COOLDOWN_MS = 5000;
-const RPC_TIMEOUT_MS = 4000;
-const CHUNK_SIZE = 5000n;
+const RPC_TIMEOUT_MS = 8000;
+const CHUNK_SIZE = 50000n;
 
 export function resetSyncCooldown(chainId?: number): void {
   if (chainId !== undefined) {

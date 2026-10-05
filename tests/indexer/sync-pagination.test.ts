@@ -19,9 +19,9 @@ describe('Indexer Sync Pagination & Reliability Suite', () => {
     indexerStore.clear();
   });
 
-  it('paginates large block gaps in 5000-block chunks', async () => {
+  it('paginates large block gaps in 50000-block chunks', async () => {
     const mockGetLogs = vi.fn().mockResolvedValue([]);
-    const mockGetBlockNumber = vi.fn().mockResolvedValue(127812000n);
+    const mockGetBlockNumber = vi.fn().mockResolvedValue(127920000n);
     const mockGetBlock = vi.fn().mockResolvedValue({ hash: '0xblockhash123' });
 
     (createPublicClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -38,20 +38,20 @@ describe('Indexer Sync Pagination & Reliability Suite', () => {
     expect(mockGetLogs).toHaveBeenCalledTimes(3);
     expect(mockGetLogs).toHaveBeenNthCalledWith(1, expect.objectContaining({
       fromBlock: 127800001n,
-      toBlock: 127805000n,
+      toBlock: 127850000n,
     }));
     expect(mockGetLogs).toHaveBeenNthCalledWith(2, expect.objectContaining({
-      fromBlock: 127805001n,
-      toBlock: 127810000n,
+      fromBlock: 127850001n,
+      toBlock: 127900000n,
     }));
     expect(mockGetLogs).toHaveBeenNthCalledWith(3, expect.objectContaining({
-      fromBlock: 127810001n,
-      toBlock: 127812000n,
+      fromBlock: 127900001n,
+      toBlock: 127920000n,
     }));
 
     const checkpoint = indexerStore.getCheckpoint(46630, '0x481F5591D7B26661B651Ab2efB66c10c46958E33');
     expect(checkpoint).toBeDefined();
-    expect(checkpoint?.last_block_number).toBe(127812000);
+    expect(checkpoint?.last_block_number).toBe(127920000);
     expect(checkpoint?.last_block_hash).toBe('0xblockhash123');
   });
 
@@ -59,7 +59,7 @@ describe('Indexer Sync Pagination & Reliability Suite', () => {
     const mockGetLogs = vi.fn()
       .mockResolvedValueOnce([])
       .mockRejectedValueOnce(new Error('RPC rate limited'));
-    const mockGetBlockNumber = vi.fn().mockResolvedValue(127812000n);
+    const mockGetBlockNumber = vi.fn().mockResolvedValue(127920000n);
     const mockGetBlock = vi.fn().mockResolvedValue({ hash: '0xblockhashchunk1' });
 
     (createPublicClient as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -73,7 +73,7 @@ describe('Indexer Sync Pagination & Reliability Suite', () => {
     await syncOnChainLogs(46630);
 
     const checkpoint = indexerStore.getCheckpoint(46630, '0x481F5591D7B26661B651Ab2efB66c10c46958E33');
-    expect(checkpoint?.last_block_number).toBe(127805000);
+    expect(checkpoint?.last_block_number).toBe(127850000);
   });
 
   it('isolates sync cooldown per chain ID', async () => {

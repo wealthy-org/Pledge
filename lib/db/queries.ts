@@ -1,5 +1,6 @@
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
+import { getPledgeDeploymentBlock } from '@/config/contracts';
 import {
   fetchOnChainCollectionInfo,
   resolveCollectionImageUrl,
@@ -56,6 +57,10 @@ export async function getLastIndexedBlock(chainId?: number): Promise<number> {
   if (highest === 0) {
     const snapshot = await getProtocolSnapshot(targetChain);
     highest = snapshot.blockNumber;
+  }
+
+  if (highest === 0) {
+    highest = Number(getPledgeDeploymentBlock(targetChain));
   }
 
   return highest;

@@ -4,7 +4,7 @@ import PledgeLoansAbiJson from '@/lib/abi/PledgeLoans.json';
 export const PLEDGE_LOANS_ABI = PledgeLoansAbiJson;
 
 export const PLEDGE_DEPLOYMENT_BLOCKS: Record<number, bigint> = {
-  [TESTNET_CHAIN_ID]: BigInt(process.env.NEXT_PUBLIC_PLEDGE_START_BLOCK || '127800000'),
+  [TESTNET_CHAIN_ID]: BigInt(process.env.NEXT_PUBLIC_PLEDGE_START_BLOCK || '127855000'),
   [MAINNET_CHAIN_ID]: BigInt(process.env.NEXT_PUBLIC_PLEDGE_START_BLOCK_MAINNET || '0'),
 };
 
