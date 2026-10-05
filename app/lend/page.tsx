@@ -100,6 +100,7 @@ export default function LendPage() {
       name: item.name,
       symbol: item.symbol,
       contractAddress: item.address,
+      imageUrl: item.imageUrl,
     }));
   }, [unifiedCollections]);
 

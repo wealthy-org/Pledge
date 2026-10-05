@@ -3,7 +3,7 @@ import { gondiClient } from '@/lib/gondi';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse } from '@/lib/api/response';
-import { resolveCollectionImageUrl, fetchOnChainCollectionInfo } from '@/lib/services/metadata';
+import { resolveCollectionImageUrl, setCollectionImageCache, fetchOnChainCollectionInfo } from '@/lib/services/metadata';
 import { detectDuplicateNames } from '@/lib/services/collectionSafety';
 import type { ExploreCollectionItem, ExploreCollectionsResponse } from '@/types/api';
 
@@ -71,6 +71,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    if (item.collection?.image?.cacheUrl) {
+      setCollectionImageCache(addr, item.collection.image.cacheUrl);
+    }
     const name = item.collection?.name || 'Unnamed Collection';
     const symbol = item.collection?.slug?.toUpperCase() || 'NFT';
     const imageUrl = item.collection?.image?.cacheUrl || resolveCollectionImageUrl(addr, symbol || name);
@@ -110,6 +113,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    if (node.image?.cacheUrl) {
+      setCollectionImageCache(addr, node.image.cacheUrl);
+    }
     const name = node.name || 'Unnamed Collection';
     const symbol = node.slug?.toUpperCase() || 'NFT';
     const imageUrl = node.image?.cacheUrl || resolveCollectionImageUrl(addr, symbol || name);

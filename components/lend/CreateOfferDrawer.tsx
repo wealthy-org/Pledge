@@ -22,6 +22,7 @@ export interface CreateOfferCollectionOption {
   name: string;
   symbol: string;
   contractAddress?: string;
+  imageUrl?: string;
   addresses?: Record<number, `0x${string}`>;
 }
 
