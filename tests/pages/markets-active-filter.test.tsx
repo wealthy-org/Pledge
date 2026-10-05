@@ -63,20 +63,20 @@ describe('TICKET-80: Markets Page Active Offers Filter & Explore Link', () => {
     expect(screen.getByText('Explore All Collections')).toBeDefined();
   });
 
-  it('filters table to only show collections with active offers by default', () => {
+  it('renders all collections in table by default', () => {
     render(<HomePage />);
-    const table = screen.getByRole('table');
-    expect(within(table).getByText('Active Collection Alpha')).toBeDefined();
-    expect(within(table).queryByText('Zero Offers Collection Beta')).toBeNull();
-  });
-
-  it('allows toggling to view all markets', () => {
-    render(<HomePage />);
-    const allButton = screen.getByRole('button', { name: /All Markets \(/i });
-    fireEvent.click(allButton);
     const table = screen.getByRole('table');
     expect(within(table).getByText('Active Collection Alpha')).toBeDefined();
     expect(within(table).getByText('Zero Offers Collection Beta')).toBeDefined();
+  });
+
+  it('allows toggling to view only collections with active offers', () => {
+    render(<HomePage />);
+    const hasOffersButton = screen.getByRole('button', { name: /Has offers \(/i });
+    fireEvent.click(hasOffersButton);
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Active Collection Alpha')).toBeDefined();
+    expect(within(table).queryByText('Zero Offers Collection Beta')).toBeNull();
   });
 
   it('renders MarketsTable with empty state when no collections match', () => {

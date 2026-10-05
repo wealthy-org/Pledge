@@ -15,7 +15,7 @@ export default function HomePage() {
   const { collections: rawCollections, isLoading: isLoadingCollections } = useUnifiedCollectionSearch({ chainId });
   const { data: liveMarketStats, isLoading: isLoadingStats } = useMarketStats(chainId);
 
-  const [selectedFilter, setSelectedFilter] = useState<'has_offers' | 'all'>('has_offers');
+  const [selectedFilter, setSelectedFilter] = useState<'has_offers' | 'all'>('all');
 
   const collections: MarketCollectionItem[] = useMemo(() => {
     return rawCollections.map((item) => ({
@@ -162,17 +162,6 @@ export default function HomePage() {
             <div className="bg-[var(--panel)] p-1 rounded-lg flex gap-1 border border-[var(--line)]">
               <button
                 type="button"
-                onClick={() => setSelectedFilter('has_offers')}
-                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
-                  selectedFilter === 'has_offers'
-                    ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
-                    : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
-                }`}
-              >
-                Has offers ({activeOfferCollections.length})
-              </button>
-              <button
-                type="button"
                 onClick={() => setSelectedFilter('all')}
                 className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
                   selectedFilter === 'all'
@@ -181,6 +170,17 @@ export default function HomePage() {
                 }`}
               >
                 All Markets ({collections.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedFilter('has_offers')}
+                className={`text-xs font-medium py-1 px-3 rounded-md transition-colors cursor-pointer border ${
+                  selectedFilter === 'has_offers'
+                    ? 'bg-[var(--surface)] text-[var(--text)] border-[var(--line)] shadow-xs'
+                    : 'text-[var(--muted)] hover:text-[var(--text)] border-transparent'
+                }`}
+              >
+                Has offers ({activeOfferCollections.length})
               </button>
             </div>
           </div>
