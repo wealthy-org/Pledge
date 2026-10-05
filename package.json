@@ -16,6 +16,7 @@
     "cli": "tsx scripts/cli.ts",
     "cli:banner": "bash scripts/pledge-banner.sh",
     "cli:replay": "bash scripts/pledge-deploy-replay.sh",
+    "showcase": "tsx scripts/run.ts",
     "cli:status": "tsx scripts/cli.ts status"
   },
   "dependencies": {
