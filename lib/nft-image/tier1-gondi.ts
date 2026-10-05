@@ -1,4 +1,4 @@
-import { gondiClient } from '@/lib/gondi';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 import { resolveMediaUrlSafe } from './uri';
 import type { ResolvedNftImage } from './types';
 
@@ -16,29 +16,24 @@ export async function resolveFromGondi(
       return null;
     }
 
-    const rawCandidates = [
-      item.image?.cacheUrl,
-      item.description,
-    ];
+    const imgUrl = extractGondiImageUrl(item.image);
+    if (imgUrl) {
+      return {
+        url: imgUrl,
+        source: 'gondi-cdn',
+        isFallback: false,
+        rawUri: item.image?.data || item.image?.cacheUrl || null,
+      };
+    }
 
-    for (const raw of rawCandidates) {
-      if (raw && raw.startsWith('https://cdn.gondi.xyz/')) {
-        return {
-          url: raw,
-          source: 'gondi-cdn',
-          isFallback: false,
-          rawUri: raw,
-        };
-      }
-      const resolved = resolveMediaUrlSafe(raw);
-      if (resolved) {
-        return {
-          url: resolved,
-          source: 'gondi-cdn',
-          isFallback: false,
-          rawUri: raw || null,
-        };
-      }
+    const descCandidate = resolveMediaUrlSafe(item.description);
+    if (descCandidate) {
+      return {
+        url: descCandidate,
+        source: 'gondi-cdn',
+        isFallback: false,
+        rawUri: item.description || null,
+      };
     }
 
     return null;

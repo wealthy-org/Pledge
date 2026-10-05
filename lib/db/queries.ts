@@ -5,7 +5,7 @@ import {
   resolveCollectionImageUrl,
   setCollectionImageCache,
 } from '@/lib/services/metadata';
-import { gondiClient } from '@/lib/gondi';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 import { getProtocolSnapshot } from '@/lib/protocol/snapshot';
 import {
   computeCollectionStats,
@@ -121,16 +121,17 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
     const addr = (gc.contractData?.contractAddress || gc.id || '').toLowerCase();
     if (!addr) continue;
 
-    if (gc.image?.cacheUrl) {
-      setCollectionImageCache(addr, gc.image.cacheUrl);
+    const validImg = extractGondiImageUrl(gc.image);
+    if (validImg) {
+      setCollectionImageCache(addr, validImg);
     }
 
     const existing = map.get(addr);
-    const imgUrl = gc.image?.cacheUrl || resolveCollectionImageUrl(addr, gc.slug || gc.name);
+    const imgUrl = validImg || resolveCollectionImageUrl(addr, gc.slug || gc.name);
 
     if (existing) {
-      if (gc.image?.cacheUrl) {
-        existing.imageUrl = gc.image.cacheUrl;
+      if (validImg) {
+        existing.imageUrl = validImg;
       }
       if (existing.name === 'ERC721 Collection' && gc.name) {
         existing.name = gc.name;

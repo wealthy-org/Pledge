@@ -1,6 +1,10 @@
 export type GondiTimeframe = 'DAY' | 'WEEK' | 'MONTH';
 
 export interface GondiImage {
+  id?: string | null;
+  data?: string | null;
+  accessTypeName?: string | null;
+  contentTypeMime?: string | null;
   cacheUrl?: string | null;
 }
 

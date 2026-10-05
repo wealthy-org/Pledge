@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { isAddress } from 'viem';
-import { gondiClient } from '@/lib/gondi';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 import { fetchNftMetadata } from '@/lib/services/metadata';
 import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse, errorResponse } from '@/lib/api/response';
@@ -40,7 +40,7 @@ export async function GET(
       metadata = {
         name: gondiNft.name || `Token #${tokenId}`,
         description: gondiNft.description || '',
-        imageUrl: gondiNft.image?.cacheUrl || '',
+        imageUrl: extractGondiImageUrl(gondiNft.image) || '',
         attributes: [],
       };
     } else {

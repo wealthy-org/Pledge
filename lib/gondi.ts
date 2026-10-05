@@ -7,7 +7,9 @@ import type {
   GondiLendingPulseData,
   GondiLoanNode,
   GondiGraphQLResponse,
+  GondiImage,
 } from '@/types/gondi';
+import { resolveMediaUrlSafe } from '@/lib/nft-image/uri';
 
 export const GONDI_GRAPHQL_ENDPOINT = 'https://api2.gondi.xyz/graphql';
 const DEFAULT_TIMEOUT_MS = 8000;
@@ -34,6 +36,20 @@ export class GondiApiError extends Error {
 
 export function clearGondiCache(): void {
   memoryCache.clear();
+}
+
+export function extractGondiImageUrl(img?: GondiImage | null): string | null {
+  if (!img) return null;
+  if (img.data && typeof img.data === 'string' && img.data.trim() !== '') {
+    return resolveMediaUrlSafe(img.data);
+  }
+  if (img.cacheUrl && typeof img.cacheUrl === 'string' && !img.cacheUrl.includes('==')) {
+    return resolveMediaUrlSafe(img.cacheUrl);
+  }
+  if (img.cacheUrl && typeof img.cacheUrl === 'string') {
+    return resolveMediaUrlSafe(img.cacheUrl);
+  }
+  return null;
 }
 
 export async function executeGondiQuery<T>(
@@ -122,6 +138,10 @@ export class GondiClient {
                 contractAddress
               }
               image {
+                id
+                data
+                accessTypeName
+                contentTypeMime
                 cacheUrl
               }
             }
@@ -138,6 +158,10 @@ export class GondiClient {
                 contractAddress
               }
               image {
+                id
+                data
+                accessTypeName
+                contentTypeMime
                 cacheUrl
               }
             }
@@ -153,6 +177,10 @@ export class GondiClient {
                 contractAddress
               }
               image {
+                id
+                data
+                accessTypeName
+                contentTypeMime
                 cacheUrl
               }
             }
@@ -193,6 +221,10 @@ export class GondiClient {
                 contractAddress
               }
               image {
+                id
+                data
+                accessTypeName
+                contentTypeMime
                 cacheUrl
               }
             }
@@ -224,6 +256,10 @@ export class GondiClient {
           name
           description
           image {
+            id
+            data
+            accessTypeName
+            contentTypeMime
             cacheUrl
           }
           collection {
@@ -286,6 +322,10 @@ export class GondiClient {
               tokenId
               name
               image {
+                id
+                data
+                accessTypeName
+                contentTypeMime
                 cacheUrl
               }
               collection {
@@ -327,6 +367,10 @@ export class GondiClient {
                 name
                 tokenId
                 image {
+                  id
+                  data
+                  accessTypeName
+                  contentTypeMime
                   cacheUrl
                 }
                 collection {

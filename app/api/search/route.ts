@@ -3,7 +3,7 @@ import { isAddress } from 'viem';
 import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse } from '@/lib/api/response';
 import { getCuratedCollections } from '@/config/collections';
-import { gondiClient } from '@/lib/gondi';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 
 export interface SearchResultItem {
   type: 'collection' | 'wallet' | 'item';
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
         address: addr,
         name: gc.name || 'Gondi Collection',
         symbol: gc.slug?.toUpperCase() || 'NFT',
-        image: gc.image?.cacheUrl || undefined,
+        image: extractGondiImageUrl(gc.image) || undefined,
       });
     }
   }

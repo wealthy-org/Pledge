@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { gondiClient } from '@/lib/gondi';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 import { indexerStore } from '@/lib/indexer/store';
 import { syncOnChainLogs } from '@/lib/indexer/sync';
 import { jsonResponse } from '@/lib/api/response';
@@ -71,12 +71,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (item.collection?.image?.cacheUrl) {
-      setCollectionImageCache(addr, item.collection.image.cacheUrl);
+    const validImg = extractGondiImageUrl(item.collection?.image);
+    if (validImg) {
+      setCollectionImageCache(addr, validImg);
     }
     const name = item.collection?.name || 'Unnamed Collection';
     const symbol = item.collection?.slug?.toUpperCase() || 'NFT';
-    const imageUrl = item.collection?.image?.cacheUrl || resolveCollectionImageUrl(addr, symbol || name);
+    const imageUrl = validImg || resolveCollectionImageUrl(addr, symbol || name);
     const floorPriceEth = item.salesVolume ? (item.salesVolume / Math.max(1, item.salesCount || 1)).toFixed(2) : undefined;
 
     aggregated.push({
@@ -113,12 +114,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (node.image?.cacheUrl) {
-      setCollectionImageCache(addr, node.image.cacheUrl);
+    const validImg = extractGondiImageUrl(node.image);
+    if (validImg) {
+      setCollectionImageCache(addr, validImg);
     }
     const name = node.name || 'Unnamed Collection';
     const symbol = node.slug?.toUpperCase() || 'NFT';
-    const imageUrl = node.image?.cacheUrl || resolveCollectionImageUrl(addr, symbol || name);
+    const imageUrl = validImg || resolveCollectionImageUrl(addr, symbol || name);
 
     aggregated.push({
       address: node.contractData?.contractAddress || node.id,

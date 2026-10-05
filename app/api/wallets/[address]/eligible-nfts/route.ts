@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { gondiClient } from '@/lib/gondi';
+import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
@@ -31,7 +31,7 @@ export async function GET(
       const contractAddress = node.collection?.contractData?.contractAddress || node.collection?.id || '';
       const collectionName = node.collection?.name || (contractAddress ? formatShortAddress(contractAddress) : 'Verified NFT');
       const name = node.name || `${collectionName} #${node.tokenId}`;
-      const imageUrl = node.image?.cacheUrl || resolveCollectionImageUrl(collectionName);
+      const imageUrl = extractGondiImageUrl(node.image) || resolveCollectionImageUrl(collectionName);
 
       nfts.push({
         contractAddress,
