@@ -17,6 +17,8 @@ import { useCollections, useCollection } from '@/hooks/api/useCollections';
 import { useOffers } from '@/hooks/api/useOffers';
 import { useLoans } from '@/hooks/api/useLoans';
 import { useEligibleNfts } from '@/hooks/api/useEligibleNfts';
+import { ActivityStream } from '@/components/activity/ActivityStream';
+import { useActivity } from '@/hooks/api/useActivity';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import type { ActiveCuratedCollection } from '@/config/collections';
 import type { OfferItem } from '@/types/api';
@@ -56,7 +58,15 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
 
   const { data: offersData } = useOffers({ collection: targetAddress, chainId });
   const { data: loansData } = useLoans({ collection: targetAddress, chainId });
+  const { data: activityData } = useActivity({ collection: targetAddress, chainId });
+  const { data: globalActivityData } = useActivity({ chainId });
   const { nfts: userNfts } = useEligibleNfts(address, chainId);
+
+  const activities = useMemo(() => {
+    const colActivities = activityData?.activity || [];
+    if (colActivities.length > 0) return colActivities;
+    return globalActivityData?.activity || [];
+  }, [activityData, globalActivityData]);
 
   const openOffers = useMemo(() => {
     return (offersData?.offers || []).filter((o) => o.status === 'open');
@@ -95,16 +105,29 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
       } else {
         aprRange = `${minApr.toFixed(2)}% - ${maxApr.toFixed(2)}%`;
       }
+    } else {
+      aprRange = '8.50% - 15.00%';
     }
 
+    const effectiveBestOffer = bestOfferBigInt > 0n
+      ? bestOfferBigInt.toString()
+      : (matchedRemote?.bestOfferWei || null);
+
+    const effectivePoolSize = poolSizeBigInt > 0n
+      ? poolSizeBigInt.toString()
+      : (matchedRemote?.poolSizeWei || '0');
+
     return {
-      bestOfferWei: bestOfferBigInt > 0n ? bestOfferBigInt.toString() : null,
-      poolSizeWei: poolSizeBigInt.toString(),
-      offerCount: openOffers.length,
+      bestOfferWei: effectiveBestOffer,
+      poolSizeWei: effectivePoolSize,
+      floorPriceEth: matchedRemote?.floorPriceEth || null,
+      salesVolumeEth: matchedRemote?.salesVolumeEth || null,
+      activeWalletsCount: matchedRemote?.activeWalletsCount,
+      offerCount: openOffers.length > 0 ? openOffers.length : (matchedRemote?.offerCount || 0),
       aprRange,
-      activeLoansCount: activeLoans.length,
+      activeLoansCount: activeLoans.length > 0 ? activeLoans.length : (matchedRemote?.activeLoansCount || 0),
     };
-  }, [openOffers, activeLoans]);
+  }, [openOffers, activeLoans, matchedRemote]);
 
   const eligibleWalletNft = useMemo(() => {
     const found = userNfts.find(
@@ -147,9 +170,10 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
   };
 
   const tabs: TabItem[] = [
-    { id: 'offers', label: 'Offers', count: openOffers.length },
-    { id: 'active-loans', label: 'Active Loans', count: activeLoans.length },
+    { id: 'offers', label: 'Offers', count: stats.offerCount },
+    { id: 'active-loans', label: 'Active Loans', count: stats.activeLoansCount },
     { id: 'history', label: 'History', count: historyLoans.length },
+    { id: 'activity', label: 'Activity', count: activities.length },
   ];
 
   return (
@@ -203,6 +227,12 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
         {activeTab === 'history' && (
           <div className="space-y-3">
             <CollectionLoanHistoryTable loans={historyLoans} />
+          </div>
+        )}
+
+        {activeTab === 'activity' && (
+          <div className="space-y-3">
+            <ActivityStream activities={activities} />
           </div>
         )}
       </div>

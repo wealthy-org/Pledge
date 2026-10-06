@@ -14,9 +14,12 @@ import type { ActiveCuratedCollection } from '@/config/collections';
 export interface CollectionHeaderStats {
   bestOfferWei?: string | null;
   poolSizeWei: string;
+  floorPriceEth?: string | null;
+  salesVolumeEth?: string | null;
   offerCount: number;
   aprRange: string;
   activeLoansCount: number;
+  activeWalletsCount?: number;
 }
 
 export interface CollectionHeaderProps {
@@ -53,7 +56,12 @@ export function CollectionHeader({
     ? `${Number(formatUnits(BigInt(stats.bestOfferWei), 18)).toFixed(2)} ETH`
     : '--';
 
-  const poolSizeEth = `${Number(formatUnits(BigInt(stats.poolSizeWei || '0'), 18)).toFixed(2)} ETH`;
+  const poolVal = Number(formatUnits(BigInt(stats.poolSizeWei || '0'), 18));
+  const poolSizeEth = poolVal > 0
+    ? `${poolVal.toFixed(2)} ETH`
+    : (stats.salesVolumeEth ? `${stats.salesVolumeEth} ETH` : '0.00 ETH');
+
+  const floorDisplay = stats.floorPriceEth ? `${stats.floorPriceEth} ETH` : '--';
 
   const handleCopy = () => {
     if (typeof navigator !== 'undefined') {
@@ -162,6 +170,15 @@ export function CollectionHeader({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] space-y-1">
           <span className="text-[9px] uppercase font-mono tracking-[1.5px] text-[var(--muted)] block">
+            Floor Price
+          </span>
+          <span className="text-base font-bold font-mono text-[var(--text)]">
+            {floorDisplay}
+          </span>
+        </div>
+
+        <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] space-y-1">
+          <span className="text-[9px] uppercase font-mono tracking-[1.5px] text-[var(--muted)] block">
             Best Offer
           </span>
           <span className="text-base font-bold font-mono text-[var(--primary)]">
@@ -171,9 +188,9 @@ export function CollectionHeader({
 
         <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] space-y-1">
           <span className="text-[9px] uppercase font-mono tracking-[1.5px] text-[var(--muted)] block">
-            Pool Size
+            Pool Liquidity
           </span>
-          <span className="text-base font-bold font-mono text-[var(--text)]">
+          <span className="text-base font-bold font-mono text-emerald-600 dark:text-emerald-400">
             {poolSizeEth}
           </span>
         </div>
@@ -198,19 +215,10 @@ export function CollectionHeader({
 
         <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] space-y-1">
           <span className="text-[9px] uppercase font-mono tracking-[1.5px] text-[var(--muted)] block">
-            Active Loans
+            Active Wallets
           </span>
           <span className="text-base font-bold font-mono text-[var(--text)]">
-            {stats.activeLoansCount}
-          </span>
-        </div>
-
-        <div className="p-4 rounded-xl border border-[var(--line)] bg-[var(--surface)] space-y-1">
-          <span className="text-[9px] uppercase font-mono tracking-[1.5px] text-[var(--muted)] block">
-            Contract
-          </span>
-          <span className="text-base font-bold font-mono text-[var(--text)]">
-            {truncatedAddress}
+            {stats.activeWalletsCount || stats.activeLoansCount || 0}
           </span>
         </div>
       </div>

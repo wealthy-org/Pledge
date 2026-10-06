@@ -105,14 +105,17 @@ export default function LendPage() {
   }, [unifiedCollections]);
 
   const collectionStats = useMemo(() => {
-    const map: Record<string, { poolSizeEth: string; activeLoansCount: number }> = {};
+    const map: Record<string, { poolSizeEth: string; floorPriceEth?: string; activeLoansCount: number }> = {};
     for (const item of unifiedCollections) {
       const id = item.address.toLowerCase();
+      const onChainPool = item.poolSizeWei && item.poolSizeWei !== '0'
+        ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
+        : null;
+      const gondiVolume = item.salesVolumeEth ? parseFloat(item.salesVolumeEth).toFixed(2) : null;
       map[id] = {
-        poolSizeEth: item.poolSizeWei && item.poolSizeWei !== '0'
-          ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
-          : '0.00',
-        activeLoansCount: item.activeLoansCount || 0,
+        poolSizeEth: onChainPool || gondiVolume || '0.00',
+        floorPriceEth: item.floorPriceEth,
+        activeLoansCount: item.offerCount || item.activeLoansCount || 0,
       };
     }
     return map;
@@ -385,6 +388,7 @@ export default function LendPage() {
                   key={col.contractAddress || col.id}
                   collection={col}
                   poolSizeEth={collectionStats[col.id]?.poolSizeEth || '0.00'}
+                  floorPriceEth={collectionStats[col.id]?.floorPriceEth}
                   activeLoansCount={collectionStats[col.id]?.activeLoansCount || 0}
                   imageUrl={(col as any).imageUrl}
                   onMakeOffer={handleOpenDrawer}

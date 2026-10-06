@@ -30,20 +30,28 @@ export function ExploreCard({ collection }: ExploreCardProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const poolSizeEth = collection.poolSizeWei
+  const poolSizeEth = collection.poolSizeWei && collection.poolSizeWei !== '0'
     ? Number(formatUnits(BigInt(collection.poolSizeWei), 18)).toFixed(2)
-    : '0.00';
+    : (collection.salesVolumeEth || '0.00');
 
   const bestOfferEth = collection.bestOfferWei
     ? Number(formatUnits(BigInt(collection.bestOfferWei), 18)).toFixed(2)
     : null;
+
+  const floorEth = collection.floorPriceEth ? `${collection.floorPriceEth} ETH` : '—';
+  const hasChange = collection.priceChange24hPct !== undefined;
+  const changePct = collection.priceChange24hPct ?? 0;
+  const isPositive = changePct >= 0;
 
   return (
     <div
       data-testid="explore-card"
       className="group relative flex flex-col justify-between rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] card-hover-lift shadow-2xs overflow-hidden"
     >
-      <div className="p-4 space-y-3.5">
+      <Link
+        href={`/collection/${collection.address}`}
+        className="p-4 space-y-3.5 block flex-1 cursor-pointer group/card"
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-12 h-12 rounded-lg overflow-hidden bg-[var(--raised)] border border-[var(--line)] shrink-0 relative flex items-center justify-center font-mono font-bold text-xs text-[var(--accent-primary)]">
@@ -53,25 +61,26 @@ export function ExploreCard({ collection }: ExploreCardProps) {
                 contractAddress={collection.address}
                 symbol={collection.symbol || collection.name}
                 tokenId=""
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
               />
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
-                <Link
-                  href={`/collection/${collection.address}`}
-                  className="text-sm font-semibold text-[var(--text)] hover:text-[var(--accent-primary)] transition-colors truncate block"
+                <span
+                  className="text-sm font-semibold text-[var(--text)] group-hover/card:text-[var(--accent-primary)] transition-colors truncate block"
                   title={collection.name}
                 >
                   {collection.name}
-                </Link>
+                </span>
                 {collection.isVerifiedErc721 && (
                   <span
                     title="Verified ERC-721 Interface"
-                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 text-[10px]"
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0"
                   >
-                    ✓
+                    <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
                   </span>
                 )}
               </div>
@@ -86,7 +95,16 @@ export function ExploreCard({ collection }: ExploreCardProps) {
                   className="hover:text-[var(--text)] underline decoration-dotted transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <span>{formatShortAddress(collection.address)}</span>
-                  <span className="text-[10px]">{copied ? '✓' : '⧉'}</span>
+                  {copied ? (
+                    <svg className="w-3 h-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3 h-3 text-[var(--muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  )}
                 </button>
               </div>
             </div>
@@ -99,7 +117,7 @@ export function ExploreCard({ collection }: ExploreCardProps) {
               </span>
             ) : (
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-[var(--panel)] text-[var(--muted)] border border-[var(--line)]">
-                No Offers
+                Open Market
               </span>
             )}
           </div>
@@ -107,27 +125,52 @@ export function ExploreCard({ collection }: ExploreCardProps) {
 
         {collection.isDuplicateName && (
           <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-300 text-[11px] flex items-center gap-1.5">
-            <span>⚠️</span>
+            <svg className="w-3.5 h-3.5 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
             <span className="truncate">Verify contract address to avoid name spoofing.</span>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[var(--line)] text-xs">
+        <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-[var(--line)] text-xs">
+          <div>
+            <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">Floor Price</span>
+            <div className="flex items-center gap-1">
+              <span className="font-mono font-semibold text-[var(--text)]">
+                {floorEth}
+              </span>
+              {hasChange && (
+                <span className={`font-mono text-[10px] font-semibold ${isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {isPositive ? '+' : ''}{changePct.toFixed(1)}%
+                </span>
+              )}
+            </div>
+          </div>
+
           <div>
             <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">Best Offer</span>
-            <span className="font-mono font-semibold text-[var(--text)]">
+            <span className="font-mono font-semibold text-sky-600 dark:text-sky-400">
               {bestOfferEth ? `${bestOfferEth} ETH` : '—'}
             </span>
           </div>
 
           <div>
             <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">Pool Liquidity</span>
-            <span className="font-mono font-semibold text-[var(--text)]">
+            <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
               {poolSizeEth !== '0.00' ? `${poolSizeEth} ETH` : '—'}
             </span>
           </div>
+
+          <div>
+            <span className="text-[10px] uppercase font-mono text-[var(--muted)] block">24H Status</span>
+            <span className="font-mono font-medium text-[var(--muted)]">
+              {collection.offerCount > 0 ? `${collection.offerCount} Active Offers` : 'Open Catalog'}
+            </span>
+          </div>
         </div>
-      </div>
+      </Link>
 
       <div className="p-3 bg-[var(--panel)] border-t border-[var(--line)] flex items-center justify-between gap-2">
         <a
@@ -137,7 +180,9 @@ export function ExploreCard({ collection }: ExploreCardProps) {
           className="text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors flex items-center gap-1"
         >
           <span>Blockscout</span>
-          <span className="text-[10px]">↗</span>
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
         </a>
 
         <div className="flex items-center gap-2">
@@ -149,9 +194,12 @@ export function ExploreCard({ collection }: ExploreCardProps) {
           </Link>
           <Link
             href={`/lend?collection=${collection.address}`}
-            className="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-colors"
+            className="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-colors flex items-center gap-1"
           >
-            Lend +
+            <span>Lend</span>
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
           </Link>
         </div>
       </div>

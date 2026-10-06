@@ -4,16 +4,13 @@ import React, { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { useUnifiedCollectionSearch } from '@/hooks/useUnifiedCollectionSearch';
-import { useMarketStats } from '@/hooks/api/useMarketStats';
 import { MarketsTable, type MarketCollectionItem } from '@/components/markets/MarketsTable';
-import { MarketStatCards } from '@/components/markets/MarketStatCards';
 import { FeaturedListingsCarousel } from '@/components/home/FeaturedListingsCarousel';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 
 export default function HomePage() {
   const chainId = useSafeChainId();
   const { collections: rawCollections, isLoading: isLoadingCollections } = useUnifiedCollectionSearch({ chainId });
-  const { data: liveMarketStats, isLoading: isLoadingStats } = useMarketStats(chainId);
 
   const [selectedFilter, setSelectedFilter] = useState<'has_offers' | 'all'>('all');
 
@@ -48,24 +45,6 @@ export default function HomePage() {
     return collections;
   }, [collections, activeOfferCollections, selectedFilter]);
 
-  const marketStats = useMemo(() => {
-    if (liveMarketStats) {
-      return {
-        totalPoolSizeEth: (Number(BigInt(liveMarketStats.totalPoolSizeWei || '0')) / 1e18).toFixed(2),
-        totalActiveLoans: liveMarketStats.totalActiveLoansCount ?? 0,
-        totalVolumeEth: (Number(BigInt(liveMarketStats.totalVolumeWei || '0')) / 1e18).toFixed(2),
-      };
-    }
-    const totalPoolWei = collections.reduce((acc, c) => acc + BigInt(c.poolSizeWei || '0'), 0n);
-    const totalPoolEth = (Number(totalPoolWei) / 1e18).toFixed(2);
-    const totalActive = collections.reduce((acc, c) => acc + (c.activeLoansCount || 0), 0);
-    return {
-      totalPoolSizeEth: totalPoolEth,
-      totalActiveLoans: totalActive,
-      totalVolumeEth: '0.00',
-    };
-  }, [liveMarketStats, collections]);
-
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-[var(--line)]">
@@ -96,54 +75,6 @@ export default function HomePage() {
           >
             <span>Create Offer +</span>
           </Link>
-        </div>
-      </div>
-
-      <MarketStatCards stats={marketStats} />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="p-5 rounded-xl bg-gradient-to-br from-emerald-500/10 via-[var(--surface)] to-[var(--panel)] border border-emerald-500/20 flex flex-col justify-between space-y-4">
-          <div className="space-y-1.5">
-            <div className="text-[10px] uppercase font-mono tracking-wider font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              <span>Instant Liquidity</span>
-            </div>
-            <h3 className="text-base font-semibold text-[var(--text)]">Borrow Against Your NFTs</h3>
-            <p className="text-xs text-[var(--muted)] leading-relaxed">
-              Use your Robinhood Chain collectibles as collateral to access instant ETH liquidity with fixed terms and no margin calls.
-            </p>
-          </div>
-          <div>
-            <Link
-              href="/borrow"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors shadow-xs"
-            >
-              <span>Borrow Instantly</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-
-        <div className="p-5 rounded-xl bg-gradient-to-br from-sky-500/10 via-[var(--surface)] to-[var(--panel)] border border-sky-500/20 flex flex-col justify-between space-y-4">
-          <div className="space-y-1.5">
-            <div className="text-[10px] uppercase font-mono tracking-wider font-semibold text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
-              <span>Fixed-Rate Yield</span>
-            </div>
-            <h3 className="text-base font-semibold text-[var(--text)]">Lend & Earn Interest</h3>
-            <p className="text-xs text-[var(--muted)] leading-relaxed">
-              Deposit liquidity into open collection markets. Earn fixed interest upon borrower repayment with full smart contract protection.
-            </p>
-          </div>
-          <div>
-            <Link
-              href="/lend"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-colors shadow-xs"
-            >
-              <span>Provide Liquidity</span>
-              <span>→</span>
-            </Link>
-          </div>
         </div>
       </div>
 

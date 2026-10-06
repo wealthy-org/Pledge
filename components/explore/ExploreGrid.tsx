@@ -162,7 +162,11 @@ export function ExploreGrid({
                         >
                           <span>{c.name}</span>
                           {c.isVerifiedErc721 && (
-                            <span className="text-emerald-500 text-[10px]">✓</span>
+                            <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                              <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                            </span>
                           )}
                         </Link>
                         <span className="text-[10px] font-mono text-[var(--muted)]">
@@ -193,9 +197,12 @@ export function ExploreGrid({
                       </Link>
                       <Link
                         href={`/lend?collection=${c.address}`}
-                        className="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-colors"
+                        className="px-2.5 py-1 text-xs font-semibold rounded-md bg-emerald-500/10 hover:bg-emerald-500 hover:text-white text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-colors flex items-center gap-1"
                       >
-                        Lend +
+                        <span>Lend</span>
+                        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 5v14M5 12h14" />
+                        </svg>
                       </Link>
                     </div>
                   </td>

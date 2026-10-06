@@ -104,9 +104,9 @@ describe('TICKET-35: Markets Page & Table Component Test Suite', () => {
     expect(borrowLinks[0].getAttribute('href')).toContain('/borrow?collection=');
   });
 
-  it('TS-06: HomePage integrates StatCards, FilterChips, and MarketsTable', () => {
+  it('TS-06: HomePage integrates Trending Markets Carousel, FilterChips, and MarketsTable', () => {
     render(<HomePage />);
-    expect(screen.getByText(/total pool size/i)).toBeDefined();
+    expect(screen.getByText(/trending markets & offers/i)).toBeDefined();
     expect(screen.getByRole('table')).toBeDefined();
     expect(screen.getByText(/has offers/i)).toBeDefined();
   });

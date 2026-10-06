@@ -69,6 +69,11 @@ const nextConfig: NextConfig = {
         destination: '/explore',
         permanent: true,
       },
+      {
+        source: '/explorer',
+        destination: '/explore',
+        permanent: true,
+      },
     ];
   },
   async headers() {

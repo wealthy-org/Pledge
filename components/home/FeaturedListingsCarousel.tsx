@@ -150,14 +150,17 @@ export function FeaturedListingsCarousel({
                 key={item.address}
                 className="w-[260px] sm:w-[280px] shrink-0 p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] card-hover-lift shadow-2xs flex flex-col justify-between group"
               >
-                <div className="space-y-3">
+                <Link
+                  href={`/collection/${item.address}`}
+                  className="space-y-3 block flex-1 group/card"
+                >
                   <div className="relative h-[130px] rounded-lg overflow-hidden bg-[var(--panel)] border border-[var(--line)]/50">
                     <NftImage
                       src={item.imageUrl}
                       alt={item.name}
                       contractAddress={item.address}
                       symbol={item.symbol}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute top-2 left-2 flex gap-1">
                       {item.offerCount > 0 ? (
@@ -174,13 +177,12 @@ export function FeaturedListingsCarousel({
 
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-1">
-                      <Link
-                        href={`/collection/${item.address}`}
-                        className="text-xs font-bold text-[var(--text)] hover:text-[var(--primary)] truncate"
+                      <span
+                        className="text-xs font-bold text-[var(--text)] group-hover/card:text-[var(--primary)] truncate"
                         title={item.name}
                       >
                         {item.name}
-                      </Link>
+                      </span>
                       <span className="text-[10px] font-mono text-[var(--muted)] shrink-0">
                         {item.symbol}
                       </span>
@@ -201,7 +203,7 @@ export function FeaturedListingsCarousel({
                       </div>
                     </div>
                   </div>
-                </div>
+                </Link>
 
                 <div className="flex items-center gap-2 pt-3 mt-2 border-t border-[var(--line)]/60">
                   <Link
