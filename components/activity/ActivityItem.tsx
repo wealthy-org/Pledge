@@ -19,8 +19,17 @@ export function ActivityItemRow({
 }: ActivityItemRowProps) {
   const safeChainId = useSafeChainId();
   const activeChainId = chainId ?? safeChainId;
-  const colDef = getCollectionByAddress(activity.contractAddress, activeChainId);
-  const collectionName = colDef?.name ?? 'Verified Collection';
+  const rawCollection =
+    (activity.data?.collection as string) ||
+    (activity.data?.collectionAddress as string) ||
+    activity.contractAddress;
+  const colDef = getCollectionByAddress(rawCollection, activeChainId);
+  const collectionName =
+    (activity.data?.collectionName as string) ||
+    colDef?.name ||
+    (rawCollection && rawCollection.length >= 10
+      ? `${rawCollection.slice(0, 6)}...${rawCollection.slice(-4)}`
+      : 'Verified Collection');
 
   const txUrl = getExplorerTxUrl(activity.txHash, activeChainId);
 

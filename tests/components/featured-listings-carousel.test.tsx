@@ -27,6 +27,39 @@ const mockCollections: MarketCollectionItem[] = [
     activeLoansCount: 0,
     isVerified: true,
   },
+  {
+    address: '0x3333333333333333333333333333333333333333',
+    name: 'Sherwood Forest Rangers',
+    symbol: 'SFR',
+    floorPriceEth: '0.55',
+    bestOfferWei: '200000000000000000',
+    poolSizeWei: '1000000000000000000',
+    offerCount: 2,
+    activeLoansCount: 1,
+    isVerified: true,
+  },
+  {
+    address: '0x4444444444444444444444444444444444444444',
+    name: 'Nottingham Guild',
+    symbol: 'NTG',
+    floorPriceEth: '0.45',
+    bestOfferWei: '150000000000000000',
+    poolSizeWei: '3000000000000000000',
+    offerCount: 3,
+    activeLoansCount: 0,
+    isVerified: true,
+  },
+  {
+    address: '0x5555555555555555555555555555555555555555',
+    name: 'CryptoPunks V1',
+    symbol: 'PUNK',
+    floorPriceEth: '25.0',
+    bestOfferWei: '20000000000000000000',
+    poolSizeWei: '50000000000000000000',
+    offerCount: 5,
+    activeLoansCount: 2,
+    isVerified: true,
+  },
 ];
 
 describe('FeaturedListingsCarousel Component', () => {
@@ -60,7 +93,7 @@ describe('FeaturedListingsCarousel Component', () => {
     expect(screen.getAllByText('Pledge Founders').length).toBeGreaterThan(0);
   });
 
-  it('handles scroll and play/stop button interactions gracefully', () => {
+  it('handles scroll and play/stop button interactions gracefully for >=5 items', () => {
     render(<FeaturedListingsCarousel collections={mockCollections} />);
 
     const stopButton = screen.getByRole('button', { name: /stop scrolling/i });
@@ -83,5 +116,14 @@ describe('FeaturedListingsCarousel Component', () => {
     fireEvent.click(scrollRightBtn);
     fireEvent.click(scrollLeftBtn);
   });
+
+  it('toggles watchlist on card star button click', () => {
+    render(<FeaturedListingsCarousel collections={mockCollections.slice(0, 2)} />);
+
+    const starBtns = screen.getAllByRole('button', { name: /add to watchlist/i });
+    expect(starBtns.length).toBeGreaterThan(0);
+    fireEvent.click(starBtns[0]);
+  });
 });
+
 

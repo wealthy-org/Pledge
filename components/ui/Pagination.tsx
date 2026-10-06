@@ -88,7 +88,7 @@ export function Pagination({
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage <= 1}
           aria-label="Previous page"
-          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1 transition-all cursor-pointer ${
+          className={`w-8 h-8 rounded-lg text-xs font-medium border flex items-center justify-center transition-all cursor-pointer ${
             currentPage <= 1
               ? 'opacity-40 pointer-events-none border-[var(--line)] text-[var(--muted)] bg-[var(--surface)]'
               : 'border-[var(--line)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--raised)] hover:border-[var(--line-strong)] shadow-xs'
@@ -97,7 +97,6 @@ export function Pagination({
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          <span className="hidden xs:inline">Prev</span>
         </button>
 
         <div className="flex items-center gap-1">
@@ -122,7 +121,7 @@ export function Pagination({
                 type="button"
                 onClick={() => onPageChange(pageNum)}
                 aria-current={isActive ? 'page' : undefined}
-                className={`min-w-[32px] h-8 px-2 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer flex items-center justify-center ${
+                className={`w-8 h-8 rounded-lg text-xs font-mono font-medium transition-all cursor-pointer flex items-center justify-center ${
                   isActive
                     ? 'bg-emerald-600 text-white font-bold shadow-xs'
                     : 'bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] hover:bg-[var(--raised)] hover:border-[var(--line-strong)]'
@@ -139,13 +138,12 @@ export function Pagination({
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage >= totalPages}
           aria-label="Next page"
-          className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border flex items-center gap-1 transition-all cursor-pointer ${
+          className={`w-8 h-8 rounded-lg text-xs font-medium border flex items-center justify-center transition-all cursor-pointer ${
             currentPage >= totalPages
               ? 'opacity-40 pointer-events-none border-[var(--line)] text-[var(--muted)] bg-[var(--surface)]'
               : 'border-[var(--line)] bg-[var(--surface)] text-[var(--text)] hover:bg-[var(--raised)] hover:border-[var(--line-strong)] shadow-xs'
           }`}
         >
-          <span className="hidden xs:inline">Next</span>
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>

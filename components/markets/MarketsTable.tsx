@@ -407,10 +407,10 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                     <td className="py-3.5 px-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Link
-                          href={`/borrow?collection=${c.address}`}
-                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs"
+                          href={`/collection/${c.address}`}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--surface)] hover:bg-[var(--panel)] border border-[var(--line)] text-[var(--text)] transition-colors shadow-xs"
                         >
-                          Borrow
+                          View
                         </Link>
                       </div>
                     </td>

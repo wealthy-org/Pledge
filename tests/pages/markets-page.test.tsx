@@ -98,10 +98,10 @@ describe('TICKET-35: Markets Page & Table Component Test Suite', () => {
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
-  it('TS-05: Borrow button renders link to /borrow?collection={address}', () => {
+  it('TS-05: View button renders link to /collection/{address}', () => {
     render(<MarketsTable collections={mockCollections} />);
-    const borrowLinks = screen.getAllByRole('link', { name: /borrow/i });
-    expect(borrowLinks[0].getAttribute('href')).toContain('/borrow?collection=');
+    const viewLinks = screen.getAllByRole('link', { name: /view/i });
+    expect(viewLinks[0].getAttribute('href')).toContain('/collection/');
   });
 
   it('TS-06: HomePage integrates Trending Markets Carousel, FilterChips, and MarketsTable', () => {

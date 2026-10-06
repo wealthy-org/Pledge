@@ -58,7 +58,27 @@ export function ActivityPanel({
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setActivities(data.items || []);
+        const rawList = data.activity || data.items || [];
+        const normalized: ActivityItem[] = rawList.map((item: any) => {
+          const type = item.eventType || item.type || 'Event';
+          const collection = (item.data?.collection as string) || (item.data?.collectionAddress as string) || item.contractAddress || item.collection || '';
+          const tokenId = (item.data?.tokenId as string) || item.tokenId;
+          const principalWei = (item.data?.principalWei as string) || (item.data?.repaymentAmountWei as string) || (item.data?.amountWei as string) || item.principalWei;
+          const userAddress = (item.data?.borrower as string) || (item.data?.lender as string) || (item.data?.user as string) || item.userAddress;
+          return {
+            id: String(item.id || item.txHash || Math.random()),
+            type,
+            collection,
+            collectionName: item.collectionName,
+            tokenId,
+            amountEth: item.amountEth,
+            principalWei,
+            userAddress,
+            txHash: item.txHash,
+            timestamp: item.timestamp || item.indexed_at || new Date().toISOString(),
+          };
+        });
+        setActivities(normalized);
       }
     } catch {
     } finally {
