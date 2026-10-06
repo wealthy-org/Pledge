@@ -22,6 +22,8 @@ export function FeaturedListingsCarousel({
   const [filter, setFilter] = useState<CarouselFilter>('all');
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [isManualStepping, setIsManualStepping] = useState<boolean>(false);
+  const manualStepTimerRef = useRef<NodeJS.Timeout | null>(null);
   const { isWatchlisted, toggleWatchlist } = useWatchlist();
 
   const filteredItems = useMemo(() => {
@@ -55,7 +57,15 @@ export function FeaturedListingsCarousel({
   }, [filteredItems, shouldMarquee, repeatMultiplier]);
 
   useEffect(() => {
-    if (!shouldMarquee || !isPlaying || isHovered || filteredItems.length === 0) return;
+    return () => {
+      if (manualStepTimerRef.current) {
+        clearTimeout(manualStepTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldMarquee || !isPlaying || isHovered || isManualStepping || filteredItems.length === 0) return;
 
     let animationFrameId: number;
     const speed = 0.75;
@@ -77,20 +87,30 @@ export function FeaturedListingsCarousel({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [shouldMarquee, isPlaying, isHovered, filteredItems.length, repeatMultiplier]);
+  }, [shouldMarquee, isPlaying, isHovered, isManualStepping, filteredItems.length, repeatMultiplier]);
 
   const handleScroll = (direction: 'left' | 'right') => {
     const container = scrollRef.current;
     if (!container) return;
+
+    setIsManualStepping(true);
+    if (manualStepTimerRef.current) {
+      clearTimeout(manualStepTimerRef.current);
+    }
+    manualStepTimerRef.current = setTimeout(() => {
+      setIsManualStepping(false);
+    }, 1200);
+
     const scrollAmount = 294;
+    const delta = direction === 'left' ? -scrollAmount : scrollAmount;
 
     if (typeof container.scrollBy === 'function') {
       container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        left: delta,
         behavior: 'smooth',
       });
     } else {
-      container.scrollLeft += direction === 'left' ? -scrollAmount : scrollAmount;
+      container.scrollLeft += delta;
     }
   };
 
@@ -320,5 +340,3 @@ export function FeaturedListingsCarousel({
     </section>
   );
 }
-
-

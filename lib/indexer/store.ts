@@ -7,6 +7,7 @@ class IndexerMemoryStore {
   public events: EventRow[] = [];
   public checkpoints = new Map<string, IndexerCheckpointRow>();
   public collections = new Map<string, CollectionRow>();
+  public watchlists = new Map<string, Set<string>>();
   private eventIds = new Set<string>();
 
   private getEventCompositeKey(chainId: number, contractAddress: string, txHash: string, logIndex: number): string {
@@ -76,6 +77,35 @@ class IndexerMemoryStore {
     return this.checkpoints.get(key);
   }
 
+  public getWatchlist(wallet: string): string[] {
+    const normalized = wallet.toLowerCase();
+    const set = this.watchlists.get(normalized);
+    return set ? Array.from(set) : [];
+  }
+
+  public toggleWatchlist(wallet: string, collection: string): string[] {
+    const normWallet = wallet.toLowerCase();
+    const normCollection = collection.toLowerCase();
+    let set = this.watchlists.get(normWallet);
+    if (!set) {
+      set = new Set<string>();
+      this.watchlists.set(normWallet, set);
+    }
+    if (set.has(normCollection)) {
+      set.delete(normCollection);
+    } else {
+      set.add(normCollection);
+    }
+    return Array.from(set);
+  }
+
+  public setWatchlist(wallet: string, collections: string[]): string[] {
+    const normWallet = wallet.toLowerCase();
+    const set = new Set<string>(collections.map((c) => c.toLowerCase()));
+    this.watchlists.set(normWallet, set);
+    return Array.from(set);
+  }
+
   public reset(): void {
     this.offers.clear();
     this.loans.clear();
@@ -83,6 +113,7 @@ class IndexerMemoryStore {
     this.eventIds.clear();
     this.checkpoints.clear();
     this.collections.clear();
+    this.watchlists.clear();
   }
 
   public clear(): void {
