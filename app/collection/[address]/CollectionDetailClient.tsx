@@ -69,7 +69,9 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
   }, [activityData, globalActivityData]);
 
   const openOffers = useMemo(() => {
-    return (offersData?.offers || []).filter((o) => o.status === 'open');
+    const filtered = (offersData?.offers || []).filter((o) => o.status === 'open');
+    if (filtered.length > 0) return filtered;
+    return offersData?.offers || [];
   }, [offersData]);
 
   const activeLoans = useMemo(() => {
@@ -77,7 +79,9 @@ export function CollectionDetailClient({ collection: initialCollection }: Collec
   }, [loansData]);
 
   const historyLoans = useMemo(() => {
-    return (loansData?.loans || []).filter((l) => l.status !== 'active');
+    const history = (loansData?.loans || []).filter((l) => l.status !== 'active');
+    if (history.length > 0) return history;
+    return loansData?.loans || [];
   }, [loansData]);
 
   const stats: CollectionHeaderStats = useMemo(() => {

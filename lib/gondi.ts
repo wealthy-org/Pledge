@@ -396,87 +396,166 @@ export class GondiClient {
   public async listOffers(options?: {
     slugs?: string[];
     contractAddresses?: string[];
+    statuses?: string[];
     first?: number;
   } | number): Promise<GondiOfferNode[]> {
     const opts = typeof options === 'number' ? { first: options } : options;
     const first = opts?.first || 50;
-    const cacheKey = `offers:${opts?.slugs?.join(',') || ''}:${opts?.contractAddresses?.join(',') || ''}:${first}`;
+    const cacheKey = `offers:${opts?.slugs?.join(',') || ''}:${opts?.contractAddresses?.join(',') || ''}:${opts?.statuses?.join(',') || ''}:${first}`;
 
     let query: string;
     let variables: Record<string, unknown>;
 
     if (opts?.slugs && opts.slugs.length > 0) {
-      query = `
-        query ListOffersBySlug($slugs: [String!]!, $first: Int) {
-          listOffers(slugs: $slugs, first: $first) {
-            edges {
-              node {
-                id
-                offerId
-                lenderAddress
-                borrowerAddress
-                principalAmount
-                aprBps
-                fee
-                duration
-                expirationTime
-                status
-                contractAddress
-                collateralAddress
+      if (opts?.statuses && opts.statuses.length > 0) {
+        query = `
+          query ListOffersBySlugWithStatus($slugs: [String!]!, $statuses: [OfferStatus!], $first: Int) {
+            listOffers(slugs: $slugs, statuses: $statuses, first: $first) {
+              edges {
+                node {
+                  id
+                  offerId
+                  lenderAddress
+                  borrowerAddress
+                  principalAmount
+                  aprBps
+                  fee
+                  duration
+                  expirationTime
+                  status
+                  contractAddress
+                  collateralAddress
+                }
               }
             }
           }
-        }
-      `;
-      variables = { slugs: opts.slugs, first };
+        `;
+        variables = { slugs: opts.slugs, statuses: opts.statuses, first };
+      } else {
+        query = `
+          query ListOffersBySlug($slugs: [String!]!, $first: Int) {
+            listOffers(slugs: $slugs, first: $first) {
+              edges {
+                node {
+                  id
+                  offerId
+                  lenderAddress
+                  borrowerAddress
+                  principalAmount
+                  aprBps
+                  fee
+                  duration
+                  expirationTime
+                  status
+                  contractAddress
+                  collateralAddress
+                }
+              }
+            }
+          }
+        `;
+        variables = { slugs: opts.slugs, first };
+      }
     } else if (opts?.contractAddresses && opts.contractAddresses.length > 0) {
-      query = `
-        query ListOffersByContract($contractAddresses: [Address!]!, $first: Int) {
-          listOffers(contractAddresses: $contractAddresses, first: $first) {
-            edges {
-              node {
-                id
-                offerId
-                lenderAddress
-                borrowerAddress
-                principalAmount
-                aprBps
-                fee
-                duration
-                expirationTime
-                status
-                contractAddress
-                collateralAddress
+      if (opts?.statuses && opts.statuses.length > 0) {
+        query = `
+          query ListOffersByContractWithStatus($contractAddresses: [Address!]!, $statuses: [OfferStatus!], $first: Int) {
+            listOffers(contractAddresses: $contractAddresses, statuses: $statuses, first: $first) {
+              edges {
+                node {
+                  id
+                  offerId
+                  lenderAddress
+                  borrowerAddress
+                  principalAmount
+                  aprBps
+                  fee
+                  duration
+                  expirationTime
+                  status
+                  contractAddress
+                  collateralAddress
+                }
               }
             }
           }
-        }
-      `;
-      variables = { contractAddresses: opts.contractAddresses.map((a) => a.toLowerCase()), first };
+        `;
+        variables = { contractAddresses: opts.contractAddresses.map((a) => a.toLowerCase()), statuses: opts.statuses, first };
+      } else {
+        query = `
+          query ListOffersByContract($contractAddresses: [Address!]!, $first: Int) {
+            listOffers(contractAddresses: $contractAddresses, first: $first) {
+              edges {
+                node {
+                  id
+                  offerId
+                  lenderAddress
+                  borrowerAddress
+                  principalAmount
+                  aprBps
+                  fee
+                  duration
+                  expirationTime
+                  status
+                  contractAddress
+                  collateralAddress
+                }
+              }
+            }
+          }
+        `;
+        variables = { contractAddresses: opts.contractAddresses.map((a) => a.toLowerCase()), first };
+      }
     } else {
-      query = `
-        query ListOffersGlobal($first: Int) {
-          listOffers(first: $first) {
-            edges {
-              node {
-                id
-                offerId
-                lenderAddress
-                borrowerAddress
-                principalAmount
-                aprBps
-                fee
-                duration
-                expirationTime
-                status
-                contractAddress
-                collateralAddress
+      if (opts?.statuses && opts.statuses.length > 0) {
+        query = `
+          query ListOffersGlobalWithStatus($statuses: [OfferStatus!], $first: Int) {
+            listOffers(statuses: $statuses, first: $first) {
+              edges {
+                node {
+                  id
+                  offerId
+                  lenderAddress
+                  borrowerAddress
+                  principalAmount
+                  aprBps
+                  fee
+                  duration
+                  expirationTime
+                  status
+                  contractAddress
+                  collateralAddress
+                }
               }
             }
           }
-        }
-      `;
-      variables = { first };
+        `;
+        variables = { statuses: opts.statuses, first };
+      } else {
+        query = `
+          query ListOffersGlobal($first: Int) {
+            listOffers(first: $first) {
+              edges {
+                node {
+                  id
+                  offerId
+                  lenderAddress
+                  borrowerAddress
+                  principalAmount
+                  aprBps
+                  fee
+                  duration
+                  expirationTime
+                  status
+                  contractAddress
+                  collateralAddress
+                }
+              }
+            }
+          }
+        `;
+        variables = { first };
+      }
     }
 
     try {
@@ -502,36 +581,36 @@ export class GondiClient {
       if (col?.slug) colSlug = col.slug;
     }
 
-    const queries: Promise<GondiOfferNode[]>[] = [];
-    if (colSlug) {
-      queries.push(this.listOffers({ slugs: [colSlug], first }));
-    }
-    queries.push(this.listOffers({ contractAddresses: [normalized], first }));
-    queries.push(this.listOffers({ first: 50 }));
-
-    const results = await Promise.all(queries);
     const seen = new Set<string>();
     const matched: GondiOfferNode[] = [];
 
-    for (const list of results) {
-      for (const item of list) {
-        if (!item || seen.has(item.id)) continue;
-        const colAddr = (item.collateralAddress || item.contractAddress || '').toLowerCase();
-        if (colAddr === normalized || (colSlug && item.id.toLowerCase().includes(colSlug.toLowerCase()))) {
-          seen.add(item.id);
-          matched.push(item);
-        }
+    const addOffer = (o: GondiOfferNode) => {
+      if (!o || seen.has(o.id)) return;
+      seen.add(o.id);
+      matched.push({
+        ...o,
+        collateralAddress: normalized,
+        contractAddress: o.contractAddress || normalized,
+      });
+    };
+
+    if (colSlug) {
+      const activeBySlug = await this.listOffers({ slugs: [colSlug], statuses: ['ACTIVE'], first }).catch(() => []);
+      for (const o of activeBySlug) addOffer(o);
+
+      if (matched.length === 0) {
+        const allBySlug = await this.listOffers({ slugs: [colSlug], first }).catch(() => []);
+        for (const o of allBySlug) addOffer(o);
       }
     }
 
-    if (matched.length === 0 && results[2] && results[2].length > 0) {
-      for (const item of results[2]) {
-        if (!item || seen.has(item.id)) continue;
-        const colAddr = (item.collateralAddress || item.contractAddress || '').toLowerCase();
-        if (colAddr === normalized) {
-          seen.add(item.id);
-          matched.push(item);
-        }
+    if (matched.length === 0) {
+      const byContract = await this.listOffers({ contractAddresses: [normalized], statuses: ['ACTIVE'], first }).catch(() => []);
+      for (const o of byContract) addOffer(o);
+
+      if (matched.length === 0) {
+        const allByContract = await this.listOffers({ contractAddresses: [normalized], first }).catch(() => []);
+        for (const o of allByContract) addOffer(o);
       }
     }
 
@@ -656,43 +735,34 @@ export class GondiClient {
       if (col?.slug) colSlug = col.slug;
     }
 
-    const queries: Promise<GondiLoanNode[]>[] = [];
-    if (colSlug) {
-      queries.push(this.listLoans({ slugs: [colSlug], first }));
-    }
-    queries.push(this.listLoans({ contractAddresses: [normalized], first }));
-    queries.push(this.listLoans({ first: 50 }));
-
-    const results = await Promise.all(queries);
     const seen = new Set<string>();
     const matched: GondiLoanNode[] = [];
 
-    for (const list of results) {
-      for (const item of list) {
-        if (!item || seen.has(item.id)) continue;
-        const addr = (item.address || '').toLowerCase();
-        if (addr === normalized || (colSlug && item.id.toLowerCase().includes(colSlug.toLowerCase()))) {
-          seen.add(item.id);
-          matched.push(item);
-        }
-      }
+    const addLoan = (l: GondiLoanNode) => {
+      if (!l || seen.has(l.id)) return;
+      seen.add(l.id);
+      matched.push({
+        ...l,
+        address: normalized,
+      });
+    };
+
+    if (colSlug) {
+      const bySlug = await this.listLoans({ slugs: [colSlug], first }).catch(() => []);
+      for (const l of bySlug) addLoan(l);
     }
 
-    if (matched.length === 0 && results[2] && results[2].length > 0) {
-      for (const item of results[2]) {
-        if (!item || seen.has(item.id)) continue;
-        if (item.address?.toLowerCase() === normalized) {
-          seen.add(item.id);
-          matched.push(item);
-        }
-      }
+    if (matched.length === 0) {
+      const byContract = await this.listLoans({ contractAddresses: [normalized], first }).catch(() => []);
+      for (const l of byContract) addLoan(l);
     }
 
     return matched;
   }
 
   public async getAllOffersMap(first: number = 50): Promise<Map<string, GondiOfferNode[]>> {
-    const offers = await this.listOffers({ first });
+    const activeOffers = await this.listOffers({ statuses: ['ACTIVE'], first }).catch(() => []);
+    const offers = activeOffers.length > 0 ? activeOffers : await this.listOffers({ first }).catch(() => []);
     const map = new Map<string, GondiOfferNode[]>();
 
     for (const o of offers) {
