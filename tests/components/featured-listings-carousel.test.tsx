@@ -35,9 +35,9 @@ describe('FeaturedListingsCarousel Component', () => {
 
     expect(screen.getByText(/trending markets & offers/i)).toBeDefined();
     expect(screen.getByText(/live escrow/i)).toBeDefined();
-    expect(screen.getByText('Robinhood Genesis')).toBeDefined();
-    expect(screen.getByText('Pledge Founders')).toBeDefined();
-    expect(screen.getByText('4 Offers')).toBeDefined();
+    expect(screen.getAllByText('Robinhood Genesis').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Pledge Founders').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('4 Offers').length).toBeGreaterThan(0);
   });
 
   it('filters items when clicking filter chips', () => {
@@ -46,22 +46,33 @@ describe('FeaturedListingsCarousel Component', () => {
     const activeOffersChip = screen.getByRole('button', { name: /active offers/i });
     fireEvent.click(activeOffersChip);
 
-    expect(screen.getByText('Robinhood Genesis')).toBeDefined();
+    expect(screen.getAllByText('Robinhood Genesis').length).toBeGreaterThan(0);
     expect(screen.queryByText('Pledge Founders')).toBeNull();
 
     const inLoanChip = screen.getByRole('button', { name: /in loan/i });
     fireEvent.click(inLoanChip);
 
-    expect(screen.getByText('Robinhood Genesis')).toBeDefined();
+    expect(screen.getAllByText('Robinhood Genesis').length).toBeGreaterThan(0);
 
     const allChip = screen.getByRole('button', { name: /all listings/i });
     fireEvent.click(allChip);
 
-    expect(screen.getByText('Pledge Founders')).toBeDefined();
+    expect(screen.getAllByText('Pledge Founders').length).toBeGreaterThan(0);
   });
 
-  it('handles scroll button interactions gracefully', () => {
+  it('handles scroll and play/stop button interactions gracefully', () => {
     render(<FeaturedListingsCarousel collections={mockCollections} />);
+
+    const stopButton = screen.getByRole('button', { name: /stop scrolling/i });
+    expect(stopButton).toBeDefined();
+
+    fireEvent.click(stopButton);
+
+    const startButton = screen.getByRole('button', { name: /start scrolling/i });
+    expect(startButton).toBeDefined();
+
+    fireEvent.click(startButton);
+    expect(screen.getByRole('button', { name: /stop scrolling/i })).toBeDefined();
 
     const scrollRightBtn = screen.getByRole('button', { name: /scroll right/i });
     const scrollLeftBtn = screen.getByRole('button', { name: /scroll left/i });
@@ -73,3 +84,4 @@ describe('FeaturedListingsCarousel Component', () => {
     fireEvent.click(scrollLeftBtn);
   });
 });
+

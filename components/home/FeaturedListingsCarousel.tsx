@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { NftImage } from '@/components/nft/NftImage';
-import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { MarketCollectionItem } from '@/components/markets/MarketsTable';
 
@@ -20,6 +19,8 @@ export function FeaturedListingsCarousel({
 }: FeaturedListingsCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<CarouselFilter>('all');
+  const [isPlaying, setIsPlaying] = useState<boolean>(true);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const filteredItems = useMemo(() => {
     return collections.filter((item) => {
@@ -30,17 +31,71 @@ export function FeaturedListingsCarousel({
     });
   }, [collections, filter]);
 
+  const repeatMultiplier = useMemo(() => {
+    if (filteredItems.length === 0) return 1;
+    return Math.max(3, Math.ceil(12 / filteredItems.length));
+  }, [filteredItems.length]);
+
+  const repeatedItems = useMemo(() => {
+    if (filteredItems.length === 0) return [];
+    const items: Array<{ item: MarketCollectionItem; key: string }> = [];
+    for (let r = 0; r < repeatMultiplier; r++) {
+      filteredItems.forEach((item, idx) => {
+        items.push({ item, key: `${item.address}-rep-${r}-${idx}` });
+      });
+    }
+    return items;
+  }, [filteredItems, repeatMultiplier]);
+
+  useEffect(() => {
+    if (!isPlaying || isHovered || filteredItems.length === 0) return;
+
+    let animationFrameId: number;
+    const speed = 0.75;
+
+    const animate = () => {
+      const container = scrollRef.current;
+      if (container) {
+        const singleSetWidth = container.scrollWidth / repeatMultiplier;
+        container.scrollLeft += speed;
+        if (container.scrollLeft >= singleSetWidth) {
+          container.scrollLeft -= singleSetWidth;
+        }
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [isPlaying, isHovered, filteredItems.length, repeatMultiplier]);
+
   const handleScroll = (direction: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const scrollAmount = 340;
-    if (typeof scrollRef.current.scrollBy === 'function') {
-      scrollRef.current.scrollBy({
+    const container = scrollRef.current;
+    if (!container) return;
+    const scrollAmount = 294;
+    const singleSetWidth = container.scrollWidth / repeatMultiplier;
+
+    if (typeof container.scrollBy === 'function') {
+      container.scrollBy({
         left: direction === 'left' ? -scrollAmount : scrollAmount,
         behavior: 'smooth',
       });
     } else {
-      scrollRef.current.scrollLeft += direction === 'left' ? -scrollAmount : scrollAmount;
+      container.scrollLeft += direction === 'left' ? -scrollAmount : scrollAmount;
     }
+
+    if (container.scrollLeft < 0) {
+      container.scrollLeft += singleSetWidth;
+    } else if (container.scrollLeft >= singleSetWidth * 2) {
+      container.scrollLeft -= singleSetWidth;
+    }
+  };
+
+  const togglePlay = () => {
+    setIsPlaying((prev) => !prev);
   };
 
   const filterChips: { id: CarouselFilter; label: string }[] = [
@@ -65,7 +120,7 @@ export function FeaturedListingsCarousel({
           </span>
         </div>
 
-        <div className="flex items-center gap-2 justify-between sm:justify-end">
+        <div className="flex items-center gap-2 justify-between sm:justify-end flex-wrap sm:flex-nowrap">
           <div className="flex items-center gap-1 p-1 bg-[var(--panel)] border border-[var(--line)] rounded-lg overflow-x-auto no-scrollbar">
             {filterChips.map((chip) => {
               const isSelected = filter === chip.id;
@@ -86,12 +141,30 @@ export function FeaturedListingsCarousel({
             })}
           </div>
 
-          <div className="hidden sm:flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Stop scrolling' : 'Start scrolling'}
+              title={isPlaying ? 'Stop' : 'Play'}
+              className="p-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
+            >
+              {isPlaying ? (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 5h4v14H6V5zm8 0h4v14h-4V5z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              )}
+            </button>
             <button
               type="button"
               onClick={() => handleScroll('left')}
               aria-label="Scroll left"
-              className="p-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors cursor-pointer"
+              title="Previous 1 row"
+              className="p-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -101,7 +174,8 @@ export function FeaturedListingsCarousel({
               type="button"
               onClick={() => handleScroll('right')}
               aria-label="Scroll right"
-              className="p-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors cursor-pointer"
+              title="Next 1 row"
+              className="p-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--line)] text-[var(--text)] transition-colors cursor-pointer flex items-center justify-center shadow-xs"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -134,20 +208,18 @@ export function FeaturedListingsCarousel({
       ) : (
         <div
           ref={scrollRef}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           className="flex gap-3.5 overflow-x-auto no-scrollbar scroll-smooth py-1 -mx-1 px-1"
         >
-          {filteredItems.map((item) => {
-            const poolEth = item.poolSizeWei && item.poolSizeWei !== '0'
-              ? (Number(item.poolSizeWei) / 1e18).toFixed(2)
-              : '0.00';
-
+          {repeatedItems.map(({ item, key }) => {
             const bestOfferEth = item.bestOfferWei && item.bestOfferWei !== '0'
               ? (Number(item.bestOfferWei) / 1e18).toFixed(2)
               : null;
 
             return (
               <div
-                key={item.address}
+                key={key}
                 className="w-[260px] sm:w-[280px] shrink-0 p-3.5 rounded-xl bg-[var(--surface)] border border-[var(--line)] hover:border-[var(--line-strong)] card-hover-lift shadow-2xs flex flex-col justify-between group"
               >
                 <Link
@@ -227,3 +299,4 @@ export function FeaturedListingsCarousel({
     </section>
   );
 }
+
