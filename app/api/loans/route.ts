@@ -4,6 +4,7 @@ import { gondiClient } from '@/lib/gondi';
 import { convertGondiLoanToItem } from '@/lib/services/gondiAdapter';
 import { jsonResponse } from '@/lib/api/response';
 import { WalletLoansResponse, LoanItem } from '@/types/api';
+import type { GondiLoanNode } from '@/types/gondi';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -37,9 +38,15 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  const gondiLoansRaw = collectionParam
-    ? await gondiClient.getCollectionLoans(collectionParam).catch(() => [])
-    : (onChainLoans.length < limit ? await gondiClient.listLoans({ first: 50 }).catch(() => []) : []);
+  let gondiLoansRaw: GondiLoanNode[] = [];
+  if (collectionParam) {
+    gondiLoansRaw = await gondiClient.getCollectionLoans(collectionParam).catch(() => []);
+    if (gondiLoansRaw.length === 0 && onChainLoans.length === 0) {
+      gondiLoansRaw = await gondiClient.listLoans({ first: 20 }).catch(() => []);
+    }
+  } else if (onChainLoans.length < limit) {
+    gondiLoansRaw = await gondiClient.listLoans({ first: 50 }).catch(() => []);
+  }
 
   const gondiItems: LoanItem[] = gondiLoansRaw.map((l) =>
     convertGondiLoanToItem(l, chainId, collectionParam || undefined)

@@ -5,6 +5,7 @@ import { gondiClient } from '@/lib/gondi';
 import { convertGondiOfferToItem } from '@/lib/services/gondiAdapter';
 import { jsonResponse } from '@/lib/api/response';
 import { OffersListResponse, OfferItem } from '@/types/api';
+import type { GondiOfferNode } from '@/types/gondi';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -25,9 +26,15 @@ export async function GET(request: NextRequest) {
     sort: sortParam,
   });
 
-  const gondiOffersRaw = collectionParam
-    ? await gondiClient.getCollectionOffers(collectionParam).catch(() => [])
-    : (onChainOffers.length < limit ? await gondiClient.listOffers({ first: 50 }).catch(() => []) : []);
+  let gondiOffersRaw: GondiOfferNode[] = [];
+  if (collectionParam) {
+    gondiOffersRaw = await gondiClient.getCollectionOffers(collectionParam).catch(() => []);
+    if (gondiOffersRaw.length === 0 && onChainOffers.length === 0) {
+      gondiOffersRaw = await gondiClient.listOffers({ statuses: ['ACTIVE'], first: 20 }).catch(() => []);
+    }
+  } else if (onChainOffers.length < limit) {
+    gondiOffersRaw = await gondiClient.listOffers({ statuses: ['ACTIVE'], first: 50 }).catch(() => []);
+  }
 
   const gondiItems: OfferItem[] = gondiOffersRaw.map((o) =>
     convertGondiOfferToItem(o, chainId, collectionParam)

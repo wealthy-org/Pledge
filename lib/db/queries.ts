@@ -29,6 +29,7 @@ import {
   ActivityItem,
 } from '@/types/api';
 import { OfferStatus, LoanStatus } from '@/types/database';
+import type { GondiOfferNode } from '@/types/gondi';
 
 function resolveChainId(chainId?: number): number {
   if (chainId !== undefined && !isNaN(chainId) && chainId > 0) return chainId;
@@ -412,7 +413,10 @@ export async function fetchCollectionOffers(
     sort,
   });
 
-  const gondiOffersRaw = await gondiClient.getCollectionOffers(address).catch(() => []);
+  let gondiOffersRaw: GondiOfferNode[] = await gondiClient.getCollectionOffers(address).catch(() => []);
+  if (gondiOffersRaw.length === 0 && onChainOffers.length === 0) {
+    gondiOffersRaw = await gondiClient.listOffers({ statuses: ['ACTIVE'], first: 20 }).catch(() => []);
+  }
   const gondiItems: OfferItem[] = gondiOffersRaw.map((o) =>
     convertGondiOfferToItem(o, targetChain, address)
   );
