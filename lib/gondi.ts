@@ -5,6 +5,7 @@ import type {
   GondiCollectionNode,
   GondiNftNode,
   GondiLendingPulseData,
+  GondiOfferNode,
   GondiLoanNode,
   GondiGraphQLResponse,
   GondiImage,
@@ -392,46 +393,319 @@ export class GondiClient {
     }
   }
 
-  public async listLoans(first: number = 20): Promise<GondiLoanNode[]> {
-    const query = `
-      query ListLoans($first: Int!) {
-        listLoans(first: $first) {
-          edges {
-            node {
-              id
-              principalAmount
-              duration
-              startTime
-              status
-              nft {
-                name
-                tokenId
-                image {
-                  id
-                  data
-                  accessTypeName
-                  contentTypeMime
-                  cacheUrl
-                }
-                collection {
-                  name
+  public async listOffers(options?: {
+    slugs?: string[];
+    contractAddresses?: string[];
+    first?: number;
+  } | number): Promise<GondiOfferNode[]> {
+    const opts = typeof options === 'number' ? { first: options } : options;
+    const first = opts?.first || 50;
+    const cacheKey = `offers:${opts?.slugs?.join(',') || ''}:${opts?.contractAddresses?.join(',') || ''}:${first}`;
+
+    let query: string;
+    let variables: Record<string, unknown>;
+
+    if (opts?.slugs && opts.slugs.length > 0) {
+      query = `
+        query ListOffersBySlug($slugs: [String!]!, $first: Int) {
+          listOffers(slugs: $slugs, first: $first) {
+            edges {
+              node {
+                id
+                offerId
+                lenderAddress
+                borrowerAddress
+                principalAmount
+                aprBps
+                fee
+                duration
+                expirationTime
+                status
+                contractAddress
+                collateralAddress
+              }
+            }
+          }
+        }
+      `;
+      variables = { slugs: opts.slugs, first };
+    } else if (opts?.contractAddresses && opts.contractAddresses.length > 0) {
+      query = `
+        query ListOffersByContract($contractAddresses: [Address!]!, $first: Int) {
+          listOffers(contractAddresses: $contractAddresses, first: $first) {
+            edges {
+              node {
+                id
+                offerId
+                lenderAddress
+                borrowerAddress
+                principalAmount
+                aprBps
+                fee
+                duration
+                expirationTime
+                status
+                contractAddress
+                collateralAddress
+              }
+            }
+          }
+        }
+      `;
+      variables = { contractAddresses: opts.contractAddresses.map((a) => a.toLowerCase()), first };
+    } else {
+      query = `
+        query ListOffersGlobal($first: Int) {
+          listOffers(first: $first) {
+            edges {
+              node {
+                id
+                offerId
+                lenderAddress
+                borrowerAddress
+                principalAmount
+                aprBps
+                fee
+                duration
+                expirationTime
+                status
+                contractAddress
+                collateralAddress
+              }
+            }
+          }
+        }
+      `;
+      variables = { first };
+    }
+
+    try {
+      const data = await executeGondiQuery<{
+        listOffers: { edges: Array<{ node: GondiOfferNode }> };
+      }>(query, variables, cacheKey);
+      return (data?.listOffers?.edges || []).map((e) => e.node);
+    } catch {
+      return [];
+    }
+  }
+
+  public async getCollectionOffers(
+    contractAddress: string,
+    slug?: string,
+    first: number = 30
+  ): Promise<GondiOfferNode[]> {
+    if (!contractAddress) return [];
+    const normalized = contractAddress.toLowerCase();
+    let colSlug = slug;
+    if (!colSlug) {
+      const col = await this.getCollectionByAddress(normalized).catch(() => null);
+      if (col?.slug) colSlug = col.slug;
+    }
+
+    const queries: Promise<GondiOfferNode[]>[] = [];
+    if (colSlug) {
+      queries.push(this.listOffers({ slugs: [colSlug], first }));
+    }
+    queries.push(this.listOffers({ contractAddresses: [normalized], first }));
+    queries.push(this.listOffers({ first: 50 }));
+
+    const results = await Promise.all(queries);
+    const seen = new Set<string>();
+    const matched: GondiOfferNode[] = [];
+
+    for (const list of results) {
+      for (const item of list) {
+        if (!item || seen.has(item.id)) continue;
+        const colAddr = (item.collateralAddress || item.contractAddress || '').toLowerCase();
+        if (colAddr === normalized || (colSlug && item.id.toLowerCase().includes(colSlug.toLowerCase()))) {
+          seen.add(item.id);
+          matched.push(item);
+        }
+      }
+    }
+
+    if (matched.length === 0 && results[2] && results[2].length > 0) {
+      for (const item of results[2]) {
+        if (!item || seen.has(item.id)) continue;
+        const colAddr = (item.collateralAddress || item.contractAddress || '').toLowerCase();
+        if (colAddr === normalized) {
+          seen.add(item.id);
+          matched.push(item);
+        }
+      }
+    }
+
+    return matched;
+  }
+
+  public async listLoans(options?: {
+    slugs?: string[];
+    contractAddresses?: string[];
+    first?: number;
+  } | number): Promise<GondiLoanNode[]> {
+    const opts = typeof options === 'number' ? { first: options } : options;
+    const first = opts?.first || 50;
+    const cacheKey = `loans:${opts?.slugs?.join(',') || ''}:${opts?.contractAddresses?.join(',') || ''}:${first}`;
+
+    let query: string;
+    let variables: Record<string, unknown>;
+
+    if (opts?.slugs && opts.slugs.length > 0) {
+      query = `
+        query ListLoansBySlug($slugs: [String!]!, $first: Int) {
+          listLoans(slugs: $slugs, first: $first) {
+            edges {
+              node {
+                id
+                loanId
+                address
+                borrowerAddress
+                principalAddress
+                startTime
+                repaymentTime
+                duration
+                status
+                protocolFee
+                offerIds
+                currency {
+                  symbol
+                  decimals
                 }
               }
             }
           }
         }
-      }
-    `;
+      `;
+      variables = { slugs: opts.slugs, first };
+    } else if (opts?.contractAddresses && opts.contractAddresses.length > 0) {
+      query = `
+        query ListLoansByContract($contractAddresses: [Address!]!, $first: Int) {
+          listLoans(contractAddresses: $contractAddresses, first: $first) {
+            edges {
+              node {
+                id
+                loanId
+                address
+                borrowerAddress
+                principalAddress
+                startTime
+                repaymentTime
+                duration
+                status
+                protocolFee
+                offerIds
+                currency {
+                  symbol
+                  decimals
+                }
+              }
+            }
+          }
+        }
+      `;
+      variables = { contractAddresses: opts.contractAddresses.map((a) => a.toLowerCase()), first };
+    } else {
+      query = `
+        query ListLoansGlobal($first: Int) {
+          listLoans(first: $first) {
+            edges {
+              node {
+                id
+                loanId
+                address
+                borrowerAddress
+                principalAddress
+                startTime
+                repaymentTime
+                duration
+                status
+                protocolFee
+                offerIds
+                currency {
+                  symbol
+                  decimals
+                }
+              }
+            }
+          }
+        }
+      `;
+      variables = { first };
+    }
 
     try {
       const data = await executeGondiQuery<{
         listLoans: { edges: Array<{ node: GondiLoanNode }> };
-      }>(query, { first }, `loans:${first}`);
+      }>(query, variables, cacheKey);
       return (data?.listLoans?.edges || []).map((e) => e.node);
     } catch {
       return [];
     }
   }
+
+  public async getCollectionLoans(
+    contractAddress: string,
+    slug?: string,
+    first: number = 30
+  ): Promise<GondiLoanNode[]> {
+    if (!contractAddress) return [];
+    const normalized = contractAddress.toLowerCase();
+    let colSlug = slug;
+    if (!colSlug) {
+      const col = await this.getCollectionByAddress(normalized).catch(() => null);
+      if (col?.slug) colSlug = col.slug;
+    }
+
+    const queries: Promise<GondiLoanNode[]>[] = [];
+    if (colSlug) {
+      queries.push(this.listLoans({ slugs: [colSlug], first }));
+    }
+    queries.push(this.listLoans({ contractAddresses: [normalized], first }));
+    queries.push(this.listLoans({ first: 50 }));
+
+    const results = await Promise.all(queries);
+    const seen = new Set<string>();
+    const matched: GondiLoanNode[] = [];
+
+    for (const list of results) {
+      for (const item of list) {
+        if (!item || seen.has(item.id)) continue;
+        const addr = (item.address || '').toLowerCase();
+        if (addr === normalized || (colSlug && item.id.toLowerCase().includes(colSlug.toLowerCase()))) {
+          seen.add(item.id);
+          matched.push(item);
+        }
+      }
+    }
+
+    if (matched.length === 0 && results[2] && results[2].length > 0) {
+      for (const item of results[2]) {
+        if (!item || seen.has(item.id)) continue;
+        if (item.address?.toLowerCase() === normalized) {
+          seen.add(item.id);
+          matched.push(item);
+        }
+      }
+    }
+
+    return matched;
+  }
+
+  public async getAllOffersMap(first: number = 50): Promise<Map<string, GondiOfferNode[]>> {
+    const offers = await this.listOffers({ first });
+    const map = new Map<string, GondiOfferNode[]>();
+
+    for (const o of offers) {
+      const colAddr = (o.collateralAddress || o.contractAddress || '').toLowerCase();
+      if (!colAddr) continue;
+      const list = map.get(colAddr) || [];
+      list.push(o);
+      map.set(colAddr, list);
+    }
+
+    return map;
+  }
 }
 
 export const gondiClient = new GondiClient();
+

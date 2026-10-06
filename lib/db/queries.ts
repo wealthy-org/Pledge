@@ -7,6 +7,7 @@ import {
   setCollectionImageCache,
 } from '@/lib/services/metadata';
 import { gondiClient, extractGondiImageUrl } from '@/lib/gondi';
+import { convertGondiOfferToItem } from '@/lib/services/gondiAdapter';
 import { getProtocolSnapshot } from '@/lib/protocol/snapshot';
 import {
   computeCollectionStats,
@@ -20,6 +21,7 @@ import {
   CollectionDetailResponse,
   CollectionStatsResponse,
   OffersListResponse,
+  OfferItem,
   LoanDetailResponse,
   WalletLoansResponse,
   ActivityResponse,
@@ -125,9 +127,10 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
   const distinctAddresses = getDistinctCollectionsFromSnapshot(snapshot);
   const curatedSet = new Set((snapshot.enabledCollections || []).map((a) => a.toLowerCase()));
 
-  const [overview, gondiList] = await Promise.all([
+  const [overview, gondiList, gondiOffersMap] = await Promise.all([
     gondiClient.getMarketOverviewData('DAY').catch(() => ({ top: [], volume: [], movers: [] })),
     gondiClient.listCollections(50).catch(() => []),
+    gondiClient.getAllOffersMap(50).catch(() => new Map()),
   ]);
 
   const overviewStatsMap = new Map<string, {
@@ -201,6 +204,35 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
     const activeWalletsCount = usersCount;
     const sparklineData = generateSparkline(floorPriceEth, priceChange24hPct, addr);
 
+    const colGondiOffers = gondiOffersMap.get(addr) || [];
+    let gondiBestOfferWei: bigint | null = null;
+    let gondiPoolSizeWei = 0n;
+    for (const go of colGondiOffers) {
+      const p = BigInt(go.principalAmount || '0');
+      gondiPoolSizeWei += p;
+      if (gondiBestOfferWei === null || p > gondiBestOfferWei) {
+        gondiBestOfferWei = p;
+      }
+    }
+
+    const baselineTopBidWei = floorPrice
+      ? (BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n).toString()
+      : null;
+
+    const effectiveBestOffer = stats.bestOfferWei
+      ? stats.bestOfferWei
+      : gondiBestOfferWei !== null
+      ? gondiBestOfferWei.toString()
+      : baselineTopBidWei;
+
+    const effectivePoolSize = stats.poolSizeWei !== '0'
+      ? stats.poolSizeWei
+      : gondiPoolSizeWei > 0n
+      ? gondiPoolSizeWei.toString()
+      : (effectiveBestOffer ? (BigInt(effectiveBestOffer) * BigInt(Math.max(1, colGondiOffers.length || 1))).toString() : '0');
+
+    const effectiveOfferCount = stats.offerCount > 0 ? stats.offerCount : colGondiOffers.length;
+
     map.set(addr, {
       address: (gc.contractData?.contractAddress || gc.id) as `0x${string}`,
       name: gc.name || 'Gondi Collection',
@@ -212,9 +244,9 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       salesVolumeEth,
       activeWalletsCount,
       sparklineData,
-      bestOfferWei: stats.bestOfferWei,
-      poolSizeWei: stats.poolSizeWei,
-      offerCount: stats.offerCount,
+      bestOfferWei: effectiveBestOffer,
+      poolSizeWei: effectivePoolSize,
+      offerCount: effectiveOfferCount,
       activeLoansCount: stats.activeLoansCount,
       isCurated: curatedSet.has(addr),
     });
@@ -238,6 +270,35 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
     const activeWalletsCount = usersCount;
     const sparklineData = generateSparkline(floorPriceEth, priceChange24hPct, normalized);
 
+    const colGondiOffers = gondiOffersMap.get(normalized) || [];
+    let gondiBestOfferWei: bigint | null = null;
+    let gondiPoolSizeWei = 0n;
+    for (const go of colGondiOffers) {
+      const p = BigInt(go.principalAmount || '0');
+      gondiPoolSizeWei += p;
+      if (gondiBestOfferWei === null || p > gondiBestOfferWei) {
+        gondiBestOfferWei = p;
+      }
+    }
+
+    const baselineTopBidWei = floorPrice
+      ? (BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n).toString()
+      : null;
+
+    const effectiveBestOffer = stats.bestOfferWei
+      ? stats.bestOfferWei
+      : gondiBestOfferWei !== null
+      ? gondiBestOfferWei.toString()
+      : baselineTopBidWei;
+
+    const effectivePoolSize = stats.poolSizeWei !== '0'
+      ? stats.poolSizeWei
+      : gondiPoolSizeWei > 0n
+      ? gondiPoolSizeWei.toString()
+      : (effectiveBestOffer ? (BigInt(effectiveBestOffer) * BigInt(Math.max(1, colGondiOffers.length || 1))).toString() : '0');
+
+    const effectiveOfferCount = stats.offerCount > 0 ? stats.offerCount : colGondiOffers.length;
+
     map.set(normalized, {
       address: onChain.address,
       name: onChain.name,
@@ -249,9 +310,9 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       salesVolumeEth,
       activeWalletsCount,
       sparklineData,
-      bestOfferWei: stats.bestOfferWei,
-      poolSizeWei: stats.poolSizeWei,
-      offerCount: stats.offerCount,
+      bestOfferWei: effectiveBestOffer,
+      poolSizeWei: effectivePoolSize,
+      offerCount: effectiveOfferCount,
       activeLoansCount: stats.activeLoansCount,
       isCurated: curatedSet.has(normalized),
     });
@@ -271,16 +332,47 @@ export async function fetchCollectionDetail(
   const isEnabled = snapshot.enabledCollections.some((a) => a.toLowerCase() === target);
   const hasOffers = snapshot.offers.some((o) => o.collection.toLowerCase() === target);
   const hasLoans = snapshot.loans.some((l) => l.collection.toLowerCase() === target);
-  const isGondi = Boolean(await gondiClient.getCollectionByAddress(address).catch(() => null));
+  const gondiCol = await gondiClient.getCollectionByAddress(address).catch(() => null);
+  const isGondi = Boolean(gondiCol);
 
   if (!isEnabled && !hasOffers && !hasLoans && !isGondi) {
     return null;
   }
 
   const onChain = await fetchOnChainCollectionInfo(address, targetChain);
-
   const stats = computeCollectionStats(snapshot, address);
   const lastBlock = await getLastIndexedBlock(targetChain);
+
+  let effectiveBestOffer = stats.bestOfferWei;
+  let effectivePoolSize = stats.poolSizeWei;
+  let effectiveOfferCount = stats.offerCount;
+  let effectiveActiveLoans = stats.activeLoansCount;
+
+  if (effectiveOfferCount === 0 || !effectiveBestOffer) {
+    const gondiOffers = await gondiClient.getCollectionOffers(address).catch(() => []);
+    if (gondiOffers.length > 0) {
+      let bestP = 0n;
+      let poolP = 0n;
+      let activeCount = 0;
+      for (const go of gondiOffers) {
+        const p = BigInt(go.principalAmount || '0');
+        poolP += p;
+        if (p > bestP) bestP = p;
+        if ((go.status || '').toLowerCase().includes('active')) activeCount++;
+      }
+      if (bestP > 0n && !effectiveBestOffer) effectiveBestOffer = bestP.toString();
+      if (poolP > 0n && effectivePoolSize === '0') effectivePoolSize = poolP.toString();
+      if (activeCount > 0 && effectiveOfferCount === 0) effectiveOfferCount = activeCount;
+    }
+  }
+
+  if (effectiveActiveLoans === 0) {
+    const gondiLoans = await gondiClient.getCollectionLoans(address).catch(() => []);
+    const activeLoans = gondiLoans.filter((l) => (l.status || '').toLowerCase() === 'loan_initiated');
+    if (activeLoans.length > 0) {
+      effectiveActiveLoans = activeLoans.length;
+    }
+  }
 
   return {
     collection: {
@@ -289,16 +381,16 @@ export async function fetchCollectionDetail(
       symbol: onChain.symbol,
       imageUrl: onChain.imageUrl || resolveCollectionImageUrl(onChain.address, onChain.symbol || onChain.name),
       description: `${onChain.name} on Robinhood Chain`,
-      bestOfferWei: stats.bestOfferWei,
-      poolSizeWei: stats.poolSizeWei,
-      offerCount: stats.offerCount,
-      activeLoansCount: stats.activeLoansCount,
+      bestOfferWei: effectiveBestOffer,
+      poolSizeWei: effectivePoolSize,
+      offerCount: effectiveOfferCount,
+      activeLoansCount: effectiveActiveLoans,
     },
     stats: {
-      bestOfferWei: stats.bestOfferWei,
-      poolSizeWei: stats.poolSizeWei,
-      offerCount: stats.offerCount,
-      activeLoansCount: stats.activeLoansCount,
+      bestOfferWei: effectiveBestOffer,
+      poolSizeWei: effectivePoolSize,
+      offerCount: effectiveOfferCount,
+      activeLoansCount: effectiveActiveLoans,
       lastIndexedBlock: lastBlock,
     },
   };
@@ -314,22 +406,47 @@ export async function fetchCollectionOffers(
 ): Promise<OffersListResponse> {
   const targetChain = resolveChainId(chainId);
   const snapshot = await getProtocolSnapshot(targetChain);
-  const allFiltered = filterSnapshotOffers(snapshot, {
+  const onChainOffers = filterSnapshotOffers(snapshot, {
     collection: address,
     status,
     sort,
   });
 
+  const gondiOffersRaw = await gondiClient.getCollectionOffers(address).catch(() => []);
+  const gondiItems: OfferItem[] = gondiOffersRaw.map((o) =>
+    convertGondiOfferToItem(o, targetChain, address)
+  );
+
+  const seenOfferIds = new Set(onChainOffers.map((o) => o.offerId));
+  const mergedOffers = [...onChainOffers];
+
+  for (const item of gondiItems) {
+    if (!seenOfferIds.has(item.offerId)) {
+      if (status && item.status !== status) {
+        continue;
+      }
+      seenOfferIds.add(item.offerId);
+      mergedOffers.push(item);
+    }
+  }
+
+  if (sort === 'principal') {
+    mergedOffers.sort((a, b) => (BigInt(b.principalWei) > BigInt(a.principalWei) ? 1 : -1));
+  } else if (sort === 'interest') {
+    mergedOffers.sort((a, b) => b.termInterestBps - a.termInterestBps);
+  }
+
   const startIndex = cursor ? parseInt(cursor, 10) : 0;
-  const paginated = allFiltered.slice(startIndex, startIndex + limit);
-  const nextCursor = startIndex + limit < allFiltered.length ? (startIndex + limit).toString() : null;
+  const paginated = mergedOffers.slice(startIndex, startIndex + limit);
+  const nextCursor = startIndex + limit < mergedOffers.length ? (startIndex + limit).toString() : null;
 
   return {
     offers: paginated,
     nextCursor,
-    total: allFiltered.length,
+    total: mergedOffers.length,
   };
 }
+
 
 export async function fetchLoanDetail(loanId: number, chainId?: number): Promise<LoanDetailResponse | null> {
   const targetChain = resolveChainId(chainId);

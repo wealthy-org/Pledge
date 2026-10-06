@@ -1,10 +1,14 @@
 import { NextRequest } from 'next/server';
 import { indexerStore } from '@/lib/indexer/store';
+import { gondiClient } from '@/lib/gondi';
+import { convertGondiLoanToItem } from '@/lib/services/gondiAdapter';
 import { jsonResponse } from '@/lib/api/response';
 import { WalletLoansResponse, LoanItem } from '@/types/api';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const chainIdParam = searchParams.get('chainId');
+  const chainId = chainIdParam ? parseInt(chainIdParam, 10) : 46630;
   const statusParam = searchParams.get('status');
   const collectionParam = searchParams.get('collection');
   const borrowerParam = searchParams.get('borrower');
@@ -12,9 +16,9 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 50);
   const cursor = searchParams.get('cursor');
 
-  const allLoans: LoanItem[] = [];
+  const onChainLoans: LoanItem[] = [];
   for (const row of indexerStore.loans.values()) {
-    allLoans.push({
+    onChainLoans.push({
       loanId: row.loan_id,
       offerId: row.offer_id,
       chainId: row.chain_id,
@@ -33,7 +37,25 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  let filtered = allLoans;
+  const gondiLoansRaw = collectionParam
+    ? await gondiClient.getCollectionLoans(collectionParam).catch(() => [])
+    : (onChainLoans.length < limit ? await gondiClient.listLoans({ first: 50 }).catch(() => []) : []);
+
+  const gondiItems: LoanItem[] = gondiLoansRaw.map((l) =>
+    convertGondiLoanToItem(l, chainId, collectionParam || undefined)
+  );
+
+  const seenLoanIds = new Set(onChainLoans.map((l) => l.loanId));
+  const mergedLoans = [...onChainLoans];
+
+  for (const item of gondiItems) {
+    if (!seenLoanIds.has(item.loanId)) {
+      seenLoanIds.add(item.loanId);
+      mergedLoans.push(item);
+    }
+  }
+
+  let filtered = mergedLoans;
 
   if (statusParam) {
     filtered = filtered.filter((l) => l.status === statusParam);
@@ -68,3 +90,4 @@ export async function GET(request: NextRequest) {
 
   return jsonResponse(response);
 }
+

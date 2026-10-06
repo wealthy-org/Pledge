@@ -71,12 +71,39 @@ export interface GondiLendingPulseData {
   newLoans24h?: number | null;
 }
 
+export interface GondiOfferNode {
+  id: string;
+  offerId?: number | string | null;
+  lenderAddress?: string | null;
+  borrowerAddress?: string | null;
+  signerAddress?: string | null;
+  contractAddress?: string | null;
+  collateralAddress?: string | null;
+  principalAmount: string;
+  aprBps: string;
+  fee?: string | null;
+  duration: string;
+  expirationTime: string;
+  status: string;
+}
+
 export interface GondiLoanNode {
   id: string;
-  principalAmount: string;
-  duration: string;
-  startTime: string;
-  status: string;
+  loanId?: number | string | null;
+  address?: string | null;
+  borrowerAddress?: string | null;
+  principalAddress?: string | null;
+  startTime?: string | null;
+  repaymentTime?: string | null;
+  contractStartTime?: string | null;
+  duration?: string | null;
+  status?: string | null;
+  protocolFee?: string | null;
+  offerIds?: string[] | null;
+  currency?: {
+    symbol?: string | null;
+    decimals?: number | null;
+  } | null;
   nft?: {
     name?: string | null;
     tokenId?: string | null;
@@ -91,3 +118,4 @@ export interface GondiGraphQLResponse<T> {
   data?: T | null;
   errors?: Array<{ message: string; locations?: unknown[] }> | null;
 }
+
