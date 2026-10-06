@@ -61,9 +61,12 @@ export function ActivityStream({
             variant="secondary"
             size="md"
             onClick={onLoadMore}
-            className="w-full sm:w-auto font-mono text-xs"
+            className="w-full sm:w-auto font-mono text-xs inline-flex items-center gap-1.5"
           >
-            Load More Events ↓
+            <span>Load More Events</span>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </Button>
         </div>
       )}

@@ -118,9 +118,12 @@ export function NftHoverCard({
 
             <Link
               href={`/item/${collection}/${tokenId}`}
-              className="block w-full py-1.5 text-center text-[10px] font-bold rounded-md bg-[var(--panel)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--text)] transition-colors"
+              className="w-full py-1.5 inline-flex items-center justify-center gap-1 text-center text-[10px] font-bold rounded-md bg-[var(--panel)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--text)] transition-colors"
             >
-              View Token Details ↗
+              <span>View Token Details</span>
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
             </Link>
           </div>
         </div>

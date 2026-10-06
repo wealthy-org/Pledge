@@ -161,12 +161,7 @@ export async function GET(request: NextRequest) {
     const activeWalletsCount = usersCount;
     const sparklineData = generateSparkline(floorPriceEth, priceChange24hPct, addr);
 
-    if (bestOffer === null && floorPrice) {
-      bestOffer = BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n;
-    }
-    if (poolSize === 0n && bestOffer !== null) {
-      poolSize = bestOffer * BigInt(Math.max(1, colOffers.length + colGondiOffers.length || 1));
-    }
+
 
     aggregated.push({
       address: item.collection?.contractData?.contractAddress || item.collection?.id,
@@ -235,12 +230,7 @@ export async function GET(request: NextRequest) {
     const activeWalletsCount = usersCount;
     const sparklineData = generateSparkline(floorPriceEth, priceChange24hPct, addr);
 
-    if (bestOffer === null && floorPrice) {
-      bestOffer = BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n;
-    }
-    if (poolSize === 0n && bestOffer !== null) {
-      poolSize = bestOffer * BigInt(Math.max(1, colOffers.length + colGondiOffers.length || 1));
-    }
+
 
     aggregated.push({
       address: node.contractData?.contractAddress || node.id,
@@ -298,13 +288,6 @@ export async function GET(request: NextRequest) {
       const salesVolumeEth = salesVolume ? salesVolume.toFixed(2) : undefined;
       const activeWalletsCount = usersCount;
       const sparklineData = generateSparkline(floorPriceEth, priceChange24hPct, colAddr);
-
-      if (bestOffer === null && floorPrice) {
-        bestOffer = BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n;
-      }
-      if (poolSize === 0n && bestOffer !== null) {
-        poolSize = bestOffer * BigInt(Math.max(1, colOffers.length + colGondiOffers.length || 1));
-      }
 
       aggregated.push({
         address: colAddr,

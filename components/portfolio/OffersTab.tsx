@@ -86,17 +86,23 @@ export function OffersTab({
   if (userOpenOffers.length === 0) {
     return (
       <div className="py-16 px-6 border border-dashed border-[#e1ebe6] dark:border-[#1e332c] rounded-xl text-center bg-white dark:bg-[#111a17]">
-        <div className="text-3xl text-[var(--lime)] dark:text-emerald-400 mb-2 font-mono">◈</div>
+        <div className="w-8 h-8 mx-auto mb-2 text-[var(--lime)] dark:text-emerald-400 flex items-center justify-center">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2l8 10-8 10-8-10 8-10z" />
+          </svg>
+        </div>
         <h3 className="text-base font-medium text-[#142d2b] dark:text-[#f0f6fc]">Make your first offer.</h3>
         <p className="text-xs text-[var(--muted)] dark:text-[#8ca197] mt-1 mb-4">
           Choose a curated collection and deploy liquidity to earn fixed interest.
         </p>
         <Link
           href="/lend"
-          className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-[#edf7f2] dark:bg-[#142e24] hover:bg-[#e1f1e9] dark:hover:bg-[#1a3d30] border border-[#cfe4dc] dark:border-[#1e4537] text-[#142d2b] dark:text-[#f0f6fc] text-xs font-semibold transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#edf7f2] dark:bg-[#142e24] hover:bg-[#e1f1e9] dark:hover:bg-[#1a3d30] border border-[#cfe4dc] dark:border-[#1e4537] text-[#142d2b] dark:text-[#f0f6fc] text-xs font-semibold transition-colors"
         >
           <span>Explore collections</span>
-          <span>↗</span>
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
         </Link>
       </div>
     );

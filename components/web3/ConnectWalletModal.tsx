@@ -134,13 +134,25 @@ export function ConnectWalletModal({ isOpen, onClose, onSuccess, onError }: Conn
                 <div className="text-sm font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">
                   Phantom Wallet
                 </div>
-                <div className="text-xs text-[var(--muted)]">
-                  {availability.phantom ? 'Detected & Ready' : 'Install Phantom Extension →'}
+                <div className="text-xs text-[var(--muted)] flex items-center gap-1">
+                  <span>{availability.phantom ? 'Detected & Ready' : 'Install Phantom Extension'}</span>
+                  {!availability.phantom && (
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  )}
                 </div>
               </div>
             </div>
-            <span className="text-xs font-medium text-[var(--muted)] group-hover:text-[var(--text)]">
-              {availability.phantom ? 'Connect →' : 'Install ↗'}
+            <span className="text-xs font-medium text-[var(--muted)] group-hover:text-[var(--text)] flex items-center gap-1">
+              <span>{availability.phantom ? 'Connect' : 'Install'}</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {availability.phantom ? (
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                ) : (
+                  <path d="M7 17L17 7M17 7H7M17 7V17" />
+                )}
+              </svg>
             </span>
           </button>
 
@@ -163,13 +175,25 @@ export function ConnectWalletModal({ isOpen, onClose, onSuccess, onError }: Conn
                 <div className="text-sm font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">
                   MetaMask
                 </div>
-                <div className="text-xs text-[var(--muted)]">
-                  {availability.metamask ? 'Detected & Ready' : 'Install MetaMask Extension →'}
+                <div className="text-xs text-[var(--muted)] flex items-center gap-1">
+                  <span>{availability.metamask ? 'Detected & Ready' : 'Install MetaMask Extension'}</span>
+                  {!availability.metamask && (
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  )}
                 </div>
               </div>
             </div>
-            <span className="text-xs font-medium text-[var(--muted)] group-hover:text-[var(--text)]">
-              {availability.metamask ? 'Connect →' : 'Install ↗'}
+            <span className="text-xs font-medium text-[var(--muted)] group-hover:text-[var(--text)] flex items-center gap-1">
+              <span>{availability.metamask ? 'Connect' : 'Install'}</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {availability.metamask ? (
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                ) : (
+                  <path d="M7 17L17 7M17 7H7M17 7V17" />
+                )}
+              </svg>
             </span>
           </button>
 
@@ -190,13 +214,25 @@ export function ConnectWalletModal({ isOpen, onClose, onSuccess, onError }: Conn
                 <div className="text-sm font-semibold text-[var(--text)] group-hover:text-[var(--primary)] transition-colors">
                   Browser Wallet
                 </div>
-                <div className="text-xs text-[var(--muted)]">
-                  {availability.injected ? 'Detected (Rabby / Injected)' : 'Install Rabby / Browser Wallet →'}
+                <div className="text-xs text-[var(--muted)] flex items-center gap-1">
+                  <span>{availability.injected ? 'Detected (Rabby / Injected)' : 'Install Rabby / Browser Wallet'}</span>
+                  {!availability.injected && (
+                    <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  )}
                 </div>
               </div>
             </div>
-            <span className="text-xs font-medium text-[var(--muted)] group-hover:text-[var(--text)]">
-              {availability.injected ? 'Connect →' : 'Install ↗'}
+            <span className="text-xs font-medium text-[var(--muted)] group-hover:text-[var(--text)] flex items-center gap-1">
+              <span>{availability.injected ? 'Connect' : 'Install'}</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {availability.injected ? (
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                ) : (
+                  <path d="M7 17L17 7M17 7H7M17 7V17" />
+                )}
+              </svg>
             </span>
           </button>
         </div>

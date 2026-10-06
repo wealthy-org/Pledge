@@ -48,9 +48,12 @@ export function BorrowDisconnectedHero({ onConnect }: BorrowDisconnectedHeroProp
 
           <Link
             href="/explore"
-            className="px-5 py-2.5 rounded-xl bg-white dark:bg-[#152721] hover:bg-[#ebf5f0] dark:hover:bg-[#1a312a] border border-[#cfe4dc] dark:border-[#1e332c] text-xs font-semibold text-[#142d2b] dark:text-[#f0fdf4] transition-all shadow-xs"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-white dark:bg-[#152721] hover:bg-[#ebf5f0] dark:hover:bg-[#1a312a] border border-[#cfe4dc] dark:border-[#1e332c] text-xs font-semibold text-[#142d2b] dark:text-[#f0fdf4] transition-all shadow-xs"
           >
-            Explore Collections ↗
+            <span>Explore Collections</span>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
           </Link>
         </div>
 

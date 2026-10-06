@@ -86,16 +86,22 @@ export function NFTGrid({
             <button
               type="button"
               onClick={onMintTestnet}
-              className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors shadow-xs cursor-pointer"
             >
-              Mint Testnet NFT (1-Click) ⚡
+              <span>Mint Testnet NFT (1-Click)</span>
+              <svg className="w-3.5 h-3.5 text-emerald-200" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
             </button>
           )}
           <Link
             href="/explore"
-            className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--panel)] hover:bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] transition-colors shadow-xs"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-[var(--panel)] hover:bg-[var(--surface)] text-[var(--text)] border border-[var(--line)] transition-colors shadow-xs"
           >
-            Explore Collections ↗
+            <span>Explore Collections</span>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
           </Link>
         </div>
       </div>
@@ -184,7 +190,11 @@ export function NFTGrid({
                   }`}
                 >
                   <span>{nft.isInLoan ? 'In Loan' : 'Compare offers'}</span>
-                  {!nft.isInLoan && <span className="text-xs">↗</span>}
+                  {!nft.isInLoan && (
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" />
+                    </svg>
+                  )}
                 </button>
               </div>
             </article>

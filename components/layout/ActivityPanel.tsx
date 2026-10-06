@@ -206,9 +206,12 @@ export function ActivityPanel({
           <Link
             href="/explore"
             onClick={onMobileClose}
-            className="inline-block px-3 py-1.5 rounded-lg bg-[var(--surface)] hover:bg-[var(--line)] border border-[var(--line)] text-xs font-medium text-[var(--text)] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface)] hover:bg-[var(--line)] border border-[var(--line)] text-xs font-medium text-[var(--text)] transition-colors"
           >
-            Explore Collections →
+            <span>Explore Collections</span>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </Link>
         </div>
       );
@@ -303,9 +306,11 @@ export function ActivityPanel({
                       <strong className="text-xs font-medium text-[var(--text)] block truncate group-hover:text-[var(--accent-primary)] transition-colors">
                         {colName} {e.tokenId ? `#${e.tokenId}` : ''}
                       </strong>
-                      <small className="text-[10px] text-[var(--muted)] block mt-0.5 font-mono">
-                        {e.userAddress ? `${e.userAddress.slice(0, 6)}...${e.userAddress.slice(-4)}` : 'On-chain'}{' '}
-                        <span>↗</span>
+                      <small className="text-[10px] text-[var(--muted)] flex items-center gap-1 mt-0.5 font-mono">
+                        <span>{e.userAddress ? `${e.userAddress.slice(0, 6)}...${e.userAddress.slice(-4)}` : 'On-chain'}</span>
+                        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" />
+                        </svg>
                       </small>
                     </div>
 
@@ -442,9 +447,11 @@ export function ActivityPanel({
                       <strong className="text-xs font-medium text-[var(--text)] block truncate group-hover:text-[var(--accent-primary)] transition-colors">
                         {colName} {e.tokenId ? `#${e.tokenId}` : ''}
                       </strong>
-                      <small className="text-[10px] text-[var(--muted)] block mt-0.5 font-mono">
-                        {e.userAddress ? `${e.userAddress.slice(0, 6)}...${e.userAddress.slice(-4)}` : 'On-chain'}{' '}
-                        <span>↗</span>
+                      <small className="text-[10px] text-[var(--muted)] flex items-center gap-1 mt-0.5 font-mono">
+                        <span>{e.userAddress ? `${e.userAddress.slice(0, 6)}...${e.userAddress.slice(-4)}` : 'On-chain'}</span>
+                        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M7 17L17 7M17 7H7M17 7V17" />
+                        </svg>
                       </small>
                     </div>
 
@@ -482,9 +489,12 @@ export function ActivityPanel({
         <Link
           href="/borrow"
           onClick={onMobileClose}
-          className="w-full flex items-center justify-center py-2 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-xs transition-colors"
+          className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold shadow-xs transition-colors"
         >
-          Explore borrowing ↗
+          <span>Explore borrowing</span>
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
         </Link>
       </div>
     </>
@@ -511,9 +521,12 @@ export function ActivityPanel({
               <div className="flex items-center gap-2">
                 <Link
                   href="/activity"
-                  className="text-[11px] text-[var(--muted)] hover:text-[var(--text)] transition-colors hover:underline"
+                  className="inline-flex items-center gap-1 text-[11px] text-[var(--muted)] hover:text-[var(--text)] transition-colors hover:underline"
                 >
-                  View all ↗
+                  <span>View all</span>
+                  <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  </svg>
                 </Link>
                 <button
                   type="button"
@@ -576,9 +589,12 @@ export function ActivityPanel({
                 <Link
                   href="/activity"
                   onClick={onMobileClose}
-                  className="text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors hover:underline"
+                  className="inline-flex items-center gap-1 text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors hover:underline"
                 >
-                  View all ↗
+                  <span>View all</span>
+                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  </svg>
                 </Link>
                 <button
                   type="button"

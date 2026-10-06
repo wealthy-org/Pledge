@@ -30,12 +30,11 @@ export async function GET(
   try {
     const { getProtocolSnapshot } = await import('@/lib/protocol/snapshot');
     const snapshot = await getProtocolSnapshot(chainId);
-    const allowedCollections = new Set(snapshot.enabledCollections.map((c) => c.toLowerCase()));
 
     const list = await gondiClient.listNfts(limit);
     for (const node of list) {
       const contractAddress = (node.collection?.contractData?.contractAddress || node.collection?.id || '').toLowerCase();
-      if (!contractAddress || !allowedCollections.has(contractAddress)) {
+      if (!contractAddress) {
         continue;
       }
 

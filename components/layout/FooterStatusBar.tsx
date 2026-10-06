@@ -108,7 +108,9 @@ export function FooterStatusBar() {
           className="text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 font-medium"
         >
           <span>Blockscout</span>
-          <span>↗</span>
+          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
         </a>
       </div>
     </footer>

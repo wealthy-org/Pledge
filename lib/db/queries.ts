@@ -216,21 +216,17 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       }
     }
 
-    const baselineTopBidWei = floorPrice
-      ? (BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n).toString()
-      : null;
-
     const effectiveBestOffer = stats.bestOfferWei
       ? stats.bestOfferWei
       : gondiBestOfferWei !== null
       ? gondiBestOfferWei.toString()
-      : baselineTopBidWei;
+      : null;
 
     const effectivePoolSize = stats.poolSizeWei !== '0'
       ? stats.poolSizeWei
       : gondiPoolSizeWei > 0n
       ? gondiPoolSizeWei.toString()
-      : (effectiveBestOffer ? (BigInt(effectiveBestOffer) * BigInt(Math.max(1, colGondiOffers.length || 1))).toString() : '0');
+      : '0';
 
     const effectiveOfferCount = stats.offerCount > 0 ? stats.offerCount : colGondiOffers.length;
 
@@ -282,21 +278,17 @@ export async function fetchCollectionsWithStats(chainId?: number): Promise<Colle
       }
     }
 
-    const baselineTopBidWei = floorPrice
-      ? (BigInt(Math.max(1, Math.round(floorPrice * 0.75 * 1000))) * 10n**15n).toString()
-      : null;
-
     const effectiveBestOffer = stats.bestOfferWei
       ? stats.bestOfferWei
       : gondiBestOfferWei !== null
       ? gondiBestOfferWei.toString()
-      : baselineTopBidWei;
+      : null;
 
     const effectivePoolSize = stats.poolSizeWei !== '0'
       ? stats.poolSizeWei
       : gondiPoolSizeWei > 0n
       ? gondiPoolSizeWei.toString()
-      : (effectiveBestOffer ? (BigInt(effectiveBestOffer) * BigInt(Math.max(1, colGondiOffers.length || 1))).toString() : '0');
+      : '0';
 
     const effectiveOfferCount = stats.offerCount > 0 ? stats.offerCount : colGondiOffers.length;
 
@@ -413,10 +405,7 @@ export async function fetchCollectionOffers(
     sort,
   });
 
-  let gondiOffersRaw: GondiOfferNode[] = await gondiClient.getCollectionOffers(address).catch(() => []);
-  if (gondiOffersRaw.length === 0 && onChainOffers.length === 0) {
-    gondiOffersRaw = await gondiClient.listOffers({ statuses: ['ACTIVE'], first: 20 }).catch(() => []);
-  }
+  const gondiOffersRaw: GondiOfferNode[] = await gondiClient.getCollectionOffers(address).catch(() => []);
   const gondiItems: OfferItem[] = gondiOffersRaw.map((o) =>
     convertGondiOfferToItem(o, targetChain, address)
   );

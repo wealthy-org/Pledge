@@ -274,7 +274,10 @@ function BorrowContent() {
             onClick={isConnected ? handleMintTestnetNft : openConnectModal}
             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-white dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-colors cursor-pointer shadow-xs self-start sm:self-auto"
           >
-            <span>{isConnected ? 'Mint Testnet NFT ⚡' : 'Connect Wallet to Mint ⚡'}</span>
+            <span>{isConnected ? 'Mint Testnet NFT' : 'Connect Wallet to Mint'}</span>
+            <svg className="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+            </svg>
           </button>
         </div>
 

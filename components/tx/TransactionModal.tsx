@@ -244,9 +244,14 @@ export function TransactionModal({
               <button
                 type="button"
                 onClick={handleCopyHash}
-                className="px-2 py-1 rounded-md bg-white dark:bg-[#15231f] border border-[var(--line)] hover:border-[var(--primary)] text-[10px] font-mono text-[var(--text)] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-[#15231f] border border-[var(--line)] hover:border-[var(--primary)] text-[10px] font-mono text-[var(--text)] transition-colors cursor-pointer"
               >
-                {copied ? 'Copied ✓' : 'Copy'}
+                <span>{copied ? 'Copied' : 'Copy'}</span>
+                {copied && (
+                  <svg className="w-3 h-3 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
               </button>
 
               {explorerUrl && (
@@ -258,7 +263,9 @@ export function TransactionModal({
                   className="px-2 py-1 rounded-md bg-[var(--primary-soft)] text-[var(--primary)] hover:underline text-[10px] font-mono font-medium transition-colors inline-flex items-center gap-1"
                 >
                   <span>View on Explorer</span>
-                  <span>↗</span>
+                  <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17L17 7M17 7H7M17 7V17" />
+                  </svg>
                 </a>
               )}
             </div>

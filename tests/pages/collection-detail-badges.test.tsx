@@ -68,6 +68,6 @@ describe('TICKET-81: Collection Header Anti-Spoofing & Explorer Verification Bad
     );
 
     expect(screen.getByText(/Duplicate Name Warning:/i)).toBeDefined();
-    expect(screen.getByText(/Verify on Blockscout ↗/i)).toBeDefined();
+    expect(screen.getByText(/Verify on Blockscout/i)).toBeDefined();
   });
 });

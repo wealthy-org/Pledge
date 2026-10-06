@@ -88,6 +88,6 @@ describe('ItemDetailClient Component', () => {
     });
 
     expect(screen.getByText(/Currently Escrowed in Loan #99/i)).toBeDefined();
-    expect(screen.getByText('View Active Loan Terms →')).toBeDefined();
+    expect(screen.getByText('View Active Loan Terms')).toBeDefined();
   });
 });

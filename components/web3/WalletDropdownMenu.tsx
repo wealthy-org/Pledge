@@ -109,7 +109,9 @@ export function WalletDropdownMenu({
             </svg>
             <span>View on Explorer</span>
           </div>
-          <span className="text-xs text-[var(--muted)]">↗</span>
+          <svg className="w-3.5 h-3.5 text-[var(--muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 17L17 7M17 7H7M17 7V17" />
+          </svg>
         </a>
 
         <Link
@@ -125,7 +127,9 @@ export function WalletDropdownMenu({
             </svg>
             <span>My Portfolio</span>
           </div>
-          <span className="text-xs text-[var(--muted)]">→</span>
+          <svg className="w-3.5 h-3.5 text-[var(--muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </Link>
       </div>
 

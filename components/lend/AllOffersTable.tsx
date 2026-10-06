@@ -149,9 +149,12 @@ export function AllOffersTable() {
                     <td className="py-3.5 px-4 text-right">
                       <Link
                         href={`/collection/${offer.collection}`}
-                        className="inline-flex items-center px-2.5 py-1 rounded text-[11px] font-medium bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors"
                       >
-                        Borrow ↗
+                        <span>Borrow</span>
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                       </Link>
                     </td>
                   </tr>

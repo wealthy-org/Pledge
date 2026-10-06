@@ -50,7 +50,7 @@ describe('NftHoverCard Component', () => {
     expect(screen.getByRole('tooltip')).toBeDefined();
     expect(screen.getAllByText('Rare Beast #12').length).toBeGreaterThan(0);
     expect(screen.getByText('In Loan')).toBeDefined();
-    expect(screen.getByText('View Token Details ↗')).toBeDefined();
+    expect(screen.getByText('View Token Details')).toBeDefined();
   });
 
   it('dismisses tooltip on mouse leave', () => {

@@ -17,9 +17,12 @@ export default function NotFound() {
         </Link>
         <Link
           href="/"
-          className="text-xs font-medium text-[var(--muted)] hover:text-[var(--text)] transition-colors"
+          className="text-xs font-medium text-[var(--muted)] hover:text-[var(--text)] transition-colors inline-flex items-center gap-1.5"
         >
-          ← Return to App
+          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>Return to App</span>
         </Link>
       </div>
 
@@ -51,7 +54,9 @@ export default function NotFound() {
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--lime)] hover:bg-[#076b4d] text-white text-xs font-semibold transition-all duration-150 shadow-md hover:shadow-lg"
             >
               <span>Back to Markets</span>
-              <span>→</span>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
             </Link>
             <Link
               href="/explore"

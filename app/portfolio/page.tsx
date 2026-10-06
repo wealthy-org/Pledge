@@ -320,16 +320,23 @@ export default function PortfolioPage() {
               </div>
             ) : userNfts.length === 0 ? (
               <div className="py-16 px-6 border border-dashed border-[var(--line)] rounded-xl text-center bg-[var(--surface)]">
-                <div className="text-3xl text-[var(--muted)] mb-2 font-mono">◈</div>
+                <div className="w-8 h-8 mx-auto mb-2 text-[var(--muted)] flex items-center justify-center">
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2l8 10-8 10-8-10 8-10z" />
+                  </svg>
+                </div>
                 <h3 className="text-sm font-semibold text-[var(--text)] mb-1">No Collectibles in Wallet</h3>
                 <p className="text-xs text-[var(--muted)] max-w-sm mx-auto mb-4">
                   Your connected wallet does not hold any verified collectibles from our supported collections.
                 </p>
                 <Link
                   href="/borrow"
-                  className="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                  className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
                 >
-                  Mint Testnet NFT ↗
+                  <span>Mint Testnet NFT</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
                 </Link>
               </div>
             ) : (
@@ -356,9 +363,12 @@ export default function PortfolioPage() {
                       </div>
                       <Link
                         href={`/borrow?collection=${nft.contractAddress}`}
-                        className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white border border-emerald-500/25 transition-colors text-center block"
+                        className="w-full py-2 px-3 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-white border border-emerald-500/25 transition-colors text-center inline-flex items-center justify-center gap-1.5"
                       >
-                        Borrow Against NFT ↗
+                        <span>Borrow Against NFT</span>
+                        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
                       </Link>
                     </div>
                   </div>

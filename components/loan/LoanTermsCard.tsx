@@ -178,9 +178,12 @@ export function LoanTermsCard({
             target="_blank"
             rel="noopener noreferrer"
             aria-label="View on Blockscout"
-            className="text-[var(--primary)] font-mono font-semibold hover:underline decoration-dotted"
+            className="inline-flex items-center gap-1 text-[var(--primary)] font-mono font-semibold hover:underline decoration-dotted"
           >
-            View on Blockscout ↗
+            <span>View on Blockscout</span>
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
           </a>
         </div>
       </div>

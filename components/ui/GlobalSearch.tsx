@@ -394,8 +394,11 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                             <div className="text-[10px] text-[var(--muted)] truncate">{item.subtitle}</div>
                           </div>
                         </div>
-                        <span className="text-[11px] text-[var(--accent-primary)] font-semibold">
-                          View Profile →
+                        <span className="text-[11px] text-[var(--accent-primary)] font-semibold inline-flex items-center gap-1">
+                          <span>View Profile</span>
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
                         </span>
                       </button>
                     );
@@ -430,8 +433,11 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                             <div className="text-[10px] text-[var(--muted)] truncate">{item.subtitle}</div>
                           </div>
                         </div>
-                        <span className="text-[11px] text-[var(--lime)] font-semibold">
-                          Item Details ↗
+                        <span className="text-[11px] text-[var(--lime)] font-semibold inline-flex items-center gap-1">
+                          <span>Item Details</span>
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
                         </span>
                       </button>
                     );
@@ -444,8 +450,18 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
         <div className="px-4 py-2 bg-[var(--panel)]/40 border-t border-[var(--line)] text-[10px] text-[var(--muted)] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span>↑↓ Navigate</span>
-            <span>↵ Select</span>
+            <span className="inline-flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+              </svg>
+              Navigate
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a5 5 0 015 5v3m0 0l3-3m-3 3l-3-3" />
+              </svg>
+              Select
+            </span>
             <span>ESC Close</span>
           </div>
           <span>Pledge Global Discovery</span>

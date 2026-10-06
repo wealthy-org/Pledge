@@ -82,6 +82,6 @@ describe('TICKET-80: Markets Page Active Offers Filter & Explore Link', () => {
   it('renders MarketsTable with empty state when no collections match', () => {
     render(<MarketsTable collections={[]} isLoading={false} />);
     expect(screen.getByText('No collections match your filter')).toBeDefined();
-    expect(screen.getByText('Browse All Collections ↗')).toBeDefined();
+    expect(screen.getByText('Browse All Collections')).toBeDefined();
   });
 });

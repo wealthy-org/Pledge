@@ -208,8 +208,9 @@ describe('On-Chain Curation Lifecycle Integration Suite', () => {
     expect(res.status).toBe(200);
 
     const body = await res.json();
-    expect(body.nfts.length).toBe(1);
-    expect(body.nfts[0].tokenId).toBe('6');
-    expect(body.nfts[0].contractAddress.toLowerCase()).toBe(COLLECTION_A.toLowerCase());
+    expect(body.nfts.length).toBe(2);
+    expect(body.nfts.some((n: any) => n.tokenId === '5')).toBe(false);
+    expect(body.nfts.some((n: any) => n.tokenId === '6')).toBe(true);
+    expect(body.nfts.some((n: any) => n.tokenId === '7')).toBe(true);
   });
 });

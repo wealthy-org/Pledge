@@ -82,7 +82,7 @@ describe('TICKET-62 & TICKET-110: Real-time ActivityPanel API Integration Test S
     });
 
     expect(screen.getByText(/watchlist is empty/i)).toBeDefined();
-    expect(screen.getByText(/explore collections →/i)).toBeDefined();
+    expect(screen.getByText(/explore collections/i)).toBeDefined();
   });
 
   it('renders mobile slide-over drawer overlay when isMobileOpen is true and closes via backdrop or ESC', async () => {

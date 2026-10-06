@@ -50,9 +50,12 @@ export function PortfolioDisconnectedState({ onConnect }: PortfolioDisconnectedS
 
             <Link
               href="/explore"
-              className="px-5 py-2.5 rounded-xl bg-[var(--panel)] hover:bg-[var(--raised)] border border-[var(--line)] text-xs font-semibold text-[var(--text)] transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[var(--panel)] hover:bg-[var(--raised)] border border-[var(--line)] text-xs font-semibold text-[var(--text)] transition-all shadow-xs"
             >
-              Explore Markets ↗
+              <span>Explore Markets</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
             </Link>
           </div>
         </div>

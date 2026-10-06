@@ -128,9 +128,18 @@ export function ProfileDetailClient({ address }: { address: string }) {
             <button
               type="button"
               onClick={handleCopy}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--panel)] border border-[var(--line)] text-[var(--text)] hover:bg-[var(--line)] transition-colors cursor-pointer"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--panel)] border border-[var(--line)] text-[var(--text)] hover:bg-[var(--line)] transition-colors cursor-pointer inline-flex items-center gap-1"
             >
-              {copied ? '✓ Copied' : 'Copy Address'}
+              {copied ? (
+                <>
+                  <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>Copied</span>
+                </>
+              ) : (
+                <span>Copy Address</span>
+              )}
             </button>
             <a
               href={`https://explorer.testnet.chain.robinhood.com/address/${address}`}

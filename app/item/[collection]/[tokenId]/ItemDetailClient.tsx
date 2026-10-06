@@ -214,9 +214,12 @@ export function ItemDetailClient({
 
               <Link
                 href={`/loan/${activeLoan.loanId}`}
-                className="block w-full py-2 text-center text-xs font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors shadow-xs"
+                className="w-full py-2 text-center text-xs font-bold rounded-lg bg-amber-500 text-white hover:bg-amber-600 transition-colors shadow-xs inline-flex items-center justify-center gap-1.5"
               >
-                View Active Loan Terms →
+                <span>View Active Loan Terms</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </Link>
             </div>
           ) : (
@@ -253,9 +256,12 @@ export function ItemDetailClient({
 
                   <Link
                     href={`/borrow`}
-                    className="block w-full py-2.5 text-center text-xs font-bold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs"
+                    className="w-full py-2.5 text-center text-xs font-bold rounded-lg bg-[var(--lime)] hover:bg-[#076b4d] text-white transition-colors shadow-xs inline-flex items-center justify-center gap-1.5"
                   >
-                    Borrow Against this NFT ↗
+                    <span>Borrow Against this NFT</span>
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
                   </Link>
                 </div>
               ) : (

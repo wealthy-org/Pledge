@@ -314,14 +314,19 @@ export function CreateOfferDrawer({
 
               {!isVerifying && customVerificationStatus === 'valid' && (
                 <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 text-xs flex items-center gap-2">
-                  <span className="font-bold text-emerald-600">✓</span>
+                  <svg className="w-4 h-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                   <span>Verified ERC-721 Compliant Contract</span>
                 </div>
               )}
 
               {!isVerifying && customVerificationStatus === 'invalid' && customAddress.length === 42 && (
                 <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs flex items-center gap-2">
-                  <span className="font-bold text-rose-600">✕</span>
+                  <svg className="w-4 h-4 text-rose-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
                   <span>Contract does not implement ERC-721 or does not exist on this chain.</span>
                 </div>
               )}

@@ -92,9 +92,12 @@ export function TransactionToast({
               href={explorerUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block text-[10px] font-mono text-[var(--primary)] hover:underline mt-1"
+              className="inline-flex items-center gap-1 text-[10px] font-mono text-[var(--primary)] hover:underline mt-1"
             >
-              View on Explorer ↗
+              <span>View on Explorer</span>
+              <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
             </a>
           )}
         </div>

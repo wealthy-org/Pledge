@@ -191,16 +191,12 @@ export class GondiClient {
       }
     `;
 
-    try {
-      const data = await executeGondiQuery<{ getMarketOverview: GondiMarketOverviewData }>(
-        query,
-        { timeframe },
-        `overview:${timeframe}`
-      );
-      return data?.getMarketOverview || { top: [], volume: [], movers: [] };
-    } catch {
-      return { top: [], volume: [], movers: [] };
-    }
+    const data = await executeGondiQuery<{ getMarketOverview: GondiMarketOverviewData }>(
+      query,
+      { timeframe },
+      `overview:${timeframe}`
+    );
+    return data?.getMarketOverview || { top: [], volume: [], movers: [] };
   }
 
   public async getMarketOverview(timeframe: GondiTimeframe = 'DAY'): Promise<GondiMarketOverviewItem[]> {
@@ -235,14 +231,10 @@ export class GondiClient {
       }
     `;
 
-    try {
-      const data = await executeGondiQuery<{
-        listCollections: { edges: Array<{ node: GondiCollectionNode }> };
-      }>(query, { first }, `collections:${first}`);
-      return (data?.listCollections?.edges || []).map((e) => e.node);
-    } catch {
-      return [];
-    }
+    const data = await executeGondiQuery<{
+      listCollections: { edges: Array<{ node: GondiCollectionNode }> };
+    }>(query, { first }, `collections:${first}`);
+    return (data?.listCollections?.edges || []).map((e) => e.node);
   }
 
   public async getCollectionByAddress(contractAddress: string): Promise<GondiCollectionNode | null> {
@@ -270,18 +262,14 @@ export class GondiClient {
       }
     `;
 
-    try {
-      const data = await executeGondiQuery<{
-        getCollectionsByContractAddress: GondiCollectionNode[];
-      }>(query, { contractAddress: normalized }, `collection:${normalized}`);
-      const list = data?.getCollectionsByContractAddress || [];
-      if (list.length > 0) {
-        return list[0];
-      }
-      return null;
-    } catch {
-      return null;
+    const data = await executeGondiQuery<{
+      getCollectionsByContractAddress: GondiCollectionNode[];
+    }>(query, { contractAddress: normalized }, `collection:${normalized}`);
+    const list = data?.getCollectionsByContractAddress || [];
+    if (list.length > 0) {
+      return list[0];
     }
+    return null;
   }
 
   public async getNftMetadata(
@@ -315,18 +303,14 @@ export class GondiClient {
       }
     `;
 
-    try {
-      const data = await executeGondiQuery<{
-        getNftByContractAddressAndTokenId: GondiNftNode | null;
-      }>(
-        query,
-        { contractAddress: contractAddress.toLowerCase(), tokenId },
-        `nft:${contractAddress.toLowerCase()}:${tokenId}`
-      );
-      return data?.getNftByContractAddressAndTokenId || null;
-    } catch {
-      return null;
-    }
+    const data = await executeGondiQuery<{
+      getNftByContractAddressAndTokenId: GondiNftNode | null;
+    }>(
+      query,
+      { contractAddress: contractAddress.toLowerCase(), tokenId },
+      `nft:${contractAddress.toLowerCase()}:${tokenId}`
+    );
+    return data?.getNftByContractAddressAndTokenId || null;
   }
 
   public async getLendingMarketPulse(): Promise<GondiLendingPulseData | null> {
@@ -343,14 +327,10 @@ export class GondiClient {
       }
     `;
 
-    try {
-      const data = await executeGondiQuery<{
-        getLendingMarketPulse: GondiLendingPulseData | null;
-      }>(query, {}, 'pulse', 30000);
-      return data?.getLendingMarketPulse || null;
-    } catch {
-      return null;
-    }
+    const data = await executeGondiQuery<{
+      getLendingMarketPulse: GondiLendingPulseData | null;
+    }>(query, {}, 'pulse', 30000);
+    return data?.getLendingMarketPulse || null;
   }
 
   public async listNfts(first: number = 20): Promise<GondiNftNode[]> {
@@ -383,14 +363,10 @@ export class GondiClient {
       }
     `;
 
-    try {
-      const data = await executeGondiQuery<{
-        listNfts: { edges: Array<{ node: GondiNftNode }> };
-      }>(query, { first }, `nfts:${first}`);
-      return (data?.listNfts?.edges || []).map((e) => e.node);
-    } catch {
-      return [];
-    }
+    const data = await executeGondiQuery<{
+      listNfts: { edges: Array<{ node: GondiNftNode }> };
+    }>(query, { first }, `nfts:${first}`);
+    return (data?.listNfts?.edges || []).map((e) => e.node);
   }
 
   public async listOffers(options?: {
@@ -558,14 +534,10 @@ export class GondiClient {
       }
     }
 
-    try {
-      const data = await executeGondiQuery<{
-        listOffers: { edges: Array<{ node: GondiOfferNode }> };
-      }>(query, variables, cacheKey);
-      return (data?.listOffers?.edges || []).map((e) => e.node);
-    } catch {
-      return [];
-    }
+    const data = await executeGondiQuery<{
+      listOffers: { edges: Array<{ node: GondiOfferNode }> };
+    }>(query, variables, cacheKey);
+    return (data?.listOffers?.edges || []).map((e) => e.node);
   }
 
   public async getCollectionOffers(
@@ -577,7 +549,7 @@ export class GondiClient {
     const normalized = contractAddress.toLowerCase();
     let colSlug = slug;
     if (!colSlug) {
-      const col = await this.getCollectionByAddress(normalized).catch(() => null);
+      const col = await this.getCollectionByAddress(normalized);
       if (col?.slug) colSlug = col.slug;
     }
 
@@ -595,21 +567,21 @@ export class GondiClient {
     };
 
     if (colSlug) {
-      const activeBySlug = await this.listOffers({ slugs: [colSlug], statuses: ['ACTIVE'], first }).catch(() => []);
+      const activeBySlug = await this.listOffers({ slugs: [colSlug], statuses: ['ACTIVE'], first });
       for (const o of activeBySlug) addOffer(o);
 
       if (matched.length === 0) {
-        const allBySlug = await this.listOffers({ slugs: [colSlug], first }).catch(() => []);
+        const allBySlug = await this.listOffers({ slugs: [colSlug], first });
         for (const o of allBySlug) addOffer(o);
       }
     }
 
     if (matched.length === 0) {
-      const byContract = await this.listOffers({ contractAddresses: [normalized], statuses: ['ACTIVE'], first }).catch(() => []);
+      const byContract = await this.listOffers({ contractAddresses: [normalized], statuses: ['ACTIVE'], first });
       for (const o of byContract) addOffer(o);
 
       if (matched.length === 0) {
-        const allByContract = await this.listOffers({ contractAddresses: [normalized], first }).catch(() => []);
+        const allByContract = await this.listOffers({ contractAddresses: [normalized], first });
         for (const o of allByContract) addOffer(o);
       }
     }
@@ -712,14 +684,10 @@ export class GondiClient {
       variables = { first };
     }
 
-    try {
-      const data = await executeGondiQuery<{
-        listLoans: { edges: Array<{ node: GondiLoanNode }> };
-      }>(query, variables, cacheKey);
-      return (data?.listLoans?.edges || []).map((e) => e.node);
-    } catch {
-      return [];
-    }
+    const data = await executeGondiQuery<{
+      listLoans: { edges: Array<{ node: GondiLoanNode }> };
+    }>(query, variables, cacheKey);
+    return (data?.listLoans?.edges || []).map((e) => e.node);
   }
 
   public async getCollectionLoans(
@@ -731,7 +699,7 @@ export class GondiClient {
     const normalized = contractAddress.toLowerCase();
     let colSlug = slug;
     if (!colSlug) {
-      const col = await this.getCollectionByAddress(normalized).catch(() => null);
+      const col = await this.getCollectionByAddress(normalized);
       if (col?.slug) colSlug = col.slug;
     }
 
@@ -748,12 +716,12 @@ export class GondiClient {
     };
 
     if (colSlug) {
-      const bySlug = await this.listLoans({ slugs: [colSlug], first }).catch(() => []);
+      const bySlug = await this.listLoans({ slugs: [colSlug], first });
       for (const l of bySlug) addLoan(l);
     }
 
     if (matched.length === 0) {
-      const byContract = await this.listLoans({ contractAddresses: [normalized], first }).catch(() => []);
+      const byContract = await this.listLoans({ contractAddresses: [normalized], first });
       for (const l of byContract) addLoan(l);
     }
 
@@ -761,8 +729,8 @@ export class GondiClient {
   }
 
   public async getAllOffersMap(first: number = 50): Promise<Map<string, GondiOfferNode[]>> {
-    const activeOffers = await this.listOffers({ statuses: ['ACTIVE'], first }).catch(() => []);
-    const offers = activeOffers.length > 0 ? activeOffers : await this.listOffers({ first }).catch(() => []);
+    const activeOffers = await this.listOffers({ statuses: ['ACTIVE'], first });
+    const offers = activeOffers.length > 0 ? activeOffers : await this.listOffers({ first });
     const map = new Map<string, GondiOfferNode[]>();
 
     for (const o of offers) {

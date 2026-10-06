@@ -26,7 +26,9 @@ export default function AboutPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--line)] space-y-3">
           <div className="w-10 h-10 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center font-bold text-lg">
-            🔒
+            <svg className="w-5 h-5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
           </div>
           <h3 className="text-base font-bold text-[var(--text)]">Zero Oracle Risk</h3>
           <p className="text-xs text-[var(--muted)] leading-relaxed">
@@ -36,7 +38,9 @@ export default function AboutPage() {
 
         <div className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--line)] space-y-3">
           <div className="w-10 h-10 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center font-bold text-lg">
-            ⚡
+            <svg className="w-5 h-5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
           </div>
           <h3 className="text-base font-bold text-[var(--text)]">Instant Escrow</h3>
           <p className="text-xs text-[var(--muted)] leading-relaxed">
@@ -46,7 +50,9 @@ export default function AboutPage() {
 
         <div className="p-6 rounded-2xl bg-[var(--surface)] border border-[var(--line)] space-y-3">
           <div className="w-10 h-10 rounded-xl bg-[var(--primary-soft)] text-[var(--primary)] flex items-center justify-center font-bold text-lg">
-            💎
+            <svg className="w-5 h-5 text-current" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
           </div>
           <h3 className="text-base font-bold text-[var(--text)]">Permissionless Markets</h3>
           <p className="text-xs text-[var(--muted)] leading-relaxed">
@@ -66,8 +72,11 @@ export default function AboutPage() {
             </p>
             <div className="pt-2">
               <Link href="/lend">
-                <Button variant="secondary" size="sm">
-                  Explore Lending →
+                <Button variant="secondary" size="sm" className="inline-flex items-center gap-1.5">
+                  Explore Lending
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
                 </Button>
               </Link>
             </div>
@@ -81,8 +90,11 @@ export default function AboutPage() {
             </p>
             <div className="pt-2">
               <Link href="/borrow">
-                <Button variant="primary" size="sm">
-                  Borrow Liquidity →
+                <Button variant="primary" size="sm" className="inline-flex items-center gap-1.5">
+                  Borrow Liquidity
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
                 </Button>
               </Link>
             </div>

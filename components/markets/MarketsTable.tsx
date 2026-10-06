@@ -235,10 +235,12 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
 
           <Link
             href="/explore"
-            className="text-xs font-medium text-[var(--muted)] hover:text-[var(--text)] transition-colors hidden md:inline-flex items-center gap-1 px-3 py-1 rounded-md border border-[var(--line)] bg-[var(--surface)]"
+            className="text-xs font-medium text-[var(--muted)] hover:text-[var(--text)] transition-colors hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-md border border-[var(--line)] bg-[var(--surface)]"
           >
             <span>All Collections</span>
-            <span>→</span>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
           </Link>
         </div>
       </div>
@@ -253,9 +255,12 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
             <div className="mt-4 flex items-center justify-center gap-3">
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--panel)] text-[var(--text)] text-xs font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-[var(--line)] bg-[var(--surface)] hover:bg-[var(--panel)] text-[var(--text)] text-xs font-medium transition-colors"
               >
-                Browse All Collections ↗
+                <span>Browse All Collections</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
               </Link>
             </div>
           )}
@@ -354,8 +359,10 @@ export function MarketsTable({ collections, isLoading = false }: MarketsTablePro
                             className="text-xs font-medium text-[var(--text)] hover:text-[var(--lime)] transition-colors flex items-center gap-1.5"
                           >
                             <span className="truncate max-w-[170px]">{c.name}</span>
-                            <span className="text-emerald-500 text-[11px]" title="Verified Collection">
-                              ✓
+                            <span className="text-emerald-500 inline-flex items-center" title="Verified Collection">
+                              <svg className="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
                             </span>
                           </Link>
                           <span className="text-[10px] font-mono text-[var(--muted)]">

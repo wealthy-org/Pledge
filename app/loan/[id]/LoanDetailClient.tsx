@@ -112,9 +112,12 @@ export function LoanDetailClient({
         <div className="flex items-center gap-3">
           <Link
             href="/portfolio"
-            className="p-2 rounded-xl bg-[var(--raised)] border border-[var(--line)] hover:bg-[var(--panel)] transition-colors text-xs font-mono font-bold text-[var(--muted)] hover:text-[var(--text)]"
+            className="p-2 px-3 rounded-xl bg-[var(--raised)] border border-[var(--line)] hover:bg-[var(--panel)] transition-colors text-xs font-mono font-bold text-[var(--muted)] hover:text-[var(--text)] inline-flex items-center gap-1.5"
           >
-            ← Back
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Back</span>
           </Link>
           <div>
             <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-[var(--text)]">

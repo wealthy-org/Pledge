@@ -79,7 +79,11 @@ export function CollectionHeader({
       {isDuplicateName && (
         <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-800 dark:text-amber-200 text-xs flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-amber-600 dark:text-amber-400 text-sm">⚠️</span>
+            <svg className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
             <span>
               <strong>Duplicate Name Warning:</strong> Multiple contracts share the name &ldquo;{collection.name}&rdquo;. Verify the contract address ({truncatedAddress}) on explorer before committing capital.
             </span>
@@ -88,9 +92,12 @@ export function CollectionHeader({
             href={explorerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] font-mono underline decoration-dotted text-amber-900 dark:text-amber-100 hover:text-[var(--accent-primary)] shrink-0"
+            className="inline-flex items-center gap-1 text-[11px] font-mono underline decoration-dotted text-amber-900 dark:text-amber-100 hover:text-[var(--accent-primary)] shrink-0"
           >
-            Verify on Blockscout ↗
+            <span>Verify on Blockscout</span>
+            <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H7M17 7V17" />
+            </svg>
           </a>
         </div>
       )}
@@ -178,8 +185,11 @@ export function CollectionHeader({
             rel="noopener noreferrer"
             className="w-full sm:w-auto"
           >
-            <Button variant="secondary" size="sm" className="w-full sm:w-auto">
-              Blockscout Explorer ↗
+            <Button variant="secondary" size="sm" className="w-full sm:w-auto inline-flex items-center gap-1.5">
+              <span>Blockscout Explorer</span>
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7M17 7H7M17 7V17" />
+              </svg>
             </Button>
           </a>
         </div>

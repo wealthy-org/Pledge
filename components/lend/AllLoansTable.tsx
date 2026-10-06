@@ -178,9 +178,12 @@ export function AllLoansTable() {
                     <td className="py-3.5 px-4 text-right">
                       <Link
                         href={`/loan/${loan.loanId}`}
-                        className="inline-flex items-center px-2.5 py-1 rounded text-[11px] font-medium bg-[var(--panel)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--text)] transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium bg-[var(--panel)] hover:bg-[var(--line)] border border-[var(--line)] text-[var(--text)] transition-colors"
                       >
-                        View Loan →
+                        <span>View Loan</span>
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                       </Link>
                     </td>
                   </tr>
