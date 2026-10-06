@@ -201,4 +201,29 @@ describe('TICKET-36: Borrow Page & Review Drawer Test Suite', () => {
     expect(screen.getByText(/instant collateral liquidity/i)).toBeDefined();
     expect(screen.getByText(/your eligible nfts/i)).toBeDefined();
   });
+
+  it('TS-07: NFTGrid paginates at 15 cards per page', () => {
+    const manyNfts: BorrowableNft[] = Array.from({ length: 20 }, (_, i) => ({
+      contractAddress: '0x1111111111111111111111111111111111111111',
+      tokenId: String(i + 1),
+      collectionName: 'Robinhood Genesis Pass',
+      name: `Robinhood Genesis Pass #${i + 1}`,
+      bestOfferWei: '1000000000000000000',
+      termInterestBps: 200,
+      offerCount: 1,
+    }));
+
+    render(<NFTGrid nfts={manyNfts} selectedNft={null} onSelectNft={() => {}} />);
+
+    expect(screen.getByText('Robinhood Genesis Pass #1')).toBeDefined();
+    expect(screen.getByText('Robinhood Genesis Pass #15')).toBeDefined();
+    expect(screen.queryByText('Robinhood Genesis Pass #16')).toBeNull();
+
+    const nextPageBtn = screen.getByRole('button', { name: /Next/i });
+    fireEvent.click(nextPageBtn);
+
+    expect(screen.getByText('Robinhood Genesis Pass #16')).toBeDefined();
+    expect(screen.getByText('Robinhood Genesis Pass #20')).toBeDefined();
+    expect(screen.queryByText('Robinhood Genesis Pass #1')).toBeNull();
+  });
 });

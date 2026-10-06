@@ -7,7 +7,7 @@ import { formatUnits } from 'viem';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Pagination } from '@/components/ui/Pagination';
 
-const BORROW_PAGE_SIZE = 10;
+const BORROW_PAGE_SIZE = 15;
 
 export interface BorrowableNft {
   contractAddress: string;
@@ -43,8 +43,8 @@ export function NFTGrid({
   }, [nfts, page]);
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5" data-testid="nft-grid-skeleton">
-        {[1, 2, 3, 4].map((i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4.5" data-testid="nft-grid-skeleton">
+        {Array.from({ length: 15 }).map((_, i) => (
           <div
             key={i}
             data-testid="nft-card-skeleton"
@@ -110,7 +110,7 @@ export function NFTGrid({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4.5">
         {paginatedNfts.map((nft) => {
           const isSelected =
             selectedNft?.contractAddress.toLowerCase() === nft.contractAddress.toLowerCase() &&

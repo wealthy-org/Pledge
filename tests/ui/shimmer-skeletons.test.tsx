@@ -26,7 +26,7 @@ describe('TICKET-69: Shimmer Skeleton Loading States Test Suite', () => {
     render(<NFTGrid nfts={[]} selectedNft={null} onSelectNft={() => {}} isLoading={true} />);
 
     const skeletonCards = screen.getAllByTestId('nft-card-skeleton');
-    expect(skeletonCards.length).toBe(4);
+    expect(skeletonCards.length).toBe(15);
   });
 
   it('renders skeleton cards for BorrowingTab when isLoading is true', () => {

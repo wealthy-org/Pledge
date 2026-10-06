@@ -40,8 +40,8 @@ export function BorrowPageSkeleton() {
           <div className="w-36 h-8 bg-[var(--panel)] rounded-lg shimmer" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-          {[1, 2, 3, 4].map((i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4.5">
+          {Array.from({ length: 15 }).map((_, i) => (
             <div
               key={i}
               data-testid="nft-card-skeleton"

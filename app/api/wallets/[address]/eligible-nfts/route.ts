@@ -20,7 +20,7 @@ export async function GET(
   }
 
   const { searchParams } = new URL(request.url);
-  const limit = Math.min(parseInt(searchParams.get('limit') || '20', 10), 100);
+  const limit = Math.min(parseInt(searchParams.get('limit') || '100', 10), 100);
   const cursor = searchParams.get('cursor');
   const chainIdParam = searchParams.get('chainId');
   const chainId = chainIdParam ? parseInt(chainIdParam, 10) : undefined;
