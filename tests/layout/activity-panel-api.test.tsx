@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import { ActivityPanel } from '@/components/layout/ActivityPanel';
 
-describe('TICKET-62: Real-time ActivityPanel API Integration Test Suite', () => {
+describe('TICKET-62 & TICKET-110: Real-time ActivityPanel API Integration Test Suite', () => {
   const mockActivities = [
     {
       id: 'act-1',
@@ -43,7 +43,9 @@ describe('TICKET-62: Real-time ActivityPanel API Integration Test Suite', () => 
   });
 
   it('fetches activities from /api/activity on mount and renders them', async () => {
-    render(<ActivityPanel />);
+    await act(async () => {
+      render(<ActivityPanel />);
+    });
 
     await waitFor(() => {
       expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/activity'));
@@ -53,33 +55,61 @@ describe('TICKET-62: Real-time ActivityPanel API Integration Test Suite', () => 
   });
 
   it('filters items when changing feed type filter to loan or repaid', async () => {
-    render(<ActivityPanel />);
+    await act(async () => {
+      render(<ActivityPanel />);
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/Robinhood Genesis Pass/i)).toBeDefined();
     });
 
     const repaidFilterBtn = screen.getByRole('button', { name: /^repaid$/i });
-    fireEvent.click(repaidFilterBtn);
+    await act(async () => {
+      fireEvent.click(repaidFilterBtn);
+    });
 
     expect(screen.getByText(/Sherwood Forest Rangers/i)).toBeDefined();
   });
 
+  it('switches to watchlist tab and displays watchlist view', async () => {
+    await act(async () => {
+      render(<ActivityPanel />);
+    });
+
+    const watchlistBtn = screen.getByRole('button', { name: /watchlist/i });
+    await act(async () => {
+      fireEvent.click(watchlistBtn);
+    });
+
+    expect(screen.getByText(/watchlist is empty/i)).toBeDefined();
+    expect(screen.getByText(/explore collections →/i)).toBeDefined();
+  });
+
   it('renders mobile slide-over drawer overlay when isMobileOpen is true and closes via backdrop or ESC', async () => {
     const handleClose = vi.fn();
-    const { rerender } = render(<ActivityPanel isMobileOpen={true} onMobileClose={handleClose} />);
+    let rerenderFn: any;
+    await act(async () => {
+      const renderResult = render(<ActivityPanel isMobileOpen={true} onMobileClose={handleClose} />);
+      rerenderFn = renderResult.rerender;
+    });
 
     expect(screen.getByTestId('activity-mobile-drawer')).toBeDefined();
     expect(screen.getByTestId('activity-backdrop')).toBeDefined();
 
     const backdrop = screen.getByTestId('activity-backdrop');
-    fireEvent.click(backdrop);
+    await act(async () => {
+      fireEvent.click(backdrop);
+    });
     expect(handleClose).toHaveBeenCalledTimes(1);
 
-    fireEvent.keyDown(window, { key: 'Escape' });
+    await act(async () => {
+      fireEvent.keyDown(window, { key: 'Escape' });
+    });
     expect(handleClose).toHaveBeenCalledTimes(2);
 
-    rerender(<ActivityPanel isMobileOpen={false} onMobileClose={handleClose} />);
+    await act(async () => {
+      rerenderFn(<ActivityPanel isMobileOpen={false} onMobileClose={handleClose} />);
+    });
     expect(screen.queryByTestId('activity-mobile-drawer')).toBeNull();
   });
 });
