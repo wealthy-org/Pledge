@@ -84,6 +84,12 @@ export interface NftMetadataCacheRow {
   cached_at: string;
 }
 
+export interface WatchlistRow {
+  wallet_address: string;
+  collection_address: string;
+  created_at: string;
+}
+
 export interface CollectionStatsRow {
   collection: string;
   best_offer_wei: number | null;
@@ -125,6 +131,11 @@ export interface Database {
         Insert: NftMetadataCacheRow;
         Update: Partial<NftMetadataCacheRow>;
       };
+      watchlists: {
+        Row: WatchlistRow;
+        Insert: Partial<WatchlistRow> & Pick<WatchlistRow, 'wallet_address' | 'collection_address'>;
+        Update: Partial<WatchlistRow>;
+      };
     };
     Views: {
       collection_stats: {
@@ -163,6 +174,11 @@ export interface Database {
         Row: NftMetadataCacheRow;
         Insert: NftMetadataCacheRow;
         Update: Partial<NftMetadataCacheRow>;
+      };
+      watchlists: {
+        Row: WatchlistRow;
+        Insert: Partial<WatchlistRow> & Pick<WatchlistRow, 'wallet_address' | 'collection_address'>;
+        Update: Partial<WatchlistRow>;
       };
     };
     Views: {

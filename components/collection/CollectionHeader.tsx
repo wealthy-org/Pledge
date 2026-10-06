@@ -9,6 +9,7 @@ import { getExplorerAddressUrl } from '@/config/chains';
 import { useSafeChainId } from '@/hooks/useSafeChainId';
 import { resolveCollectionImageUrl } from '@/lib/services/metadata';
 import { formatShortAddress } from '@/lib/services/collectionSafety';
+import { useWatchlist } from '@/hooks/useWatchlist';
 import type { ActiveCuratedCollection } from '@/config/collections';
 
 export interface CollectionHeaderStats {
@@ -39,6 +40,8 @@ export function CollectionHeader({
 }: CollectionHeaderProps) {
   const safeChainId = useSafeChainId();
   const activeChainId = chainId ?? safeChainId;
+  const { isWatchlisted, toggleWatchlist } = useWatchlist();
+  const isStarred = isWatchlisted(collection.contractAddress);
   const [copied, setCopied] = useState(false);
   const [imgError, setImgError] = useState(false);
   const rawImage =
@@ -154,6 +157,21 @@ export function CollectionHeader({
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={() => toggleWatchlist(collection.contractAddress)}
+            className={`px-3 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs ${
+              isStarred
+                ? 'bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400'
+                : 'bg-[var(--panel)] border-[var(--line)] text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--line)]'
+            }`}
+            aria-label={isStarred ? 'Remove from Watchlist' : 'Add to Watchlist'}
+          >
+            <svg className="w-4 h-4" fill={isStarred ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            <span>{isStarred ? 'Watchlisted' : 'Watchlist'}</span>
+          </button>
           <a
             href={explorerUrl}
             target="_blank"

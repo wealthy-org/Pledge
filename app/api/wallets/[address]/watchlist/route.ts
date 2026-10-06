@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { indexerStore } from '@/lib/indexer/store';
 import { jsonResponse, errorResponse, validateAddress } from '@/lib/api/response';
+import { getServiceSupabaseClient, getSupabaseClient } from '@/lib/db/supabase';
 
 export async function GET(
   _request: NextRequest,
@@ -16,10 +17,31 @@ export async function GET(
     );
   }
 
-  const watchlist = indexerStore.getWatchlist(address);
+  const target = address.toLowerCase();
+
+  try {
+    const supabase = getServiceSupabaseClient() || getSupabaseClient();
+    const { data, error } = await (supabase as any)
+      .from('watchlists')
+      .select('collection_address')
+      .eq('wallet_address', target);
+
+    if (!error && data) {
+      const dbList = (data as Array<{ collection_address: string }>).map((r) => r.collection_address.toLowerCase());
+      const memoryList = indexerStore.getWatchlist(target);
+      const combined = Array.from(new Set([...memoryList, ...dbList]));
+      indexerStore.setWatchlist(target, combined);
+      return jsonResponse({
+        address: target,
+        watchlist: combined,
+      });
+    }
+  } catch {}
+
+  const watchlist = indexerStore.getWatchlist(target);
 
   return jsonResponse({
-    address: address.toLowerCase(),
+    address: target,
     watchlist,
   });
 }
@@ -38,6 +60,8 @@ export async function POST(
     );
   }
 
+  const target = address.toLowerCase();
+
   let body: { collection?: string; collections?: string[]; action?: 'toggle' | 'set' };
   try {
     body = await request.json();
@@ -48,7 +72,19 @@ export async function POST(
   let updated: string[] = [];
 
   if (body.collections && Array.isArray(body.collections)) {
-    updated = indexerStore.setWatchlist(address, body.collections);
+    updated = indexerStore.setWatchlist(target, body.collections);
+    try {
+      const supabase = getServiceSupabaseClient() || getSupabaseClient();
+      await (supabase as any).from('watchlists').delete().eq('wallet_address', target);
+      if (updated.length > 0) {
+        await (supabase as any).from('watchlists').insert(
+          updated.map((c) => ({
+            wallet_address: target,
+            collection_address: c.toLowerCase(),
+          }))
+        );
+      }
+    } catch {}
   } else if (body.collection && typeof body.collection === 'string') {
     if (!validateAddress(body.collection)) {
       return errorResponse(
@@ -57,7 +93,24 @@ export async function POST(
         400
       );
     }
-    updated = indexerStore.toggleWatchlist(address, body.collection);
+    const normCollection = body.collection.toLowerCase();
+    updated = indexerStore.toggleWatchlist(target, normCollection);
+    try {
+      const supabase = getServiceSupabaseClient() || getSupabaseClient();
+      const isNowPresent = updated.includes(normCollection);
+      if (isNowPresent) {
+        await (supabase as any).from('watchlists').upsert({
+          wallet_address: target,
+          collection_address: normCollection,
+        });
+      } else {
+        await (supabase as any)
+          .from('watchlists')
+          .delete()
+          .eq('wallet_address', target)
+          .eq('collection_address', normCollection);
+      }
+    } catch {}
   } else {
     return errorResponse(
       'Missing collection or collections in request body',
@@ -67,7 +120,7 @@ export async function POST(
   }
 
   return jsonResponse({
-    address: address.toLowerCase(),
+    address: target,
     watchlist: updated,
   });
 }
